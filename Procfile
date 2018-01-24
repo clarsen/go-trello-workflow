@@ -1,1 +1,1 @@
-web: trello-workflow
+longrun: trello-workflow
