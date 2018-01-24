@@ -5,4 +5,4 @@ build:
     - go
 
 run:
-  web: trello-workflow
+  web: go-trello-workflow

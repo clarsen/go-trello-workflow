@@ -1,1 +1,1 @@
-longrun: trello-workflow
+longrun: go-trello-workflow
