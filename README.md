@@ -6,26 +6,28 @@
 
 
 
-    generate Trello app key by https://trello.com/1/appKey/generate
-    get auth token from https://trello.com/1/connect?key=<YOUR TRELLO APP KEY>&name=trellow-workflow&response_type=token
+Generate Trello app key by https://trello.com/1/appKey/generate
+
+Get auth token from https://trello.com/1/connect?key=<YOUR TRELLO APP KEY>&name=trellow-workflow&response_type=token
 
 Trello boards should be set up as per expectations of code.
 
 ## Deploy to heroku
-$ heroku config:set appkey=<YOUR TRELLO APP KEY>
-$ heroku config:set authtoken=<YOUR TRELLO ACCOUNT AUTH TOKEN>
-$ heroku config:set user=<your trello username>
-$ git push heroku master
+    $ heroku config:set appkey=<YOUR TRELLO APP KEY>
+    $ heroku config:set authtoken=<YOUR TRELLO ACCOUNT AUTH TOKEN>
+    $ heroku config:set user=<your trello username>
+    $ git push heroku master
 
 Turn on `longrun` dyno which runs go-trello-workflow
 
 ## Use in CLI
 Create .env with:
+
     appkey=<YOUR TRELLO APP KEY>
     authtoken=<YOUR TRELLO ACCOUNT AUTH TOKEN>
     user=<your trello username>
 
-Then, these commands:
+### Help
 
     $ trello-workflow-cli -h
 
