@@ -6,7 +6,6 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/clarsen/trello"
-	"github.com/urfave/cli"
 )
 
 // Client wraps logged in member
@@ -15,7 +14,7 @@ type Client struct {
 }
 
 // Test does nothing
-func (c *Client) Test() {
+func (cl *Client) Test() {
 
 }
 
@@ -93,7 +92,8 @@ func listFor(m *trello.Member, b string, l string) (list *trello.List, err error
 	return
 }
 
-func (cl *Client) doToday(c *cli.Context) error {
+// DoToday moves cards back to their respective boards at end of day
+func (cl *Client) DoToday() error {
 	board, err := boardFor(cl.member, "Kanban daily/weekly")
 	if err != nil {
 		// handle error
@@ -126,7 +126,7 @@ func New(user string, appKey string, token string) (c *Client, err error) {
 
 	client := trello.NewClient(appKey, token)
 	client.Logger = logger
-	fmt.Println("got", client)
+	// fmt.Println("got", client)
 	member, err := client.GetMember(user, trello.Defaults())
 	if err != nil {
 		// Handle error

@@ -9,15 +9,15 @@ import (
 	"github.com/robfig/cron"
 )
 
-func updateBoards(user, appkey, authtoken string) {
-	log.Println("Running updateBoards")
+func dailyMaintenance(user, appkey, authtoken string) {
+	log.Println("Running dailyMaintenance")
 	wf, err := workflow.New(user, appkey, authtoken)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	wf.Test()
-	log.Println("Finished running updateBoards")
+	wf.DoToday()
+	log.Println("Finished running dailyMaintenance")
 }
 
 func main() {
@@ -34,7 +34,7 @@ func main() {
 		log.Fatal("$authtoken must be set")
 	}
 	c := cron.New()
-	c.AddFunc("@every 1m", func() { updateBoards(user, appkey, authtoken) })
+	c.AddFunc("@every 1m", func() { dailyMaintenance(user, appkey, authtoken) })
 	c.Start()
 	for {
 		log.Println("wait...")
