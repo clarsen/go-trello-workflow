@@ -3,9 +3,22 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/clarsen/go-trello-workflow/workflow"
+	"github.com/robfig/cron"
 )
+
+func updateBoards(user, appkey, authtoken string) {
+	log.Println("Running updateBoards")
+	wf, err := workflow.New(user, appkey, authtoken)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	wf.Test()
+	log.Println("Finished running updateBoards")
+}
 
 func main() {
 	appkey := os.Getenv("appkey")
@@ -20,10 +33,11 @@ func main() {
 	if authtoken == "" {
 		log.Fatal("$authtoken must be set")
 	}
-	c, err := workflow.New(user, appkey, authtoken)
-	if err != nil {
-		log.Fatal(err)
-		return
+	c := cron.New()
+	c.AddFunc("* * * * * *", func() { updateBoards(user, appkey, authtoken) })
+	c.Start()
+	for {
+		log.Println("wait...")
+		time.Sleep(60 * time.Second)
 	}
-	c.Test()
 }
