@@ -1,39 +1,58 @@
+# go-trello-workflow
 
-# go-getting-started
+## Installation
+    $ go get github.com/clarsen/go-trello-workflow
+    $ trello-workflow-cli
 
-A barebones Go app, which can easily be deployed to Heroku.
 
-This application supports the [Getting Started with Go on Heroku](https://devcenter.heroku.com/articles/getting-started-with-go) article - check it out.
 
-## Running Locally
+    generate Trello app key by https://trello.com/1/appKey/generate
+    get auth token from https://trello.com/1/connect?key=<YOUR TRELLO APP KEY>&name=trellow-workflow&response_type=token
 
-Make sure you have [Go](http://golang.org/doc/install) and the [Heroku Toolbelt](https://toolbelt.heroku.com/) installed.
+Trello boards should be set up as per expectations of code.
 
-```sh
-$ go get -u github.com/heroku/go-getting-started
-$ cd $GOPATH/src/github.com/heroku/go-getting-started
-$ heroku local
-```
-
-Your app should now be running on [localhost:5000](http://localhost:5000/).
-
-You should also install [govendor](https://github.com/kardianos/govendor) if you are going to add any dependencies to the sample app.
-
-## Deploying to Heroku
-
-```sh
-$ heroku create
+## Deploy to heroku
+$ heroku config:set appkey=<YOUR TRELLO APP KEY>
+$ heroku config:set authtoken=<YOUR TRELLO ACCOUNT AUTH TOKEN>
+$ heroku config:set user=<your trello username>
 $ git push heroku master
-$ heroku open
-```
 
-or
+Turn on `longrun` dyno which runs go-trello-workflow
 
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+## Use in CLI
+Create .env with:
+    appkey=<YOUR TRELLO APP KEY>
+    authtoken=<YOUR TRELLO ACCOUNT AUTH TOKEN>
+    user=<your trello username>
 
+Then, these commands:
 
-## Documentation
+    $ trello-workflow-cli -h
 
-For more information about using Go on Heroku, see these Dev Center articles:
+    NAME:
+       trello-workflow - Update Trello board
 
-- [Go on Heroku](https://devcenter.heroku.com/categories/go)
+    USAGE:
+       trello-workflow-cli [global options] command [command options] [arguments...]
+
+    VERSION:
+       0.0.0
+
+    COMMANDS:
+         today, t  Update the trello board on daily basis
+         help, h   Shows a list of commands or help for one command
+
+    GLOBAL OPTIONS:
+       --help, -h     show help
+       --version, -v  print the version
+
+### In the morning or end of day
+    $ trello-workflow-cli today
+
+## Notable mentions
+- Butlerbot does this using trello cards as a conversational API https://trello.com/b/2dLsEE9t/butler-for-trello
+  and has a command builder https://butlerfortrello.com/builder.html   I will use this for the orange label cherry picking interaction.
+
+## License
+
+MIT
