@@ -34,7 +34,7 @@ func main() {
 		log.Fatal("$authtoken must be set")
 	}
 	c := cron.New()
-	c.AddFunc("* * * * * *", func() { updateBoards(user, appkey, authtoken) })
+	c.AddFunc("@every 1m", func() { updateBoards(user, appkey, authtoken) })
 	c.Start()
 	for {
 		log.Println("wait...")
