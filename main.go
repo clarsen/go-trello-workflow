@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/clarsen/trello-workflow/workflow"
+	"github.com/clarsen/go-trello-workflow/workflow"
 )
 
 func main() {
