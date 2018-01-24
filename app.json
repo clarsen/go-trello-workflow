@@ -1,0 +1,11 @@
+{
+  "name": "trello-workflow",
+  "description": "Kanban workflow using Trello",
+  "keywords": [
+    "trello",
+    "go",
+    "workflow"
+  ],
+  "website": "http://github.com/clarsen/go-trello-workflow",
+  "repository": "http://github.com/clarsen/go-trello-workflow"
+}
