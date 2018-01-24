@@ -9,17 +9,6 @@ import (
 	"github.com/robfig/cron"
 )
 
-func dailyMaintenance(user, appkey, authtoken string) {
-	log.Println("Running dailyMaintenance")
-	wf, err := workflow.New(user, appkey, authtoken)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	wf.DoToday()
-	log.Println("Finished running dailyMaintenance")
-}
-
 func main() {
 	appkey := os.Getenv("appkey")
 	if appkey == "" {
@@ -34,10 +23,11 @@ func main() {
 		log.Fatal("$authtoken must be set")
 	}
 	c := cron.New()
-	c.AddFunc("@every 1m", func() { dailyMaintenance(user, appkey, authtoken) })
+	// every night at 9:30PM
+	c.AddFunc("0 30 21 * * *", func() { workflow.DailyMaintenance(user, appkey, authtoken) })
 	c.Start()
 	for {
-		log.Println("wait...")
-		time.Sleep(60 * time.Second)
+		log.Println("wait 10 minutes...")
+		time.Sleep(10 * time.Minute)
 	}
 }
