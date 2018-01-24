@@ -1,6 +1,49 @@
 {
 	"comment": "",
 	"ignore": "test",
-	"package": [],
+	"package": [
+		{
+			"checksumSHA1": "08GMCNmcwI5tembGOGJfW+4Exzs=",
+			"path": "github.com/adlio/trello",
+			"revision": "860abbe1f41016626c0703d7d6204837e0dc2c04",
+			"revisionTime": "2017-11-02T18:09:14Z"
+		},
+		{
+			"checksumSHA1": "xCv4GBFyw07vZkVtKF/XrUnkHRk=",
+			"path": "github.com/pkg/errors",
+			"revision": "e881fd58d78e04cf6d0de1217f8707c8cc2249bc",
+			"revisionTime": "2017-12-16T07:03:16Z"
+		},
+		{
+			"checksumSHA1": "ySaT8G3I3y4MmnoXOYAAX0rC+p8=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "d682213848ed68c0a260ca37d6dd5ace8423f5ba",
+			"revisionTime": "2017-12-05T20:32:29Z"
+		},
+		{
+			"checksumSHA1": "H1Ne82yYzWRQ2DKBsmRd0Hwcl04=",
+			"path": "github.com/urfave/cli",
+			"revision": "75104e932ac2ddb944a6ea19d9f9f26316ff1145",
+			"revisionTime": "2018-01-06T19:10:48Z"
+		},
+		{
+			"checksumSHA1": "X1NTlfcau2XcV6WtAHF6b/DECOA=",
+			"path": "golang.org/x/crypto/ssh/terminal",
+			"revision": "3d37316aaa6bd9929127ac9a527abf408178ea7b",
+			"revisionTime": "2018-01-22T21:46:34Z"
+		},
+		{
+			"checksumSHA1": "m0LbR1VvGELW+qpORm/o6lXwUSA=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "af50095a40f9041b3b38960738837185c26e9419",
+			"revisionTime": "2018-01-19T16:06:40Z"
+		},
+		{
+			"checksumSHA1": "eQq+ZoTWPjyizS9XalhZwfGjQao=",
+			"path": "golang.org/x/sys/windows",
+			"revision": "af50095a40f9041b3b38960738837185c26e9419",
+			"revisionTime": "2018-01-19T16:06:40Z"
+		}
+	],
 	"rootPath": "github.com/clarsen/go-trello-workflow"
 }
