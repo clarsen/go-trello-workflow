@@ -88,6 +88,13 @@ func (c *Card) MoveToList(listID string, args Arguments) error {
 	return c.client.Put(path, args, &c)
 }
 
+func (c *Card) MoveToListOnBoard(listID string, boardID string, args Arguments) error {
+	path := fmt.Sprintf("cards/%s", c.ID)
+	args["idBoard"] = boardID
+	args["idList"] = listID
+	return c.client.Put(path, args, &c)
+}
+
 func (c *Card) SetPos(newPos float64) error {
 	path := fmt.Sprintf("cards/%s", c.ID)
 	return c.client.Put(path, Arguments{"pos": fmt.Sprintf("%f", newPos)}, c)

@@ -5,7 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/adlio/trello"
+	"github.com/clarsen/trello"
 	"github.com/urfave/cli"
 )
 
