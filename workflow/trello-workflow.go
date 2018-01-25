@@ -166,23 +166,34 @@ func addDateToName(card *trello.Card) {
 	card.Update(trello.Arguments{"name": card.Name + " " + s})
 }
 
+type boardAndList struct {
+	Board string
+	List  string
+}
+
 func (cl *Client) doMinutely() (err error) {
-
-	list, err := listFor(cl.member, "Kanban daily/weekly", "Inbox")
-	if err != nil {
-		// handle error
-		return
+	boardsAndLists := []boardAndList{
+		{"Kanban daily/weekly", "Inbox"},
+		{"Kanban daily/weekly", "Today"},
+		{"Backlog (Personal)", "Backlog"},
 	}
+	for _, boardlist := range boardsAndLists {
+		list, err := listFor(cl.member, boardlist.Board, boardlist.List)
+		if err != nil {
+			// handle error
+			return err
+		}
 
-	cards, err := list.GetCards(trello.Defaults())
-	if err != nil {
-		// handle error
-		return
-	}
-	for _, card := range cards {
+		cards, err := list.GetCards(trello.Defaults())
+		if err != nil {
+			// handle error
+			return err
+		}
+		for _, card := range cards {
 
-		if !hasDate(card) && !isPeriodic(card) {
-			addDateToName(card)
+			if !hasDate(card) && !isPeriodic(card) {
+				addDateToName(card)
+			}
 		}
 	}
 	return
