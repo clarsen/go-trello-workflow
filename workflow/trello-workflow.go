@@ -171,13 +171,46 @@ type boardAndList struct {
 	List  string
 }
 
-func (cl *Client) doMinutely() (err error) {
-	boardsAndLists := []boardAndList{
+const (
+	cherryPickLabel = "orange"
+)
+
+func removeLabel(card *trello.Card, color string) {
+
+	for _, label := range card.Labels {
+		if label.Color == color {
+			card.RemoveLabel(label.ID)
+			return
+		}
+	}
+	return
+}
+
+func hasLabel(card *trello.Card, color string) bool {
+	for _, label := range card.Labels {
+		if label.Color == color {
+			return true
+		}
+	}
+	return false
+}
+
+func (cl *Client) doMinutely() error {
+	dateBoardsAndLists := []boardAndList{
 		{"Kanban daily/weekly", "Inbox"},
 		{"Kanban daily/weekly", "Today"},
 		{"Backlog (Personal)", "Backlog"},
 	}
-	for _, boardlist := range boardsAndLists {
+	cherryPickBoardsAndLists := []boardAndList{
+		{"Backlog (Personal)", "Backlog"},
+		{"Backlog (work)", "Backlog"},
+		{"Periodic board", "Often"},
+		{"Periodic board", "Weekly"},
+		{"Periodic board", "Bi-weekly to monthly"},
+		{"Periodic board", "Quarterly to Yearly"},
+	}
+
+	for _, boardlist := range dateBoardsAndLists {
 		list, err := listFor(cl.member, boardlist.Board, boardlist.List)
 		if err != nil {
 			// handle error
@@ -196,7 +229,36 @@ func (cl *Client) doMinutely() (err error) {
 			}
 		}
 	}
-	return
+
+	cherryPickDestlist, err := listFor(cl.member, "Kanban daily/weekly", "Today")
+	if err != nil {
+		return err
+	}
+
+	for _, boardlist := range cherryPickBoardsAndLists {
+		list, err := listFor(cl.member, boardlist.Board, boardlist.List)
+		if err != nil {
+			// handle error
+			return err
+		}
+
+		cards, err := list.GetCards(trello.Defaults())
+		if err != nil {
+			// handle error
+			return err
+		}
+		for _, card := range cards {
+
+			if hasLabel(card, cherryPickLabel) {
+				fmt.Println("cherry picking", card.Name, card.Labels)
+				removeLabel(card, cherryPickLabel)
+				card.MoveToListOnBoard(cherryPickDestlist.ID,
+					cherryPickDestlist.IDBoard, trello.Defaults())
+			}
+		}
+	}
+
+	return nil
 }
 
 // PrepareToday moves cards back to their respective boards at end of day

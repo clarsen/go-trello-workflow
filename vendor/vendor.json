@@ -3,10 +3,10 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "fJObr7wPfg0qTb5Rrci3USPwk4U=",
+			"checksumSHA1": "p1KgdsSiAmIgZb6vpls5JZNimaQ=",
 			"path": "github.com/clarsen/trello",
-			"revision": "7fe5df0703318d1c9aff9436f598253ccdd9685c",
-			"revisionTime": "2018-01-24T05:13:22Z"
+			"revision": "58454b04981d8124aba22c89d9becf75ff738ffe",
+			"revisionTime": "2018-01-25T04:29:41Z"
 		},
 		{
 			"checksumSHA1": "xCv4GBFyw07vZkVtKF/XrUnkHRk=",

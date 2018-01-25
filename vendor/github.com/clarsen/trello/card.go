@@ -105,6 +105,11 @@ func (c *Card) RemoveMember(memberID string) error {
 	return c.client.Delete(path, Defaults(), nil)
 }
 
+func (c *Card) RemoveLabel(labelID string) error {
+	path := fmt.Sprintf("cards/%s/idLabels/%s", c.ID, labelID)
+	return c.client.Delete(path, Defaults(), nil)
+}
+
 func (c *Card) MoveToTopOfList() error {
 	path := fmt.Sprintf("cards/%s", c.ID)
 	return c.client.Put(path, Arguments{"pos": "top"}, c)
