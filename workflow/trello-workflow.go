@@ -172,7 +172,10 @@ type boardAndList struct {
 }
 
 const (
-	cherryPickLabel = "orange"
+	cherryPickLabel     = "orange"
+	toTopLabel          = "sky"
+	toSomedayMaybeLabel = "lime"
+	toDoneLabel         = "pink"
 )
 
 func removeLabel(card *trello.Card, color string) {
@@ -202,6 +205,14 @@ func (cl *Client) doMinutely() error {
 		{"Backlog (Personal)", "Backlog"},
 	}
 	cherryPickBoardsAndLists := []boardAndList{
+		{"Backlog (Personal)", "Backlog"},
+		{"Backlog (work)", "Backlog"},
+		{"Periodic board", "Often"},
+		{"Periodic board", "Weekly"},
+		{"Periodic board", "Bi-weekly to monthly"},
+		{"Periodic board", "Quarterly to Yearly"},
+	}
+	reorderBoardsAndLists := []boardAndList{
 		{"Backlog (Personal)", "Backlog"},
 		{"Backlog (work)", "Backlog"},
 		{"Periodic board", "Often"},
@@ -254,6 +265,48 @@ func (cl *Client) doMinutely() error {
 				removeLabel(card, cherryPickLabel)
 				card.MoveToListOnBoard(cherryPickDestlist.ID,
 					cherryPickDestlist.IDBoard, trello.Defaults())
+			}
+		}
+	}
+
+	somedayDestlist, err := listFor(cl.member, "Someday/Maybe", "Maybe")
+	if err != nil {
+		return err
+	}
+	doneDestList, err := listFor(cl.member, "Kanban daily/weekly", "Done this week")
+	if err != nil {
+		return err
+	}
+
+	for _, boardlist := range reorderBoardsAndLists {
+		list, err := listFor(cl.member, boardlist.Board, boardlist.List)
+		if err != nil {
+			// handle error
+			return err
+		}
+
+		cards, err := list.GetCards(trello.Defaults())
+		if err != nil {
+			// handle error
+			return err
+		}
+		for _, card := range cards {
+
+			if hasLabel(card, toTopLabel) {
+				fmt.Println("moving to top", card.Name, card.Labels)
+				removeLabel(card, toTopLabel)
+				card.MoveToTopOfList()
+			} else if hasLabel(card, toSomedayMaybeLabel) {
+				fmt.Println("moving to", somedayDestlist.Name)
+				removeLabel(card, toSomedayMaybeLabel)
+				card.MoveToListOnBoard(somedayDestlist.ID,
+					somedayDestlist.IDBoard, trello.Defaults())
+			} else if hasLabel(card, toDoneLabel) {
+				fmt.Println("moving to", doneDestList.Name)
+				removeLabel(card, toDoneLabel)
+				card.MoveToListOnBoard(doneDestList.ID,
+					doneDestList.IDBoard, trello.Defaults())
+
 			}
 		}
 	}
