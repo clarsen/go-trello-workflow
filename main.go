@@ -23,8 +23,8 @@ func main() {
 		log.Fatal("$authtoken must be set")
 	}
 	c := cron.New()
-	// every night at 9:30PM
-	c.AddFunc("0 30 21 * * *", func() { workflow.DailyMaintenance(user, appkey, authtoken) })
+	// every night at 5:30 GMT (9:30PST)
+	c.AddFunc("0 30 5 * * *", func() { workflow.DailyMaintenance(user, appkey, authtoken) })
 	// every minute
 	c.AddFunc("0 * * * * *", func() { workflow.MinutelyMaintenance(user, appkey, authtoken) })
 	c.Start()
