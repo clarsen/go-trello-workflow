@@ -38,6 +38,12 @@ func main() {
 			Usage:   "Update the trello board on daily basis",
 			Action:  func(*cli.Context) { workflow.DailyMaintenance(user, appkey, authtoken) },
 		},
+		{
+			Name:    "minutely",
+			Aliases: []string{"m"},
+			Usage:   "Update the trello board on minutely basis",
+			Action:  func(*cli.Context) { workflow.MinutelyMaintenance(user, appkey, authtoken) },
+		},
 	}
 	app.Run(os.Args)
 

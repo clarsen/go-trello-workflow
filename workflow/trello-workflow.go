@@ -3,7 +3,9 @@ package workflow
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -146,8 +148,48 @@ func listFor(m *trello.Member, b string, l string) (list *trello.List, err error
 	return
 }
 
+func hasDate(card *trello.Card) bool {
+	re := regexp.MustCompile("\\(\\d{4}-\\d{2}-\\d{2}\\)")
+	date := re.FindString(card.Name)
+	return date != ""
+}
+
+func isPeriodic(card *trello.Card) bool {
+	re := regexp.MustCompile("\\((po|p1w|p2w|p4w|p2m|p3m|p12m)\\)")
+	period := re.FindString(card.Name)
+	return period != ""
+}
+
+func addDateToName(card *trello.Card) {
+	log.Println("Add date to ", card.Name)
+	s := time.Now().Format("(2006-01-02)")
+	card.Update(trello.Arguments{"name": card.Name + " " + s})
+}
+
+func (cl *Client) doMinutely() (err error) {
+
+	list, err := listFor(cl.member, "Kanban daily/weekly", "Inbox")
+	if err != nil {
+		// handle error
+		return
+	}
+
+	cards, err := list.GetCards(trello.Defaults())
+	if err != nil {
+		// handle error
+		return
+	}
+	for _, card := range cards {
+
+		if !hasDate(card) && !isPeriodic(card) {
+			addDateToName(card)
+		}
+	}
+	return
+}
+
 // PrepareToday moves cards back to their respective boards at end of day
-func (cl *Client) PrepareToday() error {
+func (cl *Client) prepareToday() error {
 	board, err := boardFor(cl.member, "Kanban daily/weekly")
 	if err != nil {
 		// handle error
@@ -176,16 +218,27 @@ func (cl *Client) PrepareToday() error {
 	return nil
 }
 
-// DailyMaintenance moves cards in kanban board back to their homes at the end
-// of the day
-func DailyMaintenance(user, appkey, authtoken string) {
-	log.Println("Running dailyMaintenance")
+// MinutelyMaintenance does things like cherry picking, moving, adding dates to
+// titles
+func MinutelyMaintenance(user, appkey, authtoken string) {
+	log.Println("Running MinutelyMaintenance")
 	wf, err := New(user, appkey, authtoken)
 	if err != nil {
 		log.Fatal(err)
 	}
-	wf.PrepareToday()
-	log.Println("Finished running dailyMaintenance")
+	wf.doMinutely()
+}
+
+// DailyMaintenance moves cards in kanban board back to their homes at the end
+// of the day
+func DailyMaintenance(user, appkey, authtoken string) {
+	log.Println("Running DailyMaintenance")
+	wf, err := New(user, appkey, authtoken)
+	if err != nil {
+		log.Fatal(err)
+	}
+	wf.prepareToday()
+	log.Println("Finished running DailyMaintenance")
 }
 
 // New create new client
