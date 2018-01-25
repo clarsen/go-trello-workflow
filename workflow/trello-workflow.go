@@ -347,7 +347,7 @@ func (cl *Client) prepareToday() error {
 // MinutelyMaintenance does things like cherry picking, moving, adding dates to
 // titles
 func MinutelyMaintenance(user, appkey, authtoken string) {
-	log.Println("Running MinutelyMaintenance")
+	// log.Println("Running MinutelyMaintenance")
 	wf, err := New(user, appkey, authtoken)
 	if err != nil {
 		log.Fatal(err)
