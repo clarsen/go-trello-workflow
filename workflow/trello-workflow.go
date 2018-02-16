@@ -615,16 +615,16 @@ func (cl *Client) doMinutely() error {
 		for _, card := range cards {
 
 			if hasLabel(card, toTopLabel) {
-				fmt.Println("moving to top", card.Name, card.Labels)
+				fmt.Println("moving", card.Name, card.Labels, "to top")
 				removeLabel(card, toTopLabel)
 				card.MoveToTopOfList()
 			} else if hasLabel(card, toSomedayMaybeLabel) {
-				fmt.Println("moving to", somedayDestlist.Name)
+				fmt.Println("moving", card.Name, card.Labels, "to", somedayDestlist.Name)
 				removeLabel(card, toSomedayMaybeLabel)
 				card.MoveToListOnBoard(somedayDestlist.ID,
 					somedayDestlist.IDBoard, trello.Defaults())
 			} else if hasLabel(card, toDoneLabel) {
-				fmt.Println("moving to", doneDestList.Name)
+				fmt.Println("moving", card.Name, card.Labels, "to", doneDestList.Name)
 				removeLabel(card, toDoneLabel)
 				card.MoveToListOnBoard(doneDestList.ID,
 					doneDestList.IDBoard, trello.Defaults())
