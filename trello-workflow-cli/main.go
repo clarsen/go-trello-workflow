@@ -44,6 +44,28 @@ func main() {
 			Usage:   "Update the trello board on minutely basis",
 			Action:  func(*cli.Context) { workflow.MinutelyMaintenance(user, appkey, authtoken) },
 		},
+		{
+			Name:    "weekly",
+			Aliases: []string{"w"},
+			Usage:   "End of week report",
+			Action: func(*cli.Context) {
+				err := workflow.Weekly(user, appkey, authtoken)
+				if err != nil {
+					log.Fatal(err)
+				}
+			},
+		},
+		{
+			Name:    "weekly cleanup",
+			Aliases: []string{"wc"},
+			Usage:   "End of week cleanup",
+			Action: func(*cli.Context) {
+				err := workflow.WeeklyCleanup(user, appkey, authtoken)
+				if err != nil {
+					log.Fatal(err)
+				}
+			},
+		},
 	}
 	app.Run(os.Args)
 

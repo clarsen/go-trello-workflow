@@ -3,8 +3,12 @@ package workflow
 import (
 	"fmt"
 	"log"
+	"os"
 	"regexp"
+	"sort"
+	"strconv"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -22,9 +26,301 @@ func (cl *Client) Test() {
 
 }
 
+type CardAttrs struct {
+	DoneDate string
+	Title    string
+}
+type DayCards struct {
+	Date string
+	Done []CardAttrs
+}
+
+type MonthlyGoal struct {
+	Title             string
+	WeeklyGoals       []string
+	WeeklyGoalsByWeek []string
+	LatestWeekGoals   []string
+}
+
+type MonthlyGoals struct {
+	Month string
+	Goals []MonthlyGoal
+}
+
+type MonthlySprints struct {
+	Month   string
+	Sprints []string
+}
+
+type WeeklyReport struct {
+	Week                 string
+	DoneByDay            []DayCards
+	MonthlyGoalsByMonth  []MonthlyGoals
+	LatestMonthlySprints MonthlySprints
+	LatestMonthGoals     MonthlyGoals
+	NowHHMM              string
+}
+
 var boards []*trello.Board
 var boardmap = make(map[string]*trello.Board)
 var listmap = make(map[string]map[string]*trello.List)
+
+func reportMonthlyGoal(card *trello.Card) (MonthlyGoal, error) {
+	var g MonthlyGoal
+	g.Title = card.Name
+	goalsForWeek := map[int][]string{}
+	re := regexp.MustCompile(`^week (\d+): (.*) (?:\(\d{4}-\d{2}-\d{2}\))(?: (\(.*\)))?$`)
+	// re := regexp.MustCompile(`^week (\d+): (.*)$`)
+
+	for _, cl := range card.Checklists {
+		// log.Println("checklist:", cl)
+		for _, item := range cl.CheckItems {
+			expr := re.FindStringSubmatch(item.Name)
+			if len(expr) > 0 {
+				// log.Printf("for %s got match %+v\n", item.Name, expr)
+				// log.Println("got week", expr[1])
+				// log.Println("got text", expr[2])
+				// log.Println("got status", expr[3])
+				week, err := strconv.Atoi(expr[1])
+				if err != nil {
+					return g, err
+				}
+				text := expr[2]
+				status := expr[3]
+				if _, ok := goalsForWeek[week]; !ok {
+					goalsForWeek[week] = []string{}
+				}
+				if len(status) > 0 {
+					goalsForWeek[week] = append(goalsForWeek[week], text+" "+status)
+				} else {
+					goalsForWeek[week] = append(goalsForWeek[week], text)
+				}
+			}
+			g.WeeklyGoals = append(g.WeeklyGoals, item.Name)
+		}
+	}
+
+	var sortedWeeks []int
+	for week := range goalsForWeek {
+		sortedWeeks = append(sortedWeeks, week)
+	}
+	sort.IntSlice.Sort(sortedWeeks)
+	for _, week := range sortedWeeks {
+		joined := strings.Join(goalsForWeek[week], ", ")
+		str := fmt.Sprintf("week %d: %s", week, joined)
+		g.WeeklyGoalsByWeek = append(g.WeeklyGoalsByWeek, str)
+	}
+
+	latestWeek := sortedWeeks[len(sortedWeeks)-1]
+	for _, goal := range goalsForWeek[latestWeek] {
+		str := fmt.Sprintf("week %d: %s", latestWeek, goal)
+		g.LatestWeekGoals = append(g.LatestWeekGoals, str)
+	}
+
+	return g, nil
+}
+
+// WeeklyCleanup moves cards to history board, copies periodic cards to history,
+// moves periodic cards back
+func WeeklyCleanup(user, appkey, authtoken string) error {
+	cl, err := New(user, appkey, authtoken)
+	if err != nil {
+		log.Fatal(err)
+	}
+	doneList, err := listFor(cl.member, "Kanban daily/weekly", "Done this week")
+	if err != nil {
+		return err
+	}
+	// log.Println(time.Now().Add(-time.Hour * 72))
+	year, week := time.Now().Add(-time.Hour * 72).ISOWeek()
+	month := time.Now().Month().String()
+	destListName := fmt.Sprintf("%02d %s", week, month)
+
+	destList, err := listForCreate(cl.member, fmt.Sprintf("History %d", year), destListName)
+	if err != nil {
+		return err
+	}
+	destGoalsListName := fmt.Sprintf("%02d %s goals", week, month)
+	destGoalsList, err := listForCreate(cl.member, fmt.Sprintf("History %d", year), destGoalsListName)
+	if err != nil {
+		return err
+	}
+	var _ = destList      // TODO: for real
+	var _ = destGoalsList // TODO: for real
+
+	cards, err := doneList.GetCards(trello.Defaults())
+	if err != nil {
+		// handle error
+		return err
+	}
+	for _, card := range cards {
+		if isPeriodic(card) {
+			log.Println("copying", card.Name, "to", destListName)
+			card.CopyToList(destList.ID,
+				trello.Arguments{"idBoard": destList.IDBoard, "pos": "bottom", "keepFromSource": "all"})
+		} else {
+			log.Println("moving", card.Name, "to", destListName)
+			card.MoveToListOnBoard(destList.ID, destList.IDBoard, trello.Arguments{"pos": "bottom"})
+		}
+	}
+	for _, card := range cards {
+		if isPeriodic(card) {
+			log.Println("moving", card.Name, "back to periodic")
+			err2 := moveBackPeriodic(cl.member, card)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	monthlyGoalsList, err := listFor(cl.member, "Kanban daily/weekly", "Monthly Goals")
+	if err != nil {
+		return err
+	}
+	cards, err = monthlyGoalsList.GetCards(trello.Defaults())
+	if err != nil {
+		// handle error
+		return err
+	}
+	for _, card := range cards {
+		log.Println("copying", card.Name, "to", destGoalsListName)
+		card.CopyToList(destGoalsList.ID,
+			trello.Arguments{"idBoard": destGoalsList.IDBoard, "pos": "bottom", "keepFromSource": "all"})
+	}
+
+	return nil
+}
+
+// Weekly writes out report of weekly tasks done, goals, sprints
+func Weekly(user, appkey, authtoken string) error {
+
+	cl, err := New(user, appkey, authtoken)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	doneList, err := listFor(cl.member, "Kanban daily/weekly", "Done this week")
+	if err != nil {
+		return err
+	}
+
+	cards, err := doneList.GetCards(trello.Defaults())
+	if err != nil {
+		// handle error
+		return err
+	}
+	report := WeeklyReport{}
+	report.Week = "2018-01-28" // TODO: make correct week
+	doneByDay := map[string][]CardAttrs{}
+
+	for _, card := range cards {
+		dateForSort := card.DateLastActivity.Format("2006-01-02")
+		date := card.DateLastActivity.Format("2006-Jan-2 (Mon)")
+		done := CardAttrs{
+			DoneDate: date,
+			Title:    card.Name,
+		}
+		if _, ok := doneByDay[dateForSort]; !ok {
+			doneByDay[dateForSort] = []CardAttrs{}
+		}
+		doneByDay[dateForSort] = append(doneByDay[dateForSort], done)
+	}
+	var sortedDates []string
+	for date := range doneByDay {
+		sortedDates = append(sortedDates, date)
+	}
+	sort.Strings(sortedDates)
+	for _, d := range sortedDates {
+		report.DoneByDay = append(report.DoneByDay,
+			DayCards{Date: doneByDay[d][0].DoneDate, Done: doneByDay[d]})
+	}
+
+	// historyBoard, err := boardFor(cl.member, "History 2018")
+	// if err != nil {
+	// 	// handle error
+	// 	return err
+	// }
+
+	months := []string{"January", "February", "March", "April",
+		"May", "June", "July", "August", "September", "October",
+		"November", "December",
+	}
+
+	var currentMonth string
+
+	for _, month := range months {
+		olderMonthlyGoals, err := listFor(cl.member, "History 2018", month+" goals")
+		if err != nil {
+			return err
+		}
+		if olderMonthlyGoals == nil {
+			// assume this month is current
+			currentMonth = month
+			break
+		}
+		goalCards, err := olderMonthlyGoals.GetCards(trello.Defaults())
+		if err != nil {
+			return err
+		}
+		monthlyGoals := MonthlyGoals{}
+		monthlyGoals.Month = month
+
+		for _, goalCard := range goalCards {
+			rmg, err := reportMonthlyGoal(goalCard)
+			if err != nil {
+				return err
+			}
+			monthlyGoals.Goals = append(monthlyGoals.Goals, rmg)
+		}
+		report.MonthlyGoalsByMonth = append(report.MonthlyGoalsByMonth, monthlyGoals)
+	}
+
+	monthlyGoalsList, err := listFor(cl.member, "Kanban daily/weekly", "Monthly Goals")
+	if err != nil {
+		return err
+	}
+	goalCards, err := monthlyGoalsList.GetCards(trello.Arguments{"fields": "all"})
+	if err != nil {
+		// handle error
+		return err
+	}
+	monthlyGoals := MonthlyGoals{}
+	monthlyGoals.Month = currentMonth
+
+	for _, goalCard := range goalCards {
+		rmg, err := reportMonthlyGoal(goalCard)
+		if err != nil {
+			return err
+		}
+		monthlyGoals.Goals = append(monthlyGoals.Goals, rmg)
+	}
+	report.MonthlyGoalsByMonth = append(report.MonthlyGoalsByMonth, monthlyGoals)
+	report.LatestMonthGoals = monthlyGoals
+
+	monthlySprintsList, err := listFor(cl.member, "Kanban daily/weekly", "Monthly Sprints")
+	if err != nil {
+		return err
+	}
+	sprintCards, err := monthlySprintsList.GetCards(trello.Arguments{"fields": "all"})
+	if err != nil {
+		// handle error
+		return err
+	}
+	monthlySprints := MonthlySprints{}
+	monthlySprints.Month = currentMonth
+
+	for _, sprintCard := range sprintCards {
+		monthlySprints.Sprints = append(monthlySprints.Sprints, sprintCard.Name)
+	}
+	report.LatestMonthlySprints = monthlySprints
+
+	// log.Printf("report is %+v\n", report)
+	report.NowHHMM = time.Now().Format("15:04")
+
+	t, _ := template.ParseFiles("templates/weekly.md")
+	t.Execute(os.Stdout, report)
+
+	return nil
+}
 
 func boardFor(m *trello.Member, s string) (board *trello.Board, err error) {
 	if boards == nil {
@@ -45,6 +341,7 @@ func boardFor(m *trello.Member, s string) (board *trello.Board, err error) {
 	board = boardmap[s]
 	return
 }
+
 func moveBackPeriodic(m *trello.Member, c *trello.Card) (err error) {
 	periodicToList := map[string]string{
 		"(po)":   "Often",
@@ -121,17 +418,41 @@ func moveBackCard(m *trello.Member, c *trello.Card) (err error) {
 	return
 }
 
-func listFor(m *trello.Member, b string, l string) (list *trello.List, err error) {
+func listForCreate(m *trello.Member, b string, l string) (*trello.List, error) {
+	list, err := listFor(m, b, l)
+	if list != nil {
+		return list, err
+	}
+	board, err := boardFor(m, b)
+	if err != nil {
+		return nil, err
+	}
+	list, err = board.CreateList(l, trello.Arguments{"pos": "bottom"})
+	if err != nil {
+		return nil, err
+	}
+	listmap[b][l] = list
+	return list, nil
+}
+
+func listFor(m *trello.Member, b string, l string) (*trello.List, error) {
+	if list, ok := listmap[b][l]; ok {
+		return list, nil
+	}
+
 	board, err := boardFor(m, b)
 	if err != nil {
 		// handle error
-		return
+		return nil, err
+	}
+	if board == nil {
+		return nil, fmt.Errorf("Board %s not found", b)
 	}
 
 	lists, err := board.GetLists(trello.Defaults())
 	if err != nil {
 		// handle error
-		return
+		return nil, err
 	}
 	for _, li := range lists {
 		// fmt.Println("examining board ", b)
@@ -139,13 +460,14 @@ func listFor(m *trello.Member, b string, l string) (list *trello.List, err error
 		// if listmap[board.Name] == nil {
 		//   listmap[board.Name] = map[string]*trello.List{}
 		// }
+		// fmt.Println("list ", li.Name)
 		if listmap[board.Name] == nil {
 			listmap[board.Name] = map[string]*trello.List{}
 		}
 		listmap[board.Name][li.Name] = li
 	}
-	list = listmap[b][l]
-	return
+	list := listmap[b][l]
+	return list, nil
 }
 
 func hasDate(card *trello.Card) bool {
@@ -374,7 +696,7 @@ func New(user string, appKey string, token string) (c *Client, err error) {
 
 	client := trello.NewClient(appKey, token)
 	client.Logger = logger
-	// fmt.Println("got", client)
+
 	member, err := client.GetMember(user, trello.Defaults())
 	if err != nil {
 		// Handle error
