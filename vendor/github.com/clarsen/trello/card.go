@@ -371,9 +371,29 @@ func (b *Board) GetCards(args Arguments) (cards []*Card, err error) {
 func (l *List) GetCards(args Arguments) (cards []*Card, err error) {
 	path := fmt.Sprintf("lists/%s/cards", l.ID)
 	err = l.client.Get(path, args, &cards)
-	for i := range cards {
-		cards[i].client = l.client
+	if err != nil {
+		return nil, err
 	}
+	for i := range cards {
+		l.client.log("got card %+v", *cards[i])
+		cards[i].client = l.client
+		if len(cards[i].IDCheckLists) > 0 {
+			err = cards[i].populateChecklists(args)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return
+}
+
+func (c *Card) populateChecklists(args Arguments) (err error) {
+	path := fmt.Sprintf("cards/%s/checklists", c.ID)
+	err = c.client.Get(path, args, &c.Checklists)
+	if err != nil {
+		return err
+	}
+	c.client.log("got checklist %+v", c.Checklists[0])
 	return
 }
 

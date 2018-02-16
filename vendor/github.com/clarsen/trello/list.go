@@ -43,3 +43,16 @@ func (b *Board) GetLists(args Arguments) (lists []*List, err error) {
 	}
 	return
 }
+
+func (b *Board) CreateList(name string, args Arguments) (list *List, err error) {
+	path := fmt.Sprintf("lists")
+	args["name"] = name
+	args["idBoard"] = b.ID
+
+	err = b.client.Post(path, args, &list)
+	if err != nil {
+		return nil, err
+	}
+	list.client = b.client
+	return list, nil
+}

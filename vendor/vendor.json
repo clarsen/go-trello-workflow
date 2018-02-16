@@ -5,8 +5,8 @@
 		{
 			"checksumSHA1": "7Zj+iORUlawU7WerztLQcoXEohU=",
 			"path": "github.com/clarsen/trello",
-			"revision": "58454b04981d8124aba22c89d9becf75ff738ffe",
-			"revisionTime": "2018-01-25T04:29:41Z"
+			"revision": "6d3ef32e03a9f0e9472471a25dee30d5503757b8",
+			"revisionTime": "2018-02-16T23:12:45Z"
 		},
 		{
 			"checksumSHA1": "xCv4GBFyw07vZkVtKF/XrUnkHRk=",
@@ -49,6 +49,10 @@
 			"path": "golang.org/x/sys/windows",
 			"revision": "fff93fa7cd278d84afc205751523809c464168ab",
 			"revisionTime": "2018-01-12T09:54:32Z"
+		},
+		{
+			"path": "gopkg.in/yaml.v2",
+			"revision": ""
 		}
 	],
 	"rootPath": "github.com/clarsen/go-trello-workflow"
