@@ -1,4 +1,4 @@
-<h1>Week of {{.ThisWeekSunday}}</h1>
+Week of {{.ThisWeekSunday}}
 
 **Weekly retrospective**
 What 3 things going well?
