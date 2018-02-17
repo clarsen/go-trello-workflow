@@ -484,7 +484,11 @@ func isPeriodic(card *trello.Card) bool {
 
 func addDateToName(card *trello.Card) {
 	log.Println("Add date to ", card.Name)
-	s := time.Now().Format("(2006-01-02)")
+	local, err := time.LoadLocation("America/Los_Angeles")
+	if err != nil {
+		log.Println("Can't find timezone")
+	}
+	s := time.Now().In(local).Format("(2006-01-02)")
 	card.Update(trello.Arguments{"name": card.Name + " " + s})
 }
 

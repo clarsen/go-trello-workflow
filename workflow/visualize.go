@@ -1,9 +1,12 @@
 package workflow
 
 import (
+	"errors"
+	"fmt"
 	"html/template"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"sort"
 	"time"
@@ -17,12 +20,19 @@ type DaySummary struct {
 	Done []TaskInfo
 }
 
+// WeeklyRetrospective defines what goes into the visualization template.
 type WeeklyRetrospective struct {
 	WeeklySummary
 	WeeklyReview
 	NowHHMM        string
 	ThisWeekSunday string
 	DoneByDay      []DaySummary
+}
+
+// MonthlyRetrospective defines what goes into the visualization template.
+type MonthlyRetrospective struct {
+	MonthlySummary // mostly source
+	MonthlyReview  // populated, joined with source
 }
 
 func summarizeByDay(summary WeeklySummary) ([]DaySummary, error) {
@@ -86,6 +96,79 @@ func VisualizeWeeklyRetrospective(summaryIn, reviewIn io.Reader) error {
 
 	t, _ := template.ParseFiles("templates/weekly-retrospective.md")
 	t.Execute(os.Stdout, weekly)
+
+	return nil
+}
+
+// VisualizeMonthlyRetrospective writes out report of monthly goals, sprints
+func VisualizeMonthlyRetrospective(summaryIn, reviewIn io.Reader) error {
+	buf, err := ioutil.ReadAll(summaryIn)
+	if err != nil {
+		return err
+	}
+	// log.Println("Read", buf)
+
+	var retrospective MonthlyRetrospective
+	err = yaml.Unmarshal(buf, &retrospective.MonthlySummary)
+	if err != nil {
+		return err
+	}
+
+	buf, err = ioutil.ReadAll(reviewIn)
+	if err != nil {
+		return err
+	}
+	err = yaml.Unmarshal(buf, &retrospective.MonthlyReview)
+	if err != nil {
+		return err
+	}
+
+	shouldSee := map[string]MonthlyGoalInfo{}
+
+	for _, goal := range retrospective.MonthlySummary.MonthlyGoals {
+		shouldSee[goal.Title] = goal
+	}
+	// cross check and also fill in info
+	for _, goal := range retrospective.MonthlyReview.MonthlyGoalReviews {
+		if _, ok := shouldSee[goal.Title]; ok {
+			// goal.Created = shouldSee[goal.Title].Created
+			delete(shouldSee, goal.Title)
+		} else {
+			return fmt.Errorf("Goal %s not found as a goal", goal.Title)
+		}
+	}
+
+	if len(shouldSee) > 0 {
+		for k := range shouldSee {
+			log.Printf("Need comment about goal %s", k)
+		}
+		return errors.New("Need comments")
+	}
+
+	shouldSee = map[string]MonthlyGoalInfo{}
+
+	for _, goal := range retrospective.MonthlySummary.MonthlySprints {
+		shouldSee[goal.Title] = goal
+	}
+	// cross check and also fill in info
+	for _, goal := range retrospective.MonthlyReview.MonthlySprintReviews {
+		if _, ok := shouldSee[goal.Title]; ok {
+			// goal.Created = shouldSee[goal.Title].Created
+			delete(shouldSee, goal.Title)
+		} else {
+			return fmt.Errorf("Sprint %s not found as a sprint", goal.Title)
+		}
+	}
+
+	if len(shouldSee) > 0 {
+		for k := range shouldSee {
+			log.Printf("Need comment about sprint %s", k)
+		}
+		return errors.New("Need comments")
+	}
+
+	t, _ := template.ParseFiles("templates/monthly-retrospective.md")
+	t.Execute(os.Stdout, retrospective)
 
 	return nil
 }

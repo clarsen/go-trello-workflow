@@ -39,7 +39,7 @@ Compared to outcomes planned for the week,
 {{- range .MonthlyGoals }}
     - {{ .Title }} ({{ .Created }})
     {{- range .WeeklyGoals }}
-        - week {{ .Week }}: {{ .Title -}} ({{ .Created }}) {{ .Status -}}
+        - week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}
     {{ end -}}
 {{ end }}
 
@@ -47,7 +47,7 @@ Compared to outcomes planned for the week,
 {{- range .MonthlySprints }}
     - {{ .Title }} ({{ .Created }})
     {{- range .WeeklyGoals }}
-        - week {{ .Week }}: {{ .Title -}} ({{ .Created }}) {{ .Status -}}
+        - week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}
     {{ end -}}
 {{ end }}
 
@@ -67,6 +67,7 @@ Who did i interact with?
 - ask a question?
 - share feedback with?
 
+These could be a checklist in Trello or somewhere else instead.
 [ ] review Yearly goals https://paper.dropbox.com/doc/Yearly-goals-2017-odfgfBzyJr3JFEixro4t0
 [ ] review work: task paper
 [ ] review timeular (where was time spent?)
