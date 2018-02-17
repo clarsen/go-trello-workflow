@@ -27,6 +27,11 @@ func main() {
 		log.Fatal("$reviewdir must be set")
 	}
 
+	reviewvisdir := os.Getenv("reviewvisdir")
+	if reviewvisdir == "" {
+		log.Fatal("$reviewvisdir must be set")
+	}
+
 	app := cli.NewApp()
 	app.Name = "trello-dump-summary"
 	app.Usage = "Dump data from Trello board"
@@ -60,20 +65,37 @@ func main() {
 			Aliases: []string{"w"},
 			Usage:   "Generate weekly review \"visualization\"",
 			Action: func(*cli.Context) {
-				year, week := time.Now().AddDate(0, 0, -3).ISOWeek()
-				inSummary, err2 := os.Open(fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, year, week))
-				if err != nil {
-					log.Fatal(err2)
-				}
+				year := time.Now().AddDate(0, 0, -3).Year()
+				for week := 1; week <= 53; week++ {
+					summaryFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, year, week)
+					if _, err = os.Stat(summaryFname); os.IsNotExist(err) {
+						continue
+					}
 
-				inReview, err2 := os.Open(fmt.Sprintf("%s/weekly-%d-%02d.yaml", reviewdir, year, week))
-				if err != nil {
-					log.Fatal(err2)
-				}
+					inSummary, err2 := os.Open(summaryFname)
+					if err2 != nil {
+						log.Fatal(err2)
+					}
+					reviewFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", reviewdir, year, week)
+					if _, err = os.Stat(reviewFname); os.IsNotExist(err) {
+						continue
+					}
 
-				err2 = workflow.VisualizeWeeklyRetrospective(inSummary, inReview)
-				if err2 != nil {
-					log.Fatal(err2)
+					inReview, err2 := os.Open(reviewFname)
+					if err2 != nil {
+						log.Fatal(err2)
+						continue
+					}
+
+					out, err2 := os.Create(fmt.Sprintf("%s/weekly-%d-%02d.md", reviewvisdir, year, week))
+					if err2 != nil {
+						log.Fatal(err2)
+					}
+
+					err2 = workflow.VisualizeWeeklyRetrospective(inSummary, inReview, out)
+					if err2 != nil {
+						log.Fatal(err2)
+					}
 				}
 			},
 		},
@@ -113,22 +135,31 @@ func main() {
 			Usage:   "Generate monthly review \"visualization\"",
 			Action: func(*cli.Context) {
 				year := time.Now().Year()
-				month := int(time.Now().AddDate(0, 0, -5).Month())
 
-				inSummary, err := os.Open(fmt.Sprintf("%s/monthly-%d-%02d.yaml", summarydir, year, month))
-				if err != nil {
-					log.Fatal(err)
+				for month := 1; month <= 12; month++ {
+					inSummary, err := os.Open(fmt.Sprintf("%s/monthly-%d-%02d.yaml", summarydir, year, month))
+					if err != nil {
+						log.Println(err)
+						continue
+					}
+
+					inReview, err := os.Open(fmt.Sprintf("%s/monthly-%d-%02d.yaml", reviewdir, year, month))
+					if err != nil {
+						log.Println(err)
+						continue
+					}
+					out, err := os.Create(fmt.Sprintf("%s/monthly-%d-%02d.md", reviewvisdir, year, month))
+					if err != nil {
+						log.Fatal(err)
+					}
+
+					err = workflow.VisualizeMonthlyRetrospective(inSummary, inReview, out)
+					if err != nil {
+						log.Fatal(err)
+					}
+
 				}
 
-				inReview, err := os.Open(fmt.Sprintf("%s/monthly-%d-%02d.yaml", reviewdir, year, month))
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				err = workflow.VisualizeMonthlyRetrospective(inSummary, inReview)
-				if err != nil {
-					log.Fatal(err)
-				}
 			},
 		},
 	}

@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"os"
 	"sort"
 	"time"
 
@@ -126,7 +125,7 @@ func CreateEmptyMonthlyRetrospective(summaryIn io.Reader, reviewOut io.Writer) e
 }
 
 // VisualizeWeeklyRetrospective writes out report of weekly tasks done, goals, sprints
-func VisualizeWeeklyRetrospective(summaryIn, reviewIn io.Reader) error {
+func VisualizeWeeklyRetrospective(summaryIn, reviewIn io.Reader, visOut io.Writer) error {
 	buf, err := ioutil.ReadAll(summaryIn)
 	if err != nil {
 		return err
@@ -162,13 +161,13 @@ func VisualizeWeeklyRetrospective(summaryIn, reviewIn io.Reader) error {
 	// log.Printf("Got %+v\n", weekly)
 
 	t, _ := template.ParseFiles("templates/weekly-retrospective.md")
-	t.Execute(os.Stdout, weekly)
+	t.Execute(visOut, weekly)
 
 	return nil
 }
 
 // VisualizeMonthlyRetrospective writes out report of monthly goals, sprints
-func VisualizeMonthlyRetrospective(summaryIn, reviewIn io.Reader) error {
+func VisualizeMonthlyRetrospective(summaryIn, reviewIn io.Reader, visOut io.Writer) error {
 	buf, err := ioutil.ReadAll(summaryIn)
 	if err != nil {
 		return err
@@ -235,7 +234,7 @@ func VisualizeMonthlyRetrospective(summaryIn, reviewIn io.Reader) error {
 	}
 
 	t, _ := template.ParseFiles("templates/monthly-retrospective.md")
-	t.Execute(os.Stdout, retrospective)
+	t.Execute(visOut, retrospective)
 
 	return nil
 }
