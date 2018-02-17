@@ -58,6 +58,73 @@ func summarizeByDay(summary WeeklySummary) ([]DaySummary, error) {
 	return ds, nil
 }
 
+// CreateEmptyWeeklyRetrospective populates an empty template based on weekly summary
+func CreateEmptyWeeklyRetrospective(reviewOut io.Writer) error {
+	review := WeeklyReview{
+		GoingWell:                []string{"1", "2", "3"},
+		NeedsImprovement:         []string{"1", "2", "3"},
+		Successes:                []string{"1", "2"},
+		Challenges:               []string{"1", "2"},
+		LearnAboutMyself:         []string{"1", "2"},
+		LearnAboutOthers:         []string{"1", "2"},
+		WhatIDidToCreateOutcome:  []string{"1", "2"},
+		WhatIPlanToDoDifferently: []string{"1", "2"},
+	}
+
+	buf, err := yaml.Marshal(&review)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = reviewOut.Write(buf)
+	return err
+}
+
+// CreateEmptyMonthlyRetrospective populates an empty template based on monthly summary
+func CreateEmptyMonthlyRetrospective(summaryIn io.Reader, reviewOut io.Writer) error {
+	buf, err := ioutil.ReadAll(summaryIn)
+	if err != nil {
+		return err
+	}
+	log.Printf("Got %+v", buf)
+	retro := MonthlyRetrospective{
+		MonthlyReview: MonthlyReview{
+			DoDifferently:    []string{"1", "2"},
+			CandidateGoals:   []string{"1", "2"},
+			CandidateSprints: []string{"1", "2"},
+			Highlights:       []string{"1", "2"},
+		},
+	}
+
+	err = yaml.Unmarshal(buf, &retro.MonthlySummary)
+	if err != nil {
+		return err
+	}
+	log.Printf("Got %+v", retro)
+
+	for _, goal := range retro.MonthlyGoals {
+		retro.MonthlyGoalReviews = append(retro.MonthlyGoalReviews, MonthlyGoalReview{
+			Title:           goal.Title,
+			Accomplishments: []string{"1", "2"},
+			CreatedBy:       []string{"1", "2"},
+		})
+	}
+	for _, goal := range retro.MonthlySprints {
+		retro.MonthlySprintReviews = append(retro.MonthlySprintReviews, MonthlySprintReview{
+			Title: goal.Title,
+			CommentsContinueChange: []string{"1", "2"},
+		})
+	}
+
+	buf, err = yaml.Marshal(&retro.MonthlyReview)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = reviewOut.Write(buf)
+	return err
+}
+
 // VisualizeWeeklyRetrospective writes out report of weekly tasks done, goals, sprints
 func VisualizeWeeklyRetrospective(summaryIn, reviewIn io.Reader) error {
 	buf, err := ioutil.ReadAll(summaryIn)

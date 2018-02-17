@@ -32,6 +32,30 @@ func main() {
 	app.Usage = "Dump data from Trello board"
 	app.Commands = []cli.Command{
 		{
+			Name:    "weekly-review-template",
+			Aliases: []string{"tw"},
+			Usage:   "Generate weekly review \"visualization\" template",
+			Action: func(*cli.Context) {
+
+				year, week := time.Now().AddDate(0, 0, -3).ISOWeek()
+
+				templateFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", reviewdir, year, week)
+				if _, err = os.Stat(templateFname); err == nil {
+					log.Fatalf("%s exists already", templateFname)
+				}
+
+				outReview, err2 := os.Create(templateFname)
+				if err2 != nil {
+					log.Fatal(err2)
+				}
+
+				err2 = workflow.CreateEmptyWeeklyRetrospective(outReview)
+				if err2 != nil {
+					log.Fatal(err2)
+				}
+			},
+		},
+		{
 			Name:    "weekly-review",
 			Aliases: []string{"w"},
 			Usage:   "Generate weekly review \"visualization\"",
@@ -48,6 +72,36 @@ func main() {
 				}
 
 				err2 = workflow.VisualizeWeeklyRetrospective(inSummary, inReview)
+				if err2 != nil {
+					log.Fatal(err2)
+				}
+			},
+		},
+		{
+			Name:    "monthly-review-template",
+			Aliases: []string{"tm"},
+			Usage:   "Generate monthly review \"visualization\" template",
+			Action: func(*cli.Context) {
+
+				year := time.Now().AddDate(0, 0, -3).Year()
+				month := int(time.Now().AddDate(0, 0, -5).Month())
+
+				inSummary, err2 := os.Open(fmt.Sprintf("%s/monthly-%d-%02d.yaml", summarydir, year, month))
+				if err != nil {
+					log.Fatal(err2)
+				}
+
+				templateFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", reviewdir, year, month)
+				if _, err = os.Stat(templateFname); err == nil {
+					log.Fatalf("%s exists already", templateFname)
+				}
+
+				outReview, err2 := os.Create(templateFname)
+				if err2 != nil {
+					log.Fatal(err2)
+				}
+
+				err2 = workflow.CreateEmptyMonthlyRetrospective(inSummary, outReview)
 				if err2 != nil {
 					log.Fatal(err2)
 				}
