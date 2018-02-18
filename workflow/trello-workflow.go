@@ -366,7 +366,7 @@ func moveBackPeriodic(m *trello.Member, c *trello.Card) (err error) {
 		}
 	}
 	if destlist != nil {
-		fmt.Println("would move", c.Name, "to", destlist.Name)
+		fmt.Println("moving", c.Name, "to", destlist.Name)
 		c.MoveToListOnBoard(destlist.ID, destlist.IDBoard, trello.Defaults())
 		c.MoveToTopOfList()
 	}

@@ -3,17 +3,18 @@ Week of {{.ThisWeekSunday}}
 **Weekly retrospective**
 
 What 3 things going well?
-{{- range .GoingWell }}
+{{ range .GoingWell }}
 - {{ . -}}
 {{ end }}
 
 What 3 things need improvement?
-{{- range .NeedsImprovement }}
+{{ range .NeedsImprovement }}
 - {{ . -}}
 {{ end }}
 
 
 How did my week go?
+
 - what success did i experience?
 {{- range .Successes }}
     - {{ . -}}
@@ -25,6 +26,7 @@ How did my week go?
 {{ end }}
 
 What did i learn this week?
+
 - about myself?
 {{- range .LearnAboutMyself }}
     - {{ . -}}
@@ -36,6 +38,7 @@ What did i learn this week?
 {{ end }}
 
 Compared to outcomes planned for the week,
+
 - what actually was or wasn’t done:
 {{- range .MonthlyGoals }}
     - {{ .Title }} ({{ .Created }})
@@ -70,6 +73,7 @@ Who did i interact with?
 
 ----
 These could be a checklist in Trello or somewhere else instead.
+
 - [ ] review Yearly goals https://paper.dropbox.com/doc/Yearly-goals-2017-odfgfBzyJr3JFEixro4t0
 - [ ] review work: task paper
 - [ ] review timeular (where was time spent?)
