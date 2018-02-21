@@ -4,17 +4,35 @@ As a reminder, these are the monthly goals with goals for this week:
 
 {{- range .MonthlyGoals }}
 - {{ .Title }} ({{ .Created }})
-    {{- range .WeeklyGoals }}
+    {{ range .WeeklyGoals }}
+    {{- if .Status -}}
+    {{- else -}}
     - week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}
+    {{ end }}
+    {{ end }}
+    - With actions already:
+    {{- range .WeeklyGoals }}
+    {{- if .Status }}
+        - week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}
     {{ end -}}
+    {{ end }}
 {{ end }}
 
 And these are the monthly sprints with goals for this week:
 {{- range .MonthlySprints }}
 - {{ .Title }} ({{ .Created }})
-    {{- range .WeeklyGoals }}
+    {{ range .WeeklyGoals }}
+    {{- if .Status }}
+    {{- else -}}
     - week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}
+    {{ end }}
+    {{ end }}
+    - With actions already:
+    {{- range .WeeklyGoals }}
+    {{- if .Status }}
+        - week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}
     {{ end -}}
+    {{ end }}
 {{ end }}
 
 
@@ -22,5 +40,5 @@ And these are the monthly sprints with goals for this week:
 This is what you have gotten done so far.  Good work!
 
 {{range .Done}}
-- {{ .DoneDate }} {{ .Title }}
+- {{ .DoneDate }} {{ .Title -}}
 {{end}}
