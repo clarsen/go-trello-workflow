@@ -21,6 +21,24 @@
 			"revisionTime": "2017-11-01T20:10:47Z"
 		},
 		{
+			"checksumSHA1": "1am4FGlEIZUzQmgO3z5ikrHKGnc=",
+			"path": "github.com/sendgrid/rest",
+			"revision": "a44614977dc1c40d4c7cb62caeb3bd145e974e7d",
+			"revisionTime": "2017-12-11T23:24:04Z"
+		},
+		{
+			"checksumSHA1": "0P3K5Qj3F7YQ4e6oVHyef2UFpi8=",
+			"path": "github.com/sendgrid/sendgrid-go",
+			"revision": "588320a743278a1824a54d232a7e9f36df6f6c99",
+			"revisionTime": "2018-02-07T00:05:56Z"
+		},
+		{
+			"checksumSHA1": "S8+5XJgd+oHImvyXkSQMZNPCi9w=",
+			"path": "github.com/sendgrid/sendgrid-go/helpers/mail",
+			"revision": "588320a743278a1824a54d232a7e9f36df6f6c99",
+			"revisionTime": "2018-02-07T00:05:56Z"
+		},
+		{
 			"checksumSHA1": "ySaT8G3I3y4MmnoXOYAAX0rC+p8=",
 			"path": "github.com/sirupsen/logrus",
 			"revision": "d682213848ed68c0a260ca37d6dd5ace8423f5ba",
