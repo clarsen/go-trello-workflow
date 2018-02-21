@@ -24,14 +24,36 @@ func main() {
 		log.Fatal("$authtoken must be set")
 	}
 	user := os.Getenv("user")
-	if authtoken == "" {
-		log.Fatal("$authtoken must be set")
+	if user == "" {
+		log.Fatal("$user must be set")
+	}
+
+	sendgridKey := os.Getenv("SENDGRID_API_KEY")
+	if sendgridKey == "" {
+		log.Fatal("$sendgridKey must be set")
+	}
+
+	userEmail := os.Getenv("USER_EMAIL")
+	if userEmail == "" {
+		log.Fatal("$USER_EMAIL must be set")
+
 	}
 
 	app := cli.NewApp()
 	app.Name = "trello-workflow"
 	app.Usage = "Update Trello board"
 	app.Commands = []cli.Command{
+		{
+			Name:    "remind",
+			Aliases: []string{"r"},
+			Usage:   "Update the trello board on daily basis",
+			Action: func(*cli.Context) {
+				err := workflow.MorningRemind(user, appkey, authtoken, sendgridKey, userEmail)
+				if err != nil {
+					log.Fatal(err)
+				}
+			},
+		},
 		{
 			Name:    "today",
 			Aliases: []string{"t"},

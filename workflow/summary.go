@@ -119,24 +119,38 @@ func dumpMonthlyGoalInfo(card *trello.Card, weekNumber *int) (MonthlyGoalInfo, e
 }
 
 func dumpSummaryForWeek(
-	year, week, month int,
-	doneCards, goalCards, sprintCards []*trello.Card,
+	summary *WeeklySummary,
 	out io.Writer,
 ) error {
+	buf, err := yaml.Marshal(summary)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = out.Write(buf)
+	return err
+}
+
+func generateWeeklySummary(
+	year, week, month int,
+	doneCards, goalCards, sprintCards []*trello.Card,
+) (
+	*WeeklySummary, error,
+) {
 	summary := WeeklySummary{}
 	summary.Year = year
 	summary.Week = week
 	summary.Month = month
 	local, err := time.LoadLocation("America/Los_Angeles")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, card := range doneCards {
 
 		actions, err2 := card.GetActions(trello.Arguments{"filter": "copyCard,updateCard:idList,moveCardToBoard"})
 		if err2 != nil {
-			return err2
+			return nil, err2
 		}
 		var latest *time.Time
 		for _, a := range actions {
@@ -148,9 +162,14 @@ func dumpSummaryForWeek(
 		// well, unfortunately, Trello loses action data after a while when moving
 		// card to another board, so the last action may only be the time when it
 		// was moved to the history board and no actions when in a previous board.
-
+		var doneDate string
+		if latest == nil {
+			doneDate = "unknown"
+		} else {
+			doneDate = latest.In(local).Format("2006-01-02 (Mon)")
+		}
 		summary.Done = append(summary.Done, TaskInfo{
-			DoneDate:    latest.In(local).Format("2006-01-02 (Mon)"),
+			DoneDate:    doneDate,
 			Title:       card.Name,
 			CreatedDate: card.CreatedAt().In(local).Format("2006-01-02"),
 		})
@@ -159,7 +178,7 @@ func dumpSummaryForWeek(
 	for _, goalCard := range goalCards {
 		dmgi, err2 := dumpMonthlyGoalInfo(goalCard, &summary.Week)
 		if err2 != nil {
-			return err2
+			return nil, err2
 		}
 		summary.MonthlyGoals = append(summary.MonthlyGoals, dmgi)
 	}
@@ -167,22 +186,19 @@ func dumpSummaryForWeek(
 	for _, sprintCard := range sprintCards {
 		dmsi, err2 := dumpMonthlyGoalInfo(sprintCard, &summary.Week)
 		if err2 != nil {
-			return err2
+			return nil, err2
 		}
 		summary.MonthlySprints = append(summary.MonthlySprints, dmsi)
 	}
-
-	buf, err := yaml.Marshal(summary)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = out.Write(buf)
-	return err
+	return &summary, nil
 }
 
-// DumpSummaryForWeek dumps current content of Trello board to summary file for week
-func DumpSummaryForWeek(user, appkey, authtoken string, out io.Writer) error {
+func prepareSummaryForWeek(
+	user, appkey, authtoken string,
+) (
+	year, week, month int,
+	doneCards, goalCards, sprintCards []*trello.Card,
+	err error) {
 	cl, err := New(user, appkey, authtoken)
 	if err != nil {
 		log.Fatal(err)
@@ -190,38 +206,62 @@ func DumpSummaryForWeek(user, appkey, authtoken string, out io.Writer) error {
 
 	doneList, err := listFor(cl.member, "Kanban daily/weekly", "Done this week")
 	if err != nil {
-		return err
+		return
 	}
 
-	doneCards, err := doneList.GetCards(trello.Defaults())
+	doneCards, err = doneList.GetCards(trello.Defaults())
 	if err != nil {
 		// handle error
-		return err
+		return
 	}
 
 	monthlyGoalsList, err := listFor(cl.member, "Kanban daily/weekly", "Monthly Goals")
 	if err != nil {
-		return err
+		return
 	}
-	goalCards, err := monthlyGoalsList.GetCards(trello.Arguments{"fields": "all"})
+	goalCards, err = monthlyGoalsList.GetCards(trello.Arguments{"fields": "all"})
 	if err != nil {
 		// handle error
-		return err
+		return
 	}
 
 	monthlySprintsList, err := listFor(cl.member, "Kanban daily/weekly", "Monthly Sprints")
 	if err != nil {
-		return err
+		return
 	}
-	sprintCards, err := monthlySprintsList.GetCards(trello.Arguments{"fields": "all"})
+	sprintCards, err = monthlySprintsList.GetCards(trello.Arguments{"fields": "all"})
 	if err != nil {
 		// handle error
-		return err
+		return
 	}
 
-	year, week := time.Now().ISOWeek()
-	month := int(time.Now().Month())
-	return dumpSummaryForWeek(year, week, month, doneCards, goalCards, sprintCards, out)
+	year, week = time.Now().ISOWeek()
+	month = int(time.Now().Month())
+
+	return year, week, month, doneCards, goalCards, sprintCards, nil
+}
+
+// GetSummaryForWeek returns a summary structure usable by other downstream
+// in-memory pipelines like daily reminder.
+func GetSummaryForWeek(user, appkey, authtoken string) (*WeeklySummary, error) {
+	year, week, month, doneCards, goalCards, sprintCards, err := prepareSummaryForWeek(user, appkey, authtoken)
+	if err != nil {
+		return nil, err
+	}
+	return generateWeeklySummary(year, week, month, doneCards, goalCards, sprintCards)
+}
+
+// DumpSummaryForWeek dumps current content of Trello board to summary file for week
+func DumpSummaryForWeek(user, appkey, authtoken string, out io.Writer) error {
+	year, week, month, doneCards, goalCards, sprintCards, err := prepareSummaryForWeek(user, appkey, authtoken)
+	if err != nil {
+		return err
+	}
+	summary, err := generateWeeklySummary(year, week, month, doneCards, goalCards, sprintCards)
+	if err != nil {
+		return err
+	}
+	return dumpSummaryForWeek(summary, out)
 
 }
 
@@ -318,7 +358,11 @@ func DumpSummaryForWeekFromHistory(user, appkey, authtoken string, week int, out
 			// handle error
 			return err
 		}
-		return dumpSummaryForWeek(2018, week, idx+1, doneCards, goalCards, sprintCards, out)
+		summary, err := generateWeeklySummary(2018, week, idx+1, doneCards, goalCards, sprintCards)
+		if err != nil {
+			return err
+		}
+		return dumpSummaryForWeek(summary, out)
 	}
 
 	// doesn't reach here

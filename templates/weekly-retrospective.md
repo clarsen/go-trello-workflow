@@ -1,5 +1,3 @@
-Week of {{.ThisWeekSunday}}
-
 **Weekly retrospective**
 
 What 3 things going well?

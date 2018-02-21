@@ -1,0 +1,26 @@
+Good morning,
+
+As a reminder, these are the monthly goals with goals for this week:
+
+{{- range .MonthlyGoals }}
+- {{ .Title }} ({{ .Created }})
+    {{- range .WeeklyGoals }}
+    - week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}
+    {{ end -}}
+{{ end }}
+
+And these are the monthly sprints with goals for this week:
+{{- range .MonthlySprints }}
+- {{ .Title }} ({{ .Created }})
+    {{- range .WeeklyGoals }}
+    - week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}
+    {{ end -}}
+{{ end }}
+
+
+
+This is what you have gotten done so far.  Good work!
+
+{{range .Done}}
+- {{ .DoneDate }} {{ .Title }}
+{{end}}
