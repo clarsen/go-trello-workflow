@@ -6,6 +6,12 @@ This is on your plate for today:
 - {{ .Name -}}
 {{ end }}
 
+These cards are due soon:
+
+{{- range .DueSoon }}
+- {{ .Due | formatAsDate }} {{ .Name -}}
+{{ end }}
+
 As a reminder, these are the monthly goals with goals for this week:
 
 {{- range .Summary.MonthlyGoals }}
