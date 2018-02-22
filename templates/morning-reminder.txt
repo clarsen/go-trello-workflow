@@ -1,8 +1,14 @@
 Good morning,
 
+This is on your plate for today:
+
+{{- range .Today }}
+- {{ .Name -}}
+{{ end }}
+
 As a reminder, these are the monthly goals with goals for this week:
 
-{{- range .MonthlyGoals }}
+{{- range .Summary.MonthlyGoals }}
 - {{ .Title }} ({{ .Created }})
     {{ range .WeeklyGoals }}
     {{- if .Status -}}
@@ -19,7 +25,7 @@ As a reminder, these are the monthly goals with goals for this week:
 {{ end }}
 
 And these are the monthly sprints with goals for this week:
-{{- range .MonthlySprints }}
+{{- range .Summary.MonthlySprints }}
 - {{ .Title }} ({{ .Created }})
     {{ range .WeeklyGoals }}
     {{- if .Status }}
@@ -39,6 +45,6 @@ And these are the monthly sprints with goals for this week:
 
 This is what you have gotten done so far.  Good work!
 
-{{range .Done}}
+{{range .Summary.Done}}
 - {{ .DoneDate }} {{ .Title -}}
 {{end}}
