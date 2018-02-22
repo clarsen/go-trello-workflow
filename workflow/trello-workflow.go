@@ -532,6 +532,7 @@ func (cl *Client) doMinutely() error {
 	}
 	cherryPickBoardsAndLists := []boardAndList{
 		{"Backlog (Personal)", "Backlog"},
+		{"Backlog (Personal)", "Projects"},
 		{"Backlog (work)", "Backlog"},
 		{"Periodic board", "Often"},
 		{"Periodic board", "Weekly"},
