@@ -51,13 +51,19 @@ type WeeklySummary struct {
 // MonthlySummary defines the summarization data that is dumped for downstream
 // consumption independent of task management tool (in this case Trello).
 //
-// for monthly summary, monthly goal and monthly sprint info will omit weekly
-// goal info
+// for monthly summary, monthly goal and monthly sprint info will merge together
+// weekly goals
 type MonthlySummary struct {
 	Year           int               `yaml:"year"`
 	Month          int               `yaml:"month"`
 	MonthlyGoals   []MonthlyGoalInfo `yaml:"monthlyGoals"`
 	MonthlySprints []MonthlyGoalInfo `yaml:"monthlySprints"`
+}
+
+// YearlySummary defines what's dumped for rolling up into the yearly plan summary
+type YearlySummary struct {
+	Year             int              `yaml:"year"`
+	MonthlySummaries []MonthlySummary `yaml:"monthlySummaries"`
 }
 
 func dumpMonthlyGoalInfo(card *trello.Card, weekNumber *int) (MonthlyGoalInfo, error) {
@@ -265,6 +271,25 @@ func DumpSummaryForWeek(user, appkey, authtoken string, out io.Writer) error {
 
 }
 
+func mergeMonthlyGoalInfo(goalsAcrossWeeks []MonthlyGoalInfo) []MonthlyGoalInfo {
+	allWeeklyGoals := map[string][]WeeklyGoalInfo{}
+	created := map[string]string{}
+	for _, mg := range goalsAcrossWeeks {
+		allWeeklyGoals[mg.Title] = append(allWeeklyGoals[mg.Title], mg.WeeklyGoals...)
+		created[mg.Title] = mg.Created
+	}
+
+	var monthlyGoals []MonthlyGoalInfo
+	for title, goals := range allWeeklyGoals {
+		mg := MonthlyGoalInfo{Title: title,
+			Created:     created[title],
+			WeeklyGoals: goals,
+		}
+		monthlyGoals = append(monthlyGoals, mg)
+	}
+	return monthlyGoals
+}
+
 // GenerateSummaryForMonth rolls up weekly summaries to month level
 func GenerateSummaryForMonth(year, month int, summaryIn [][]byte, out io.Writer) error {
 	var weeklies []WeeklySummary
@@ -285,14 +310,18 @@ func GenerateSummaryForMonth(year, month int, summaryIn [][]byte, out io.Writer)
 	summary := MonthlySummary{}
 	summary.Year = year
 	summary.Month = month
-	summary.MonthlyGoals = weeklies[0].MonthlyGoals
-	summary.MonthlySprints = weeklies[0].MonthlySprints
-	for idx := range summary.MonthlyGoals {
-		summary.MonthlyGoals[idx].WeeklyGoals = []WeeklyGoalInfo{}
+
+	var allMonthlyGoals []MonthlyGoalInfo
+	for _, ws := range weeklies {
+		allMonthlyGoals = append(allMonthlyGoals, ws.MonthlyGoals...)
 	}
-	for idx := range summary.MonthlySprints {
-		summary.MonthlySprints[idx].WeeklyGoals = []WeeklyGoalInfo{}
+	summary.MonthlyGoals = mergeMonthlyGoalInfo(allMonthlyGoals)
+
+	allMonthlyGoals = []MonthlyGoalInfo{}
+	for _, ws := range weeklies {
+		allMonthlyGoals = append(allMonthlyGoals, ws.MonthlySprints...)
 	}
+	summary.MonthlySprints = mergeMonthlyGoalInfo(allMonthlyGoals)
 	// log.Printf("filtered to %+v\n", weeklies)
 
 	buf, err := yaml.Marshal(summary)
@@ -301,6 +330,36 @@ func GenerateSummaryForMonth(year, month int, summaryIn [][]byte, out io.Writer)
 	}
 
 	_, err = out.Write(buf)
+	return err
+}
+
+// GenerateSummaryForYear rolls up monthly summaries to year level
+func GenerateSummaryForYear(year int, summaryIn [][]byte, out io.Writer) error {
+	var monthlies []MonthlySummary
+	for _, buf := range summaryIn {
+		var monthly MonthlySummary
+		err := yaml.Unmarshal(buf, &monthly)
+		if err != nil {
+			return err
+		}
+		monthlies = append(monthlies, monthly)
+	}
+	if len(monthlies) <= 0 {
+		return fmt.Errorf("No summaries for %d", year)
+	}
+
+	summary := YearlySummary{Year: year}
+	for _, m := range monthlies {
+		summary.MonthlySummaries = append(summary.MonthlySummaries, m)
+	}
+
+	buf, err := yaml.Marshal(summary)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = out.Write(buf)
+
 	return err
 }
 

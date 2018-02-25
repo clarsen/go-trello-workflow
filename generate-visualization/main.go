@@ -162,6 +162,29 @@ func main() {
 
 			},
 		},
+		{
+			Name:    "yearly-plan",
+			Aliases: []string{"yp"},
+			Usage:   "Generate yearly plan \"visualization\"",
+			Action: func(*cli.Context) {
+				year := time.Now().Year()
+
+				inSummary, err := os.Open(fmt.Sprintf("%s/yearly-%d.yaml", summarydir, year))
+				if err != nil {
+					log.Println(err)
+				}
+
+				out, err := os.Create(fmt.Sprintf("%s/yearly-%d-plansummary.md", reviewvisdir, year))
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				err = workflow.VisualizeYearlyPlanSummary(inSummary, out)
+				if err != nil {
+					log.Fatal(err)
+				}
+			},
+		},
 	}
 	app.Run(os.Args)
 

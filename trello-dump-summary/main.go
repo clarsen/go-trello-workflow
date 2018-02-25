@@ -118,6 +118,42 @@ func main() {
 				}
 			},
 		},
+		{
+			Name:    "year",
+			Aliases: []string{"y"},
+			Usage:   "Summarize the year in progress or end of year",
+			Action: func(*cli.Context) {
+				year := time.Now().Year()
+
+				var inMonthlySummaries [][]byte
+				for month := 1; month <= 12; month++ {
+					monthlySummary := fmt.Sprintf("%s/monthly-%d-%02d.yaml", summarydir, year, month)
+					if _, err := os.Stat(monthlySummary); os.IsNotExist(err) {
+						continue
+					}
+					inSummary, err2 := os.Open(monthlySummary)
+					if err2 != nil {
+						log.Fatal(err2)
+					}
+					buf, err2 := ioutil.ReadAll(inSummary)
+					if err2 != nil {
+						log.Fatal(err2)
+					}
+					inMonthlySummaries = append(inMonthlySummaries, buf)
+				}
+
+				yearlySummary := fmt.Sprintf("%s/yearly-%d.yaml", summarydir, year)
+				out, err := os.Create(yearlySummary)
+				if err != nil {
+					log.Fatal(err)
+				}
+				err = workflow.GenerateSummaryForYear(year, inMonthlySummaries, out)
+				if err != nil {
+					os.Remove(yearlySummary)
+				}
+
+			},
+		},
 	}
 	app.Run(os.Args)
 

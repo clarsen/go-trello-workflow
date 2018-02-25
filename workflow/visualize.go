@@ -34,6 +34,25 @@ type MonthlyRetrospective struct {
 	MonthlyReview  // populated, joined with source
 }
 
+func formatMonthAsString(month int) string {
+	monthString := []string{
+		"",
+		"January",
+		"February",
+		"March",
+		"April",
+		"May",
+		"June",
+		"July",
+		"August",
+		"September",
+		"October",
+		"November",
+		"December",
+	}
+	return monthString[month]
+}
+
 func summarizeByDay(summary WeeklySummary) ([]DaySummary, error) {
 	doneByDay := map[string][]TaskInfo{}
 
@@ -235,6 +254,27 @@ func VisualizeMonthlyRetrospective(summaryIn, reviewIn io.Reader, visOut io.Writ
 
 	t, _ := template.ParseFiles("templates/monthly-retrospective.md")
 	t.Execute(visOut, retrospective)
+
+	return nil
+}
+
+// VisualizeYearlyPlanSummary writes out report of monthly goals, sprints over the year
+func VisualizeYearlyPlanSummary(summaryIn io.Reader, visOut io.Writer) error {
+	buf, err := ioutil.ReadAll(summaryIn)
+	if err != nil {
+		return err
+	}
+	var summary YearlySummary
+	err = yaml.Unmarshal(buf, &summary)
+	if err != nil {
+		return err
+	}
+
+	fmap := template.FuncMap{
+		"formatMonthAsString": formatMonthAsString,
+	}
+	t := template.Must(template.New("yearly-plan-summary.md").Funcs(fmap).ParseFiles("templates/yearly-plan-summary.md"))
+	t.Execute(visOut, summary)
 
 	return nil
 }
