@@ -14,7 +14,9 @@
 {{ end }}
 
 ### Events
-- list of events for {{ .Month | formatMonthAsString }}
+{{- range .Events }}
+- {{ . -}}
+{{ end }}
 
 ### Sprints
 {{- range .MonthlySprints }}

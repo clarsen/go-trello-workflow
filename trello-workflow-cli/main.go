@@ -88,6 +88,17 @@ func main() {
 				}
 			},
 		},
+		{
+			Name:    "monthly cleanup",
+			Aliases: []string{"mc"},
+			Usage:   "End of month cleanup",
+			Action: func(*cli.Context) {
+				err := workflow.MonthlyCleanup(user, appkey, authtoken)
+				if err != nil {
+					log.Fatal(err)
+				}
+			},
+		},
 	}
 	app.Run(os.Args)
 

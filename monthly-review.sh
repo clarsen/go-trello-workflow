@@ -1,6 +1,9 @@
 #!/bin/bash
-out=$HOME/Dropbox/notes/personal/notational/monthly-retrospective.md
 
 trello-dump-summary m \
-  && generate-visualization tm \
-  && generate-visualization m > $out && cat $out
+  && generate-visualization tm
+
+(find templates -type f; \
+ find ~/lsrc/data-and-reviews/reviews -type f; \
+ find ~/lsrc/data-and-reviews/task-summary -type f) \
+| entr generate-visualization m

@@ -120,6 +120,18 @@ func reportMonthlyGoal(card *trello.Card) (MonthlyGoal, error) {
 	return g, nil
 }
 
+// MonthlyCleanup moves cards to history board
+func MonthlyCleanup(user, appkey, authtoken string) error {
+	cl, err := New(user, appkey, authtoken)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_ = cl
+	// XXX: implement node index.js --monthly-review
+	return nil
+}
+
 // WeeklyCleanup moves cards to history board, copies periodic cards to history,
 // moves periodic cards back
 func WeeklyCleanup(user, appkey, authtoken string) error {
@@ -568,6 +580,27 @@ func (cl *Client) doMinutely() error {
 		}
 	}
 
+	// Move cards from inbox to backlog
+	for _, boardlist := range []string{"Inbox"} {
+		fmt.Printf("move items from %s to backlog based on label color\n", boardlist)
+
+		list, err := listFor(cl.member, "Kanban daily/weekly", boardlist)
+		if err != nil {
+			// handle error
+			return err
+		}
+		fmt.Printf("kanban/%s is %v", boardlist, list)
+		cards, err := list.GetCards(trello.Defaults())
+		if err != nil {
+			// handle error
+			return err
+		}
+		for _, card := range cards {
+			fmt.Println(card.Name, card.Labels)
+			moveBackCard(cl.member, card)
+		}
+	}
+
 	cherryPickDestlist, err := listFor(cl.member, "Kanban daily/weekly", "Today")
 	if err != nil {
 		return err
@@ -649,7 +682,7 @@ func (cl *Client) prepareToday() error {
 		return err
 	}
 	fmt.Println("Kanban board is ", board.ID)
-	for _, boardlist := range []string{"Inbox", "Today"} {
+	for _, boardlist := range []string{"Today"} {
 		fmt.Printf("move items from %s to backlog based on label color\n", boardlist)
 
 		list, err := listFor(cl.member, "Kanban daily/weekly", boardlist)

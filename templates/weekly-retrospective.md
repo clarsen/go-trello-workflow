@@ -69,27 +69,6 @@ Who did i interact with?
 - ask a question?
 - share feedback with?
 
-----
-These could be a checklist in Trello or somewhere else instead.
-
-- [ ] review Yearly goals https://paper.dropbox.com/doc/Yearly-goals-2017-odfgfBzyJr3JFEixro4t0
-- [ ] review work: task paper
-- [ ] review timeular (where was time spent?)
-- [ ] review toggl (where was time spent?)
-- [ ] review Google DB calendar (on phone) (what happened?)
-- [ ] review personal calendar (on phone / in Fantastical) (what happened?)
-- [ ] review Kanban done below (what was done?)
-- [ ] review goals for week above
-- [ ] review sprints/habits for week above
-- [ ] review retrospective notes in Bear
-
-- [ ] end here for monthly review, start up monthly-retrospective.md file
-
-- [ ] Set new weekly goals in trello list
-- [ ] Update sprints/habits with priorities/focus for the upcoming week (task paper)
-- [ ] move work backlog forward to this week backlog (task paper)
-- [ ] update planning 2018 with `wgoals`
-- [ ] move weekly review card to done, then `trello-workflow-cli wc`
 
 ----
 

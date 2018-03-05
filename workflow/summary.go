@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"regexp"
+	"sort"
 	"strconv"
 	"time"
 
@@ -58,6 +59,7 @@ type MonthlySummary struct {
 	Month          int               `yaml:"month"`
 	MonthlyGoals   []MonthlyGoalInfo `yaml:"monthlyGoals"`
 	MonthlySprints []MonthlyGoalInfo `yaml:"monthlySprints"`
+	Events         []string          `yaml:"events"`
 }
 
 // YearlySummary defines what's dumped for rolling up into the yearly plan summary
@@ -280,7 +282,14 @@ func mergeMonthlyGoalInfo(goalsAcrossWeeks []MonthlyGoalInfo) []MonthlyGoalInfo 
 	}
 
 	var monthlyGoals []MonthlyGoalInfo
-	for title, goals := range allWeeklyGoals {
+	var titles []string
+	for title := range allWeeklyGoals {
+		titles = append(titles, title)
+	}
+	sort.Strings(titles)
+
+	for _, title := range titles {
+		goals := allWeeklyGoals[title]
 		mg := MonthlyGoalInfo{Title: title,
 			Created:     created[title],
 			WeeklyGoals: goals,
@@ -291,13 +300,63 @@ func mergeMonthlyGoalInfo(goalsAcrossWeeks []MonthlyGoalInfo) []MonthlyGoalInfo 
 }
 
 // GenerateSummaryForMonth rolls up weekly summaries to month level
-func GenerateSummaryForMonth(year, month int, summaryIn [][]byte, out io.Writer) error {
+func GenerateSummaryForMonth(user, appkey, authtoken string, year, month int, summaryIn [][]byte, out io.Writer) error {
+
+	cl, err := New(user, appkey, authtoken)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	eventsList, err := listFor(cl.member, "Kanban daily/weekly", "Upcoming events")
+	if err != nil {
+		return err
+	}
+
+	eventCards, err := eventsList.GetCards(trello.Defaults())
+	if err != nil {
+		// handle error
+		return err
+	}
+	_ = eventCards
+
+	summary := MonthlySummary{}
+	summary.Year = year
+	summary.Month = month
+
+	// XXX: parse out event info, limit to particular month
+	re := regexp.MustCompile(`^(\??\s*)(\d+)/(\d+)(?:/(\d+))?(?:-(\d+/\d+)(?:/(\d+))?)? (.*)$`)
+	for _, event := range eventCards {
+		expr := re.FindStringSubmatch(event.Name)
+		if len(expr) > 0 {
+			log.Printf("for %s got match %+v\n", event.Name, expr)
+			log.Println("got (opt) maybe", expr[1])
+			log.Println("got month", expr[2])
+			log.Println("got day", expr[3])
+			log.Println("got (opt) year", expr[4])
+			log.Println("got (opt) end date", expr[5])
+			log.Println("got (opt) end date year", expr[6])
+			log.Println("got details", expr[7])
+			mon, err2 := strconv.Atoi(expr[2])
+			if err2 != nil {
+				log.Println("error parsing month in", event.Name)
+				summary.Events = append(summary.Events, event.Name)
+				continue
+			}
+			if mon == month {
+				summary.Events = append(summary.Events, event.Name)
+			}
+		} else {
+			log.Printf("%s didn't parse\n", event.Name)
+			summary.Events = append(summary.Events, event.Name)
+		}
+	}
+
 	var weeklies []WeeklySummary
 	for _, buf := range summaryIn {
 		var weekly WeeklySummary
-		err := yaml.Unmarshal(buf, &weekly)
-		if err != nil {
-			return err
+		err2 := yaml.Unmarshal(buf, &weekly)
+		if err2 != nil {
+			return err2
 		}
 		if weekly.Year == year && weekly.Month == month {
 			weeklies = append(weeklies, weekly)
@@ -306,10 +365,6 @@ func GenerateSummaryForMonth(year, month int, summaryIn [][]byte, out io.Writer)
 	if len(weeklies) <= 0 {
 		return fmt.Errorf("No summaries for %d-%02d", year, month)
 	}
-
-	summary := MonthlySummary{}
-	summary.Year = year
-	summary.Month = month
 
 	var allMonthlyGoals []MonthlyGoalInfo
 	for _, ws := range weeklies {
@@ -323,6 +378,8 @@ func GenerateSummaryForMonth(year, month int, summaryIn [][]byte, out io.Writer)
 	}
 	summary.MonthlySprints = mergeMonthlyGoalInfo(allMonthlyGoals)
 	// log.Printf("filtered to %+v\n", weeklies)
+
+	// events
 
 	buf, err := yaml.Marshal(summary)
 	if err != nil {

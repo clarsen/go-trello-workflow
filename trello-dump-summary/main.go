@@ -111,7 +111,7 @@ func main() {
 					if err != nil {
 						log.Fatal(err)
 					}
-					err = workflow.GenerateSummaryForMonth(year, month, inSummaries, out)
+					err = workflow.GenerateSummaryForMonth(user, appkey, authtoken, year, month, inSummaries, out)
 					if err != nil {
 						os.Remove(monthlySummary)
 					}
