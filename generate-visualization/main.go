@@ -137,6 +137,7 @@ func main() {
 				year := time.Now().Year()
 
 				for month := 1; month <= 12; month++ {
+					log.Println("Month", month)
 					inSummary, err := os.Open(fmt.Sprintf("%s/monthly-%d-%02d.yaml", summarydir, year, month))
 					if err != nil {
 						log.Println(err)

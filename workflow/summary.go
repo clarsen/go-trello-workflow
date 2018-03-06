@@ -242,10 +242,41 @@ func prepareSummaryForWeek(
 		// handle error
 		return
 	}
+	type MonthForWeek struct {
+		year      int
+		month     int
+		weekBegin int
+		weekEnd   int
+	}
+
+	// Monthly reviews don't always fall strictly after the end of the month.
+	monthForWeekYearRange := []MonthForWeek{
+		{2018, 1, 1, 4},
+		{2018, 2, 5, 9},
+		{2018, 3, 10, 13},
+		{2018, 4, 14, 17},
+		{2018, 5, 18, 22},
+		{2018, 6, 23, 26},
+		{2018, 7, 27, 30},
+		{2018, 8, 31, 35},
+		{2018, 9, 36, 39},
+		{2018, 10, 40, 44},
+		{2018, 11, 45, 48},
+		{2018, 12, 49, 52},
+	}
 
 	year, week = time.Now().ISOWeek()
-	month = int(time.Now().Month())
-
+	month = 0
+	for _, ymw := range monthForWeekYearRange {
+		if year == ymw.year && week >= ymw.weekBegin && week <= ymw.weekEnd {
+			month = ymw.month
+			break
+		}
+	}
+	// month = int(time.Now().Month())
+	if month == 0 {
+		log.Fatalf("no month mapping for year %d week %d", year, week)
+	}
 	return year, week, month, doneCards, goalCards, sprintCards, nil
 }
 
@@ -323,19 +354,20 @@ func GenerateSummaryForMonth(user, appkey, authtoken string, year, month int, su
 	summary.Year = year
 	summary.Month = month
 
-	// XXX: parse out event info, limit to particular month
-	re := regexp.MustCompile(`^(\??\s*)(\d+)/(\d+)(?:/(\d+))?(?:-(\d+/\d+)(?:/(\d+))?)? (.*)$`)
+	// events
+	// parse out event info, limit to particular month
+	re := regexp.MustCompile(`^((?:\?|X)?\s*)(\d+)/(\d+)(?:/(\d+))?(?:-(\d+/\d+)(?:/(\d+))?)? (.*)$`)
 	for _, event := range eventCards {
 		expr := re.FindStringSubmatch(event.Name)
 		if len(expr) > 0 {
 			log.Printf("for %s got match %+v\n", event.Name, expr)
-			log.Println("got (opt) maybe", expr[1])
-			log.Println("got month", expr[2])
-			log.Println("got day", expr[3])
-			log.Println("got (opt) year", expr[4])
-			log.Println("got (opt) end date", expr[5])
-			log.Println("got (opt) end date year", expr[6])
-			log.Println("got details", expr[7])
+			// log.Println("got (opt) maybe/didn't do", expr[1])
+			// log.Println("got month", expr[2])
+			// log.Println("got day", expr[3])
+			// log.Println("got (opt) year", expr[4])
+			// log.Println("got (opt) end date", expr[5])
+			// log.Println("got (opt) end date year", expr[6])
+			// log.Println("got details", expr[7])
 			mon, err2 := strconv.Atoi(expr[2])
 			if err2 != nil {
 				log.Println("error parsing month in", event.Name)
@@ -362,24 +394,21 @@ func GenerateSummaryForMonth(user, appkey, authtoken string, year, month int, su
 			weeklies = append(weeklies, weekly)
 		}
 	}
-	if len(weeklies) <= 0 {
-		return fmt.Errorf("No summaries for %d-%02d", year, month)
-	}
 
-	var allMonthlyGoals []MonthlyGoalInfo
-	for _, ws := range weeklies {
-		allMonthlyGoals = append(allMonthlyGoals, ws.MonthlyGoals...)
-	}
-	summary.MonthlyGoals = mergeMonthlyGoalInfo(allMonthlyGoals)
+	if len(weeklies) > 0 {
+		var allMonthlyGoals []MonthlyGoalInfo
+		for _, ws := range weeklies {
+			allMonthlyGoals = append(allMonthlyGoals, ws.MonthlyGoals...)
+		}
+		summary.MonthlyGoals = mergeMonthlyGoalInfo(allMonthlyGoals)
 
-	allMonthlyGoals = []MonthlyGoalInfo{}
-	for _, ws := range weeklies {
-		allMonthlyGoals = append(allMonthlyGoals, ws.MonthlySprints...)
+		allMonthlyGoals = []MonthlyGoalInfo{}
+		for _, ws := range weeklies {
+			allMonthlyGoals = append(allMonthlyGoals, ws.MonthlySprints...)
+		}
+		summary.MonthlySprints = mergeMonthlyGoalInfo(allMonthlyGoals)
+		// log.Printf("filtered to %+v\n", weeklies)
 	}
-	summary.MonthlySprints = mergeMonthlyGoalInfo(allMonthlyGoals)
-	// log.Printf("filtered to %+v\n", weeklies)
-
-	// events
 
 	buf, err := yaml.Marshal(summary)
 	if err != nil {
