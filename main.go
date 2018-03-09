@@ -38,8 +38,8 @@ func main() {
 	// every morning at 14:00 GMT (6AM PST)
 	c.AddFunc("0 0 14 * * *", func() { workflow.MorningRemind(user, appkey, authtoken, sendgridKey, userEmail) })
 
-	// every minute
-	c.AddFunc("0 * * * * *", func() { workflow.MinutelyMaintenance(user, appkey, authtoken) })
+	// every other minute
+	c.AddFunc("0 */2 * * * *", func() { workflow.MinutelyMaintenance(user, appkey, authtoken) })
 	c.Start()
 	for {
 		log.Println("wait 10 minutes...")

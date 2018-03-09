@@ -582,21 +582,21 @@ func (cl *Client) doMinutely() error {
 
 	// Move cards from inbox to backlog
 	for _, boardlist := range []string{"Inbox"} {
-		fmt.Printf("move items from %s to backlog based on label color\n", boardlist)
+		// fmt.Printf("move items from %s to backlog based on label color\n", boardlist)
 
 		list, err := listFor(cl.member, "Kanban daily/weekly", boardlist)
 		if err != nil {
 			// handle error
 			return err
 		}
-		fmt.Printf("kanban/%s is %v", boardlist, list)
+		// fmt.Printf("kanban/%s is %v", boardlist, list)
 		cards, err := list.GetCards(trello.Defaults())
 		if err != nil {
 			// handle error
 			return err
 		}
 		for _, card := range cards {
-			fmt.Println(card.Name, card.Labels)
+			fmt.Println("move %s %+v to backlog", card.Name, card.Labels)
 			moveBackCard(cl.member, card)
 		}
 	}
