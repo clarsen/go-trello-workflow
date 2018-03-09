@@ -596,7 +596,7 @@ func (cl *Client) doMinutely() error {
 			return err
 		}
 		for _, card := range cards {
-			fmt.Println("move %s %+v to backlog", card.Name, card.Labels)
+			fmt.Printf("move %s %+v to backlog\n", card.Name, card.Labels)
 			moveBackCard(cl.member, card)
 		}
 	}
