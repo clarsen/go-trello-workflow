@@ -20,7 +20,7 @@
 
 ### Sprints
 {{- range .MonthlySprints }}
-- {{ .Title }} ({{ .Created }})
+- {{ .Title }}
   {{- range .WeeklyGoals }}
     - week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}
   {{ end -}}

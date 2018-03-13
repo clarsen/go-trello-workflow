@@ -39,7 +39,7 @@ Compared to outcomes planned for the week,
 
 - what actually was or wasn’t done:
 {{- range .MonthlyGoals }}
-    - {{ .Title }} ({{ .Created }})
+    - {{ .Title }}
     {{- range .WeeklyGoals }}
         - week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}
     {{ end -}}
@@ -47,7 +47,7 @@ Compared to outcomes planned for the week,
 
 - How did sprints go:
 {{- range .MonthlySprints }}
-    - {{ .Title }} ({{ .Created }})
+    - {{ .Title }}
     {{- range .WeeklyGoals }}
         - week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}
     {{ end -}}
