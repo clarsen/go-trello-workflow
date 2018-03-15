@@ -517,7 +517,6 @@ const (
 )
 
 func removeLabel(card *trello.Card, color string) {
-
 	for _, label := range card.Labels {
 		if label.Color == color {
 			card.RemoveLabel(label.ID)
@@ -534,6 +533,10 @@ func hasLabel(card *trello.Card, color string) bool {
 		}
 	}
 	return false
+}
+
+func titleStartsWith(card *trello.Card, prefix string) bool {
+	return strings.HasPrefix(card.Name, prefix)
 }
 
 func (cl *Client) doMinutely() error {
@@ -595,9 +598,23 @@ func (cl *Client) doMinutely() error {
 			// handle error
 			return err
 		}
+
+		somedaylist, err := listFor(cl.member, "Someday/Maybe", "Maybe")
+		if err != nil {
+			return err
+		}
+
 		for _, card := range cards {
-			fmt.Printf("move %s %+v to backlog\n", card.Name, card.Labels)
-			moveBackCard(cl.member, card)
+			if titleStartsWith(card, "? ") {
+				fmt.Printf("move %s %+v to someday/maybe\n", card.Name, card.Labels)
+				card.Update(trello.Arguments{"name": strings.TrimPrefix(card.Name, "? ")})
+				card.MoveToListOnBoard(somedaylist.ID, somedaylist.IDBoard, trello.Defaults())
+				card.MoveToTopOfList()
+
+			} else {
+				fmt.Printf("move %s %+v to backlog\n", card.Name, card.Labels)
+				moveBackCard(cl.member, card)
+			}
 		}
 	}
 
