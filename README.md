@@ -20,6 +20,12 @@ Trello boards should be set up as per expectations of code.
 
 Turn on `longrun` dyno which runs go-trello-workflow
 
+    heroku ps:scale longrun=1:free
+
+if you run out of free dyno hours
+
+    heroku ps:scale longrun=1:hobby
+
 ## Use in CLI
 Create .env with:
 
