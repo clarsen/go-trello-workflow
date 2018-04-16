@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -46,12 +47,24 @@ func main() {
 		{
 			Name:    "remind",
 			Aliases: []string{"r"},
-			Usage:   "Update the trello board on daily basis",
+			Usage:   "Email a reminder of close due items, today's tasks, monthly and weekly goals",
 			Action: func(*cli.Context) {
 				err := workflow.MorningRemind(user, appkey, authtoken, sendgridKey, userEmail)
 				if err != nil {
 					log.Fatal(err)
 				}
+			},
+		},
+		{
+			Name:    "remind-html",
+			Aliases: []string{"rh"},
+			Usage:   "Dump html output of remind",
+			Action: func(*cli.Context) {
+				_, out, err := workflow.MorningRemindHtml(user, appkey, authtoken)
+				if err != nil {
+					log.Fatal(err)
+				}
+				fmt.Print(out)
 			},
 		},
 		{

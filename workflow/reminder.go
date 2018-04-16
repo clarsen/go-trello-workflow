@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"sort"
 	"time"
 
 	"github.com/clarsen/trello"
@@ -20,30 +21,43 @@ func formatAsDate(t *time.Time) string {
 	return t.In(local).Format("2006-01-02 (Mon)")
 }
 
-// MorningRemind generates and sends an email reminding of weekly goals, daily
-// todos, overdue cards
-func MorningRemind(user, appkey, authtoken, sendgridAPIKey, userEmail string) error {
+type byDue []*trello.Card
+
+func (c byDue) Len() int {
+	return len(c)
+}
+
+func (c byDue) Swap(i, j int) {
+	c[i], c[j] = c[j], c[i]
+}
+
+func (c byDue) Less(i, j int) bool {
+	return c[i].Due.Before(*c[j].Due)
+}
+
+// MorningRemindHtml generates HTML for inspection as well as use in email
+func MorningRemindHtml(user, appkey, authtoken string) (*WeeklySummary, string, error) {
 	cl, err := New(user, appkey, authtoken)
 	if err != nil {
-		return err
+		return nil, "", err
 	}
 
 	summary, err := GetSummaryForWeek(user, appkey, authtoken)
 	if err != nil {
-		return err
+		return nil, "", err
 	}
 
 	// today cards
 	list, err := listFor(cl.member, "Kanban daily/weekly", "Today")
 	if err != nil {
 		// handle error
-		return err
+		return nil, "", err
 	}
 
 	todayCards, err := list.GetCards(trello.Defaults())
 	if err != nil {
 		// handle error
-		return err
+		return nil, "", err
 	}
 
 	// overdue check
@@ -66,13 +80,13 @@ func MorningRemind(user, appkey, authtoken, sendgridAPIKey, userEmail string) er
 		list, err2 := listFor(cl.member, boardlist.Board, boardlist.List)
 		if err2 != nil {
 			// handle error
-			return err2
+			return nil, "", err2
 		}
 
 		cards, err2 := list.GetCards(trello.Defaults())
 		if err2 != nil {
 			// handle error
-			return err2
+			return nil, "", err2
 		}
 		for _, card := range cards {
 			if card.Due != nil && now.After(card.Due.Add(-time.Hour*3*24)) {
@@ -81,14 +95,12 @@ func MorningRemind(user, appkey, authtoken, sendgridAPIKey, userEmail string) er
 		}
 	}
 
-	from := mail.NewEmail("Daily reminder", userEmail)
-	subject := fmt.Sprintf("Reminder for %d week %d", summary.Year, summary.Week)
-	to := mail.NewEmail("Goal seeker", userEmail)
+	sort.Sort(byDue(dueSoon))
 
 	fmap := template.FuncMap{
 		"formatAsDate": formatAsDate,
 	}
-	t := template.Must(template.New("morning-reminder.txt").Funcs(fmap).ParseFiles("templates/morning-reminder.txt"))
+	t := template.Must(template.New("morning-reminder.html").Funcs(fmap).ParseFiles("templates/morning-reminder.html"))
 
 	data := struct {
 		Summary *WeeklySummary
@@ -103,13 +115,23 @@ func MorningRemind(user, appkey, authtoken, sendgridAPIKey, userEmail string) er
 	var content bytes.Buffer
 	err = t.Execute(&content, data)
 	if err != nil {
+		return nil, "", err
+	}
+	return summary, content.String(), err
+}
+
+// MorningRemind generates and sends an email reminding of weekly goals, daily
+// todos, overdue cards
+func MorningRemind(user, appkey, authtoken, sendgridAPIKey, userEmail string) error {
+	summary, content, err := MorningRemindHtml(user, appkey, authtoken)
+	if err != nil {
 		return err
 	}
-	// for testing
-	// log.Println(content.String())
-	// return nil
+	from := mail.NewEmail("Daily reminder", userEmail)
+	subject := fmt.Sprintf("Reminder for %d week %d", summary.Year, summary.Week)
+	to := mail.NewEmail("Goal seeker", userEmail)
 
-	mailcontent := mail.NewContent("text/plain", content.String())
+	mailcontent := mail.NewContent("text/html", content)
 	m := mail.NewV3MailInit(from, subject, to, mailcontent)
 
 	request := sendgrid.GetRequest(sendgridAPIKey, "/v3/mail/send", "https://api.sendgrid.com")

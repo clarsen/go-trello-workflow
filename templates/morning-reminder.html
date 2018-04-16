@@ -1,0 +1,78 @@
+Good morning,
+
+This is on your plate for today:
+
+<ul>
+{{- range .Today }}
+<li> {{ .Name -}}</li>
+{{ end }}
+</ul>
+
+These cards are due soon:
+
+<ul>
+{{- range .DueSoon }}
+<li> {{ .Due | formatAsDate }} {{ .Name -}}</li>
+{{ end }}
+</ul>
+
+As a reminder, these are the monthly goals with goals for this week:
+
+<ul>
+{{- range .Summary.MonthlyGoals }}
+<li> <strong>{{ .Title }} ({{ .Created }})</strong>
+  <ul>
+    {{ range .WeeklyGoals }}
+    {{- if .Status -}}
+    {{- else -}}
+    <li><strong>week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}</strong></li>
+    {{ end }}
+    {{ end }}
+    <li> With actions already:
+      <ul>
+      {{- range .WeeklyGoals }}
+      {{- if .Status }}
+      <li>week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}</li>
+      {{ end -}}
+      {{ end }}
+      </ul>
+    </li>
+  </ul>
+</li>
+{{ end }}
+</ul>
+
+And these are the monthly sprints with goals for this week:
+<ul>
+{{- range .Summary.MonthlySprints }}
+<li> <strong>{{ .Title }} ({{ .Created }})</strong>
+  <ul>
+    {{ range .WeeklyGoals }}
+    {{- if .Status }}
+    {{- else -}}
+    <li><strong>week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}</strong></li>
+    {{ end }}
+    {{ end }}
+    <li> With actions already:
+      <ul>
+      {{- range .WeeklyGoals }}
+      {{- if .Status }}
+        <li> week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}</li>
+      {{ end -}}
+      {{ end }}
+      </ul>
+   </li>
+  </ul>
+</li>
+{{ end }}
+</ul>
+
+
+
+This is what you have gotten done so far.  Good work!
+
+<ul>
+{{range .Summary.Done}}
+<li>{{ .DoneDate }} {{ .Title -}}</li>
+{{end}}
+</ul>

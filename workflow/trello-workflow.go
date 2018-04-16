@@ -132,6 +132,13 @@ func MonthlyCleanup(user, appkey, authtoken string) error {
 	return nil
 }
 
+func ymwForTime(t time.Time) (int, string, int) {
+	ref := t.Add(-time.Hour * 72)
+	year, week := ref.ISOWeek()
+	month := ref.Month().String()
+	return year, month, week
+}
+
 // WeeklyCleanup moves cards to history board, copies periodic cards to history,
 // moves periodic cards back
 func WeeklyCleanup(user, appkey, authtoken string) error {
@@ -144,8 +151,7 @@ func WeeklyCleanup(user, appkey, authtoken string) error {
 		return err
 	}
 	// log.Println(time.Now().Add(-time.Hour * 72))
-	year, week := time.Now().Add(-time.Hour * 72).ISOWeek()
-	month := time.Now().Month().String()
+	year, month, week := ymwForTime(time.Now())
 	destListName := fmt.Sprintf("%02d %s", week, month)
 
 	destList, err := listForCreate(cl.member, fmt.Sprintf("History %d", year), destListName)
