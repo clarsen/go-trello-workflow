@@ -340,6 +340,20 @@ func Weekly(user, appkey, authtoken string) error {
 	return nil
 }
 
+func sortList(m *trello.Member, list *trello.List) error {
+	cards, err := list.GetCards(trello.Defaults())
+	if err != nil {
+		// handle error
+		return err
+	}
+	sort.Sort(byDue(cards))
+	for idx, card := range cards {
+		fmt.Printf("%f: %v\n", card.Pos, card.Name)
+		card.SetPos(float64(idx)*100.0 + 1.0)
+	}
+	return nil
+}
+
 func boardFor(m *trello.Member, s string) (board *trello.Board, err error) {
 	if boards == nil {
 		boards, err = m.GetBoards(trello.Defaults())
@@ -561,6 +575,7 @@ func (cl *Client) doMinutely() error {
 		{"Periodic board", "Quarterly to Yearly"},
 	}
 	reorderBoardsAndLists := []boardAndList{
+		{"Kanban daily/weekly", "Waiting on"},
 		{"Backlog (Personal)", "Backlog"},
 		{"Backlog (work)", "Backlog"},
 		{"Periodic board", "Often"},
@@ -630,16 +645,16 @@ func (cl *Client) doMinutely() error {
 	}
 
 	for _, boardlist := range cherryPickBoardsAndLists {
-		list, err := listFor(cl.member, boardlist.Board, boardlist.List)
-		if err != nil {
+		list, err2 := listFor(cl.member, boardlist.Board, boardlist.List)
+		if err2 != nil {
 			// handle error
-			return err
+			return err2
 		}
 
-		cards, err := list.GetCards(trello.Defaults())
-		if err != nil {
+		cards, err2 := list.GetCards(trello.Defaults())
+		if err2 != nil {
 			// handle error
-			return err
+			return err2
 		}
 		for _, card := range cards {
 
@@ -691,6 +706,10 @@ func (cl *Client) doMinutely() error {
 					doneDestList.IDBoard, trello.Defaults())
 
 			}
+		}
+		err = sortList(cl.member, list)
+		if err != nil {
+			return err
 		}
 	}
 

@@ -21,20 +21,6 @@ func formatAsDate(t *time.Time) string {
 	return t.In(local).Format("2006-01-02 (Mon)")
 }
 
-type byDue []*trello.Card
-
-func (c byDue) Len() int {
-	return len(c)
-}
-
-func (c byDue) Swap(i, j int) {
-	c[i], c[j] = c[j], c[i]
-}
-
-func (c byDue) Less(i, j int) bool {
-	return c[i].Due.Before(*c[j].Due)
-}
-
 // MorningRemindHtml generates HTML for inspection as well as use in email
 func MorningRemindHtml(user, appkey, authtoken string) (*WeeklySummary, string, error) {
 	cl, err := New(user, appkey, authtoken)
