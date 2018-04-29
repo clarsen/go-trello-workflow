@@ -2,14 +2,19 @@ package workflow
 
 // WeeklyReview defines the manually input data that goes into weekly review visualization
 type WeeklyReview struct {
-	GoingWell                []string `yaml:"goingWell"`
-	NeedsImprovement         []string `yaml:"needsImprovement"`
-	Successes                []string `yaml:"successes"`
-	Challenges               []string `yaml:"challenges"`
-	LearnAboutMyself         []string `yaml:"learnAboutMyself"`
-	LearnAboutOthers         []string `yaml:"learnAboutOthers"`
-	WhatIDidToCreateOutcome  []string `yaml:"whatIDidToCreateOutcome"`
-	WhatIPlanToDoDifferently []string `yaml:"whatIPlanToDoDifferently"`
+	GoingWell        []string        `yaml:"goingWell"`
+	NeedsImprovement []string        `yaml:"needsImprovement"`
+	Successes        []string        `yaml:"successes"`
+	Challenges       []string        `yaml:"challenges"`
+	LearnAboutMyself []string        `yaml:"learnAboutMyself"`
+	LearnAboutOthers []string        `yaml:"learnAboutOthers"`
+	PerGoalReviews   []PerGoalReview `yaml:"perGoalReviews"`
+}
+
+type PerGoalReview struct {
+	DidToCreateOutcome []string `yaml:"didToCreateOutcome"`
+	KeepDoing          []string `yaml:"keepDoing"`
+	DoDifferently      []string `yaml:"doDifferently"`
 }
 
 type MonthlyGoalReview struct {

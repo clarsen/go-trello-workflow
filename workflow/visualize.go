@@ -79,14 +79,19 @@ func summarizeByDay(summary WeeklySummary) ([]DaySummary, error) {
 // CreateEmptyWeeklyRetrospective populates an empty template based on weekly summary
 func CreateEmptyWeeklyRetrospective(reviewOut io.Writer) error {
 	review := WeeklyReview{
-		GoingWell:                []string{"1", "2", "3"},
-		NeedsImprovement:         []string{"1", "2", "3"},
-		Successes:                []string{"1", "2"},
-		Challenges:               []string{"1", "2"},
-		LearnAboutMyself:         []string{"1", "2"},
-		LearnAboutOthers:         []string{"1", "2"},
-		WhatIDidToCreateOutcome:  []string{"1", "2"},
-		WhatIPlanToDoDifferently: []string{"1", "2"},
+		GoingWell:        []string{"1", "2", "3"},
+		NeedsImprovement: []string{"1", "2", "3"},
+		Successes:        []string{"1", "2"},
+		Challenges:       []string{"1", "2"},
+		LearnAboutMyself: []string{"1", "2"},
+		LearnAboutOthers: []string{"1", "2"},
+		PerGoalReviews: []PerGoalReview{
+			PerGoalReview{
+				DidToCreateOutcome: []string{"1", "2"},
+				KeepDoing:          []string{"1", "2"},
+				DoDifferently:      []string{"1", "2"},
+			},
+		},
 	}
 
 	buf, err := yaml.Marshal(&review)

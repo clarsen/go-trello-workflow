@@ -53,14 +53,24 @@ Compared to outcomes planned for the week,
     {{ end -}}
 {{ end }}
 
-- what I did to create that particular outcome or situation?
-{{- range .WhatIDidToCreateOutcome }}
-    - {{ . -}}
+{{- range $index, $ := .PerGoalReviews }}
+- {{ $index }}
+    - What did I do to create that particular outcome or situation?
+{{- range .DidToCreateOutcome }}
+        - {{ . }}
 {{ end }}
-
-- What do i plan to do differently or the same next week?
-{{- range .WhatIPlanToDoDifferently }}
-    - {{ . -}}
+{{ if .KeepDoing }}
+    - What do I plan to keep doing?
+{{- range .KeepDoing }}
+        - {{ . }}
+{{ end }}
+{{ end }}
+{{ if .DoDifferently }}
+    - What do I plan to stop doing/do differently?
+{{- range .DoDifferently }}
+        - {{ . }}
+{{ end }}
+{{ end }}
 {{ end }}
 
 Who did i interact with?
