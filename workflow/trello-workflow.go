@@ -127,8 +127,51 @@ func MonthlyCleanup(user, appkey, authtoken string) error {
 		log.Fatal(err)
 	}
 
-	_ = cl
-	// XXX: implement node index.js --monthly-review
+	year, month, _ := ymwForTime(time.Now())
+
+	monthlyGoalsList, err := listFor(cl.member, "Kanban daily/weekly", "Monthly Goals")
+	if err != nil {
+		return err
+	}
+	cards, err := monthlyGoalsList.GetCards(trello.Defaults())
+	if err != nil {
+		// handle error
+		return err
+	}
+	destGoalsListName := fmt.Sprintf("%s goals", month)
+	destGoalsList, err := listForCreate(cl.member, fmt.Sprintf("History %d", year), destGoalsListName)
+	if err != nil {
+		return err
+	}
+
+	for _, card := range cards {
+		log.Println("copying", card.Name, "to", destGoalsListName)
+		card.CopyToList(destGoalsList.ID,
+			trello.Arguments{"idBoard": destGoalsList.IDBoard, "pos": "bottom", "keepFromSource": "all"})
+	}
+
+	monthlySprintsList, err := listFor(cl.member, "Kanban daily/weekly", "Monthly Sprints")
+	if err != nil {
+		return err
+	}
+	cards, err = monthlySprintsList.GetCards(trello.Defaults())
+	if err != nil {
+		// handle error
+		return err
+	}
+
+	destSprintsListName := fmt.Sprintf("%s sprints", month)
+	destSprintsList, err := listForCreate(cl.member, fmt.Sprintf("History %d", year), destSprintsListName)
+	if err != nil {
+		return err
+	}
+
+	for _, card := range cards {
+		log.Println("copying", card.Name, "to", destSprintsListName)
+		card.CopyToList(destSprintsList.ID,
+			trello.Arguments{"idBoard": destSprintsList.IDBoard, "pos": "bottom", "keepFromSource": "all"})
+	}
+
 	return nil
 }
 
