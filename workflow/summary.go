@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/clarsen/trello"
@@ -57,6 +58,7 @@ type WeeklySummary struct {
 type MonthlySummary struct {
 	Year           int               `yaml:"year"`
 	Month          int               `yaml:"month"`
+	WeeksOfYear    string            `yaml:"weeksOfYear"`
 	MonthlyGoals   []MonthlyGoalInfo `yaml:"monthlyGoals"`
 	MonthlySprints []MonthlyGoalInfo `yaml:"monthlySprints"`
 	Events         []string          `yaml:"events"`
@@ -330,6 +332,12 @@ func mergeMonthlyGoalInfo(goalsAcrossWeeks []MonthlyGoalInfo) []MonthlyGoalInfo 
 	return monthlyGoals
 }
 
+func arrayToString(a []int, delim string) string {
+	return strings.Trim(strings.Replace(fmt.Sprint(a), " ", delim, -1), "[]")
+	//return strings.Trim(strings.Join(strings.Split(fmt.Sprint(a), " "), delim), "[]")
+	//return strings.Trim(strings.Join(strings.Fields(fmt.Sprint(a)), delim), "[]")
+}
+
 // GenerateSummaryForMonth rolls up weekly summaries to month level
 func GenerateSummaryForMonth(user, appkey, authtoken string, year, month int, summaryIn [][]byte, out io.Writer) error {
 
@@ -384,6 +392,7 @@ func GenerateSummaryForMonth(user, appkey, authtoken string, year, month int, su
 	}
 
 	var weeklies []WeeklySummary
+	var weeknums = []int{}
 	for _, buf := range summaryIn {
 		var weekly WeeklySummary
 		err2 := yaml.Unmarshal(buf, &weekly)
@@ -392,8 +401,10 @@ func GenerateSummaryForMonth(user, appkey, authtoken string, year, month int, su
 		}
 		if weekly.Year == year && weekly.Month == month {
 			weeklies = append(weeklies, weekly)
+			weeknums = append(weeknums, weekly.Week)
 		}
 	}
+	summary.WeeksOfYear = arrayToString(weeknums, ",")
 
 	if len(weeklies) > 0 {
 		var allMonthlyGoals []MonthlyGoalInfo

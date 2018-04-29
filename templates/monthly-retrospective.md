@@ -1,5 +1,7 @@
 **Monthly retrospective**
 
+Covering weeks {{ .WeeksOfYear }}
+
 Compared to outcomes planned for the month, what actually was or wasn’t done and what I did to create that particular outcome or situation?
 {{ range .MonthlyGoalReviews }}
 - {{ .Title -}}
