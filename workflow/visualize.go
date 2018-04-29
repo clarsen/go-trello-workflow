@@ -112,6 +112,7 @@ func CreateEmptyMonthlyRetrospective(summaryIn io.Reader, reviewOut io.Writer) e
 	log.Printf("Got %+v", buf)
 	retro := MonthlyRetrospective{
 		MonthlyReview: MonthlyReview{
+			Continue:         []string{"1", "2"},
 			DoDifferently:    []string{"1", "2"},
 			CandidateGoals:   []string{"1", "2"},
 			CandidateSprints: []string{"1", "2"},
@@ -135,7 +136,7 @@ func CreateEmptyMonthlyRetrospective(summaryIn io.Reader, reviewOut io.Writer) e
 	for _, goal := range retro.MonthlySprints {
 		retro.MonthlySprintReviews = append(retro.MonthlySprintReviews, MonthlySprintReview{
 			Title: goal.Title,
-			CommentsContinueChange: []string{"1", "2"},
+			LearningsAndResultsWhatContinueWhatChange: []string{"1", "2"},
 		})
 	}
 

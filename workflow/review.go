@@ -24,8 +24,8 @@ type MonthlyGoalReview struct {
 }
 
 type MonthlySprintReview struct {
-	Title                  string   `yaml:"title"` // should match Title of MonthlYGoalInfo
-	CommentsContinueChange []string `yaml:"commentsContinueChange"`
+	Title                                     string   `yaml:"title"` // should match Title of MonthlYGoalInfo
+	LearningsAndResultsWhatContinueWhatChange []string `yaml:"learningsAndResultsWhatContinueWhatChange"`
 }
 
 // MonthlyReview defines the manually input data that goes into the monthly
@@ -33,6 +33,7 @@ type MonthlySprintReview struct {
 type MonthlyReview struct {
 	MonthlyGoalReviews   []MonthlyGoalReview   `yaml:"monthlyGoalReviews"`
 	MonthlySprintReviews []MonthlySprintReview `yaml:"monthlySprintReviews"`
+	Continue             []string              `yaml:"continue"`
 	DoDifferently        []string              `yaml:"doDifferently"`
 	CandidateGoals       []string              `yaml:"candidateGoals"`
 	CandidateSprints     []string              `yaml:"candidateSprints"`

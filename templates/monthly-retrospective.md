@@ -12,7 +12,12 @@ Compared to outcomes planned for the month, what actually was or wasn’t done a
     {{ end }}
 {{ end }}
 
-What do I plan to do differently or the same next month?
+What do I plan to continue doing next month?
+{{ range .Continue }}
+- {{ . -}}
+{{ end }}
+
+What do I plan to do differently next month?
 {{ range .DoDifferently }}
 - {{ . -}}
 {{ end }}
@@ -20,7 +25,7 @@ What do I plan to do differently or the same next month?
 How did the sprint go?  What to continue, what to change?
 {{ range .MonthlySprintReviews }}
 - {{ .Title }}
-    {{- range .CommentsContinueChange }}
+    {{- range .LearningsAndResultsWhatContinueWhatChange }}
     - {{ . -}}
     {{ end }}
 {{ end }}
