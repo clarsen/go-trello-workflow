@@ -44,6 +44,16 @@ func main() {
 
 				year, week := time.Now().AddDate(0, 0, -3).ISOWeek()
 
+				summaryFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, year, week)
+				if _, err = os.Stat(summaryFname); os.IsNotExist(err) {
+					log.Fatal(err)
+				}
+
+				inSummary, err2 := os.Open(summaryFname)
+				if err2 != nil {
+					log.Fatal(err2)
+				}
+
 				templateFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", reviewdir, year, week)
 				if _, err = os.Stat(templateFname); err == nil {
 					log.Fatalf("%s exists already", templateFname)
@@ -54,7 +64,7 @@ func main() {
 					log.Fatal(err2)
 				}
 
-				err2 = workflow.CreateEmptyWeeklyRetrospective(outReview)
+				err2 = workflow.CreateEmptyWeeklyRetrospective(inSummary, outReview)
 				if err2 != nil {
 					log.Fatal(err2)
 				}

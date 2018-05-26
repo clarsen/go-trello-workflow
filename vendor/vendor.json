@@ -69,6 +69,12 @@
 			"revisionTime": "2018-01-12T09:54:32Z"
 		},
 		{
+			"checksumSHA1": "cTGhZzixV6ZWBw4TcrG+s+j/fkA=",
+			"path": "gopkg.in/kyokomi/emoji.v1",
+			"revision": "2e9a9507333f3ee28f3fab88c2c3aba34455d734",
+			"revisionTime": "2017-11-21T01:00:09Z"
+		},
+		{
 			"checksumSHA1": "qOmvuDm+F+2nQQecUZBVkZrTn6Y=",
 			"path": "gopkg.in/yaml.v2",
 			"revision": "d670f9405373e636a5a2765eea47fac0c9bc91a4",

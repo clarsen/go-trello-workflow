@@ -8,8 +8,10 @@ import (
 	"io/ioutil"
 	"log"
 	"sort"
+	"strings"
 	"time"
 
+	emoji "gopkg.in/kyokomi/emoji.v1"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -77,7 +79,19 @@ func summarizeByDay(summary WeeklySummary) ([]DaySummary, error) {
 }
 
 // CreateEmptyWeeklyRetrospective populates an empty template based on weekly summary
-func CreateEmptyWeeklyRetrospective(reviewOut io.Writer) error {
+func CreateEmptyWeeklyRetrospective(summaryIn io.Reader, reviewOut io.Writer) error {
+	buf, err := ioutil.ReadAll(summaryIn)
+	if err != nil {
+		return err
+	}
+	// log.Println("Read", buf)
+
+	var weekly WeeklyRetrospective
+	err = yaml.Unmarshal(buf, &weekly.WeeklySummary)
+	if err != nil {
+		return err
+	}
+
 	review := WeeklyReview{
 		GoingWell:        []string{"1", "2", "3"},
 		NeedsImprovement: []string{"1", "2", "3"},
@@ -85,21 +99,63 @@ func CreateEmptyWeeklyRetrospective(reviewOut io.Writer) error {
 		Challenges:       []string{"1", "2"},
 		LearnAboutMyself: []string{"1", "2"},
 		LearnAboutOthers: []string{"1", "2"},
-		PerGoalReviews: []PerGoalReview{
-			PerGoalReview{
-				DidToCreateOutcome: []string{"1", "2"},
+	}
+
+	// fill in pergoalreview from weekly goals
+	for _, goal := range weekly.MonthlyGoals {
+		if len(goal.WeeklyGoals) > 0 {
+			var outcomes []string
+			for _, weeklygoal := range goal.WeeklyGoals {
+				note := ""
+				if strings.Contains(weeklygoal.Status, "(done)") {
+					note = ":green_heart:"
+				}
+				if strings.Contains(weeklygoal.Status, "(not done)") {
+					note = ":broken_heart:"
+				}
+				outcome := emoji.Sprintf("%s %s %s", weeklygoal.Title, weeklygoal.Status, note)
+				outcomes = append(outcomes, outcome)
+			}
+			outcomes = append(outcomes, "1")
+			outcomes = append(outcomes, "2")
+			review.PerGoalReviews = append(review.PerGoalReviews, PerGoalReview{
+				DidToCreateOutcome: outcomes,
 				KeepDoing:          []string{"1", "2"},
 				DoDifferently:      []string{"1", "2"},
-			},
-		},
+			})
+		}
 	}
 
-	buf, err := yaml.Marshal(&review)
-	if err != nil {
-		log.Fatal(err)
+	for _, goal := range weekly.MonthlySprints {
+		if len(goal.WeeklyGoals) > 0 {
+			var outcomes []string
+			for _, weeklygoal := range goal.WeeklyGoals {
+				note := ""
+				if strings.Contains(weeklygoal.Status, "(done)") {
+					note = ":green_heart:"
+				}
+				if strings.Contains(weeklygoal.Status, "(not done)") {
+					note = ":broken_heart:"
+				}
+				outcome := emoji.Sprintf("%s %s %s", weeklygoal.Title, weeklygoal.Status, note)
+				outcomes = append(outcomes, outcome)
+			}
+			outcomes = append(outcomes, "1")
+			outcomes = append(outcomes, "2")
+			review.PerGoalReviews = append(review.PerGoalReviews, PerGoalReview{
+				DidToCreateOutcome: outcomes,
+				KeepDoing:          []string{"1", "2"},
+				DoDifferently:      []string{"1", "2"},
+			})
+		}
 	}
 
-	_, err = reviewOut.Write(buf)
+	buf2, err3 := yaml.Marshal(&review)
+	if err3 != nil {
+		log.Fatal(err3)
+	}
+
+	_, err = reviewOut.Write(buf2)
 	return err
 }
 
