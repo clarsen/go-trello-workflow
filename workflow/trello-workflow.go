@@ -620,6 +620,11 @@ func (cl *Client) doMinutely() error {
 	reorderBoardsAndLists := []boardAndList{
 		{"Kanban daily/weekly", "Waiting on"},
 		{"Backlog (Personal)", "Backlog"},
+		{"Backlog (Personal)", "Projects"},
+		{"Backlog (Personal)", "Projects: delegated"},
+		{"Backlog (Personal)", "Projects - Soon"},
+		{"Backlog (Personal)", "Projects (not yet)"},
+		{"Backlog (Personal)", "Area: Finance"},
 		{"Backlog (work)", "Backlog"},
 		{"Periodic board", "Often"},
 		{"Periodic board", "Weekly"},
