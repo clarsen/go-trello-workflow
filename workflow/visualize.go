@@ -105,6 +105,8 @@ func CreateEmptyWeeklyRetrospective(summaryIn io.Reader, reviewOut io.Writer) er
 	for _, goal := range weekly.MonthlyGoals {
 		if len(goal.WeeklyGoals) > 0 {
 			var outcomes []string
+			monthgoal := fmt.Sprintf("goal: %s", goal.Title)
+			outcomes = append(outcomes, monthgoal)
 			for _, weeklygoal := range goal.WeeklyGoals {
 				note := ""
 				if strings.Contains(weeklygoal.Status, "(done)") {
@@ -129,6 +131,8 @@ func CreateEmptyWeeklyRetrospective(summaryIn io.Reader, reviewOut io.Writer) er
 	for _, goal := range weekly.MonthlySprints {
 		if len(goal.WeeklyGoals) > 0 {
 			var outcomes []string
+			monthsprint := fmt.Sprintf("sprint: %s", goal.Title)
+			outcomes = append(outcomes, monthsprint)
 			for _, weeklygoal := range goal.WeeklyGoals {
 				note := ""
 				if strings.Contains(weeklygoal.Status, "(done)") {
