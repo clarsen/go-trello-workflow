@@ -625,6 +625,7 @@ func (cl *Client) doMinutely() error {
 		{"Backlog (Personal)", "Projects - Soon"},
 		{"Backlog (Personal)", "Projects (not yet)"},
 		{"Backlog (Personal)", "Area: Finance"},
+		{"Backlog (Personal)", "Area: Friends"},
 		{"Backlog (work)", "Backlog"},
 		{"Periodic board", "Often"},
 		{"Periodic board", "Weekly"},
