@@ -389,7 +389,7 @@ func sortList(m *trello.Member, list *trello.List) error {
 		// handle error
 		return err
 	}
-	sort.Sort(byDue(cards))
+	sort.Stable(byDue(cards))
 	for idx, card := range cards {
 		newPos := float64(idx)*100.0 + 1.0
 		if card.Pos != newPos {
