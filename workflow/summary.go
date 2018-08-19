@@ -267,7 +267,8 @@ func prepareSummaryForWeek(
 		{2018, 12, 49, 52},
 	}
 
-	year, week = time.Now().ISOWeek()
+	// Allows us to do review on monday or tuesday instead of just sunday.
+	year, week = time.Now().AddDate(0, 0, -3).ISOWeek()
 	month = 0
 	for _, ymw := range monthForWeekYearRange {
 		if year == ymw.year && week >= ymw.weekBegin && week <= ymw.weekEnd {

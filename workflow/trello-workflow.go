@@ -391,7 +391,7 @@ func sortList(m *trello.Member, list *trello.List) error {
 	}
 	sort.Sort(byDue(cards))
 	for idx, card := range cards {
-		fmt.Printf("%f: %v\n", card.Pos, card.Name)
+		// fmt.Printf("%f: %v\n", card.Pos, card.Name)
 		card.SetPos(float64(idx)*100.0 + 1.0)
 	}
 	return nil
