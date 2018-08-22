@@ -45,7 +45,8 @@ func main() {
 			Usage:   "Summarize the week in progress or end of week",
 			Action: func(*cli.Context) {
 				// allows us to do review on monday/tuesday instead of just sunday
-				year, week := time.Now().AddDate(0, 0, -3).ISOWeek()
+				// XXX: this year, week has to match up with logic in DumpSummaryForWeek
+				year, week := time.Now().ISOWeek()
 				out, err := os.Create(fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, year, week))
 				if err != nil {
 					log.Fatal(err)

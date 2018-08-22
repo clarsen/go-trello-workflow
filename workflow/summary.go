@@ -267,8 +267,11 @@ func prepareSummaryForWeek(
 		{2018, 12, 49, 52},
 	}
 
-	// Allows us to do review on monday or tuesday instead of just sunday.
-	year, week = time.Now().AddDate(0, 0, -3).ISOWeek()
+	// Although this would allow us to do review on monday or tuesday instead of
+	// just sunday, shifting back -3 days results in daily email not reporting on
+	// upcoming week until wednesday.
+	// XXX: should make week an external parameter
+	year, week = time.Now().ISOWeek()
 	month = 0
 	for _, ymw := range monthForWeekYearRange {
 		if year == ymw.year && week >= ymw.weekBegin && week <= ymw.weekEnd {
@@ -286,6 +289,7 @@ func prepareSummaryForWeek(
 // GetSummaryForWeek returns a summary structure usable by other downstream
 // in-memory pipelines like daily reminder.
 func GetSummaryForWeek(user, appkey, authtoken string) (*WeeklySummary, error) {
+	// XXX: should make week an external parameter so email reminder can obey calendar
 	year, week, month, doneCards, goalCards, sprintCards, err := prepareSummaryForWeek(user, appkey, authtoken)
 	if err != nil {
 		return nil, err
@@ -295,6 +299,7 @@ func GetSummaryForWeek(user, appkey, authtoken string) (*WeeklySummary, error) {
 
 // DumpSummaryForWeek dumps current content of Trello board to summary file for week
 func DumpSummaryForWeek(user, appkey, authtoken string, out io.Writer) error {
+	// XXX: should make week an external parameter so review can lag a bit into the week
 	year, week, month, doneCards, goalCards, sprintCards, err := prepareSummaryForWeek(user, appkey, authtoken)
 	if err != nil {
 		return err
