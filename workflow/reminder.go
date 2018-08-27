@@ -28,7 +28,8 @@ func MorningRemindHtml(user, appkey, authtoken string) (*WeeklySummary, string, 
 		return nil, "", err
 	}
 
-	summary, err := GetSummaryForWeek(user, appkey, authtoken)
+	year, week := time.Now().ISOWeek()
+	summary, err := GetSummaryForWeek(user, appkey, authtoken, year, week)
 	if err != nil {
 		return nil, "", err
 	}

@@ -46,13 +46,13 @@ func main() {
 			Action: func(*cli.Context) {
 				// allows us to do review on monday/tuesday instead of just sunday
 				// XXX: this year, week has to match up with logic in DumpSummaryForWeek
-				year, week := time.Now().ISOWeek()
+				year, week := time.Now().Add(-time.Hour * 72).ISOWeek()
 				out, err := os.Create(fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, year, week))
 				if err != nil {
 					log.Fatal(err)
 				}
 
-				err = workflow.DumpSummaryForWeek(user, appkey, authtoken, out)
+				err = workflow.DumpSummaryForWeek(user, appkey, authtoken, year, week, out)
 				if err != nil {
 					log.Fatal(err)
 				}
