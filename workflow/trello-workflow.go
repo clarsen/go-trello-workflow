@@ -555,7 +555,7 @@ func hasDate(card *trello.Card) bool {
 }
 
 func isPeriodic(card *trello.Card) bool {
-	re := regexp.MustCompile("\\((po|p1w|p2w|p4w|p2m|p3m|p12m)\\)")
+	re := regexp.MustCompile("\\((po|p1w|p2w|p4w|p2m|p3m|p6m|p12m)\\)")
 	period := re.FindString(card.Name)
 	return period != ""
 }
