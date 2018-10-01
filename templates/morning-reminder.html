@@ -1,3 +1,18 @@
+<html>
+<head>
+<style>
+.due-overdue {
+  background-color: red;
+}
+.due-1d, .due-2d {
+  background-color: orange;
+}
+.due-3d {
+  background-color: yellow;
+}
+</style>
+</head>
+<body>
 Good morning,
 
 This is on your plate for today:
@@ -12,7 +27,7 @@ These cards are due soon:
 
 <ul>
 {{- range .DueSoon }}
-<li> {{ .Due | formatAsDate }} <a href="trello://x-callback-url/showCard?x-source=go-trello-workflow&id={{ .ID }}">{{ .Name -}}</a></li>
+<li> <span class="due-{{ .Due | durationUntilDue }}">{{ .Due | formatAsDate }}</span> <a  href="trello://x-callback-url/showCard?x-source=go-trello-workflow&id={{ .ID }}">{{ .Name -}}</a></li>
 {{ end }}
 </ul>
 
@@ -76,3 +91,5 @@ This is what you have gotten done so far.  Good work!
 <li>{{ .DoneDate }} {{ .Title -}}</li>
 {{end}}
 </ul>
+</body>
+</html>

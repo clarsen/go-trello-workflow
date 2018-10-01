@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"math"
 	"sort"
 	"time"
 
@@ -19,6 +20,22 @@ func formatAsDate(t *time.Time) string {
 		return "couldn't load timezone"
 	}
 	return t.In(local).Format("2006-01-02 (Mon)")
+}
+
+func durationUntilDue(t *time.Time) string {
+
+	d := t.Sub(time.Now())
+	var ret string
+	if d < 0 { // overdue
+		ret = "overdue"
+	} else if d < 7*24*time.Hour {
+		days := int64(math.Round(float64(d/time.Hour) / 24.0))
+		ret = fmt.Sprintf("%dd", days)
+	} else {
+		weeks := int64(math.Round(float64(d/time.Hour) / (24.0 * 7)))
+		ret = fmt.Sprintf("%dw", weeks)
+	}
+	return ret
 }
 
 // MorningRemindHtml generates HTML for inspection as well as use in email
@@ -85,7 +102,8 @@ func MorningRemindHtml(user, appkey, authtoken string) (*WeeklySummary, string, 
 	sort.Sort(byDue(dueSoon))
 
 	fmap := template.FuncMap{
-		"formatAsDate": formatAsDate,
+		"formatAsDate":     formatAsDate,
+		"durationUntilDue": durationUntilDue,
 	}
 	t := template.Must(template.New("morning-reminder.html").Funcs(fmap).ParseFiles("templates/morning-reminder.html"))
 
