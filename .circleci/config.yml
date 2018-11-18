@@ -31,7 +31,9 @@ jobs:
   deploy:
     docker:
       - image: circleci/node:10.13-stretch-browsers
-    working_directory: /go/src/github.com/clarsen/go-trello-workflow
+
+    working_directory: ~/repo
+
     steps:
       - checkout
 
