@@ -15,7 +15,8 @@ heroku: $(DOCKER_CMD)
 
 .PHONY: build
 build:
-	env GOOS=linux go build -ldflags="-s -w" -o bin/lambda lambda/main.go
+	env GOOS=linux packr build -ldflags="-s -w" -o bin/lambda lambda/main.go
+	#env GOOS=linux go build -ldflags="-s -w" -o bin/lambda lambda/main.go
 
 .PHONY: deploy
 deploy: clean build

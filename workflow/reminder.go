@@ -8,7 +8,12 @@ import (
 	"sort"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/clarsen/trello"
+	"github.com/gobuffalo/packr"
 
 	sendgrid "github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
@@ -105,7 +110,14 @@ func MorningRemindHtml(user, appkey, authtoken string) (*WeeklySummary, string, 
 		"formatAsDate":     formatAsDate,
 		"durationUntilDue": durationUntilDue,
 	}
-	t := template.Must(template.New("morning-reminder.html").Funcs(fmap).ParseFiles("templates/morning-reminder.html"))
+
+	box := packr.NewBox("../templates")
+	tmpl, err := box.FindString("morning-reminder.html")
+	if err != nil {
+		return nil, "", err
+	}
+
+	t := template.Must(template.New("morning-reminder.html").Funcs(fmap).Parse(tmpl))
 
 	data := struct {
 		Summary *WeeklySummary
@@ -125,18 +137,76 @@ func MorningRemindHtml(user, appkey, authtoken string) (*WeeklySummary, string, 
 	return summary, content.String(), err
 }
 
-// MorningRemind generates and sends an email reminding of weekly goals, daily
-// todos, overdue cards
-func MorningRemind(user, appkey, authtoken, sendgridAPIKey, userEmail string) error {
-	summary, content, err := MorningRemindHtml(user, appkey, authtoken)
-	if err != nil {
-		return err
-	}
-	from := mail.NewEmail("Daily reminder", userEmail)
-	subject := fmt.Sprintf("Reminder for %d week %d", summary.Year, summary.Week)
-	to := mail.NewEmail("Goal seeker", userEmail)
+func awsEmail(from, to, subject, htmlbody, textbody string) error {
+	// Create a new session in the us-west-2 region.
+	// Replace us-west-2 with the AWS Region you're using for Amazon SES.
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-east-1")},
+	)
+	CharSet := "UTF-8"
 
-	mailcontent := mail.NewContent("text/html", content)
+	// Create an SES session.
+	svc := ses.New(sess)
+
+	// Assemble the email.
+	input := &ses.SendEmailInput{
+		Destination: &ses.Destination{
+			CcAddresses: []*string{},
+			ToAddresses: []*string{
+				aws.String(to),
+			},
+		},
+		Message: &ses.Message{
+			Body: &ses.Body{
+				Html: &ses.Content{
+					Charset: aws.String(CharSet),
+					Data:    aws.String(htmlbody),
+				},
+				Text: &ses.Content{
+					Charset: aws.String(CharSet),
+					Data:    aws.String(textbody),
+				},
+			},
+			Subject: &ses.Content{
+				Charset: aws.String(CharSet),
+				Data:    aws.String(subject),
+			},
+		},
+		Source: aws.String(from),
+		// Uncomment to use a configuration set
+		//ConfigurationSetName: aws.String(ConfigurationSet),
+	}
+
+	// Attempt to send the email.
+	_, err = svc.SendEmail(input)
+
+	// Display error messages if they occur.
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case ses.ErrCodeMessageRejected:
+				fmt.Println(ses.ErrCodeMessageRejected, aerr.Error())
+			case ses.ErrCodeMailFromDomainNotVerifiedException:
+				fmt.Println(ses.ErrCodeMailFromDomainNotVerifiedException, aerr.Error())
+			case ses.ErrCodeConfigurationSetDoesNotExistException:
+				fmt.Println(ses.ErrCodeConfigurationSetDoesNotExistException, aerr.Error())
+			default:
+				fmt.Println(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
+	}
+	return err
+}
+
+func sendgridEmail(sendgridAPIKey, fromAddr, toAddr, subject, htmlbody, textbody string) error {
+	from := mail.NewEmail("Daily reminder", fromAddr)
+	to := mail.NewEmail("Goal seeker", toAddr)
+
+	mailcontent := mail.NewContent("text/html", htmlbody)
 	m := mail.NewV3MailInit(from, subject, to, mailcontent)
 
 	request := sendgrid.GetRequest(sendgridAPIKey, "/v3/mail/send", "https://api.sendgrid.com")
@@ -152,4 +222,17 @@ func MorningRemind(user, appkey, authtoken, sendgridAPIKey, userEmail string) er
 	}
 
 	return err
+}
+
+// MorningRemind generates and sends an email reminding of weekly goals, daily
+// todos, overdue cards
+func MorningRemind(user, appkey, authtoken, sendgridAPIKey, userEmail string) error {
+	summary, content, err := MorningRemindHtml(user, appkey, authtoken)
+	if err != nil {
+		return err
+	}
+	subject := fmt.Sprintf("Reminder for %d week %d", summary.Year, summary.Week)
+
+	// return sendgridEmail(sendgridAPIKey, userEmail, userEmail, subject, content, "This contains HTML")
+	return awsEmail(userEmail, userEmail, subject, content, "This contains HTML")
 }

@@ -47,6 +47,8 @@ func HandleRequest(ctx context.Context, event myEvent) (string, error) {
 		workflow.MinutelyMaintenance(user, appkey, authtoken)
 	} else if event.Action == "daily" {
 		workflow.DailyMaintenance(user, appkey, authtoken)
+	} else if event.Action == "morning-reminder" {
+		workflow.MorningRemind(user, appkey, authtoken, "xxx", userEmail)
 	}
 	log.Printf("Handled event %s", event.Action)
 	return fmt.Sprintf("Handled event %s!", event.Action), nil
