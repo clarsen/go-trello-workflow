@@ -22,10 +22,10 @@ jobs:
 
       - run: make build
 
-      persist_to_workspace:
-        root: .
-        paths:
-          - bin
+      - persist_to_workspace:
+          root: .
+          paths:
+            - bin
 
 
   deploy:
