@@ -45,6 +45,8 @@ type myEvent struct {
 func HandleRequest(ctx context.Context, event myEvent) (string, error) {
 	if event.Action == "minutely" {
 		workflow.MinutelyMaintenance(user, appkey, authtoken)
+	} else if event.Action == "daily" {
+		workflow.DailyMaintenance(user, appkey, authtoken)
 	}
 	log.Printf("Handled event %s", event.Action)
 	return fmt.Sprintf("Handled event %s!", event.Action), nil

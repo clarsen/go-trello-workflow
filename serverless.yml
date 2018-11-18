@@ -34,6 +34,10 @@ functions:
           rate: rate(2 minutes)
           input:
             action: minutely
+      - schedule: # every night at 5:30 GMT (9:30PST)
+          rate: cron(30 5 * * * *)
+          input:
+            action: daily
   # morningRemind:
   #   handler: bin/morningRemind
   #   events:
