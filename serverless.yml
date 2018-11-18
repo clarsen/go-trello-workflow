@@ -1,0 +1,149 @@
+service: go-trello-workflow
+
+frameworkVersion: ">=1.28.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: go1.x
+  memorySize: 128
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "ses:*"
+      Resource:
+        - "*"
+
+  environment:
+    appkey: ${env:appkey}
+    authtoken: ${env:authtoken}
+    user: ${env:user}
+    USER_EMAIL: ${env:USER_EMAIL}
+
+functions:
+  # dailyMaintenance:
+  maintenance:
+    handler: bin/lambda
+    vpc:
+      securityGroupIds:
+        - "Fn::GetAtt": ServerlessSecurityGroup.GroupId
+      subnetIds:
+        - Ref: ServerlessPrivateSubnetA
+    events:
+      - schedule:
+          rate: rate(2 minutes)
+          input:
+            action: minutely
+  # morningRemind:
+  #   handler: bin/morningRemind
+  #   events:
+  #     - schedule:
+  #       name: morning
+  #       rate: cron(0 14 * * * *)
+
+
+package:
+ exclude:
+   - ./**
+ include:
+   - ./bin/**
+
+# using https://github.com/ittus/aws-lambda-vpc-nat-examples
+resources:
+  Resources:
+    ServerlessVPC:
+      Type: AWS::EC2::VPC
+      Properties:
+        CidrBlock: "10.0.0.0/16"
+    ElasticIpLambda:
+      Type: AWS::EC2::EIP
+      Properties:
+        Domain: vpc
+
+    InternetGatewayLambda:
+      Type: AWS::EC2::InternetGateway
+
+    VPCGatewayAttachmentLambda:
+      Type: AWS::EC2::VPCGatewayAttachment
+      Properties:
+        VpcId:
+          Ref: ServerlessVPC
+        InternetGatewayId:
+          Ref: InternetGatewayLambda
+
+    NatGatewayLambda:
+      Type: AWS::EC2::NatGateway
+      Properties:
+        AllocationId:
+          Fn::GetAtt:
+            - ElasticIpLambda
+            - AllocationId
+        SubnetId:
+          Ref: ServerlessPublicSubnetA
+
+    ServerlessPrivateSubnetA:
+      DependsOn: ServerlessVPC
+      Type: AWS::EC2::Subnet
+      Properties:
+        VpcId:
+          Ref: ServerlessVPC
+        AvailabilityZone: ${self:provider.region}a
+        CidrBlock: "10.0.1.0/24"
+    ServerlessPublicSubnetA:
+      DependsOn: ServerlessVPC
+      Type: AWS::EC2::Subnet
+      Properties:
+        VpcId:
+          Ref: ServerlessVPC
+        AvailabilityZone: ${self:provider.region}a
+        CidrBlock: "10.0.2.0/24"
+
+    DefaultPrivateRouteTable:
+      Type: AWS::EC2::RouteTable
+      Properties:
+        VpcId:
+          Ref: ServerlessVPC
+
+    DefaultPrivateRoute:
+      Type: AWS::EC2::Route
+      Properties:
+        RouteTableId:
+          Ref: DefaultPrivateRouteTable
+        DestinationCidrBlock: 0.0.0.0/0
+        NatGatewayId:
+          Ref: NatGatewayLambda
+
+    DefaultPublicRouteTable:
+      Type: AWS::EC2::RouteTable
+      Properties:
+        VpcId:
+          Ref: ServerlessVPC
+
+    DefaultPublicRoute:
+      Type: AWS::EC2::Route
+      Properties:
+        RouteTableId:
+          Ref: DefaultPublicRouteTable
+        DestinationCidrBlock: 0.0.0.0/0
+        GatewayId:
+          Ref: InternetGatewayLambda
+    SubnetRouteTableAssociationLambdaPrivateA:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        SubnetId:
+          Ref: ServerlessPrivateSubnetA
+        RouteTableId:
+          Ref: DefaultPrivateRouteTable
+    SubnetRouteTableAssociationLambdaPublicA:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        SubnetId:
+          Ref: ServerlessPublicSubnetA
+        RouteTableId:
+          Ref: DefaultPublicRouteTable
+    ServerlessSecurityGroup:
+      DependsOn: ServerlessVPC
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: SecurityGroup for Serverless Functions
+        VpcId:
+          Ref: ServerlessVPC

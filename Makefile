@@ -6,8 +6,17 @@ $(DOCKER_CMD): clean
 	mkdir -p $(DOCKER_BUILD)
 	$(GO_BUILD_ENV) go build -v -o $(DOCKER_CMD) .
 
+.PHONY: clean
 clean:
-	rm -rf $(DOCKER_BUILD)
+	rm -rf ./bin $(DOCKER_BUILD)
 
 heroku: $(DOCKER_CMD)
 	heroku container:push web
+
+.PHONY: build
+build:
+	env GOOS=linux go build -ldflags="-s -w" -o bin/lambda lambda/main.go
+
+.PHONY: deploy
+deploy: clean build
+	sls deploy --verbose

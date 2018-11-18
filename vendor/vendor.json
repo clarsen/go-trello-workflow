@@ -3,6 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "HvLvb3yCwkFwIBoc/tuJG0Cts7M=",
+			"path": "github.com/aws/aws-lambda-go",
+			"revision": "fb8f88d824489a878aee1e0badde7d8e129f8767",
+			"revisionTime": "2018-11-02T09:48:10Z"
+		},
+		{
 			"checksumSHA1": "7Zj+iORUlawU7WerztLQcoXEohU=",
 			"path": "github.com/clarsen/trello",
 			"revision": "6d3ef32e03a9f0e9472471a25dee30d5503757b8",
