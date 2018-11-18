@@ -39,7 +39,8 @@ func main() {
 	c.AddFunc("0 0 14 * * *", func() { workflow.MorningRemind(user, appkey, authtoken, sendgridKey, userEmail) })
 
 	// every other minute
-	c.AddFunc("0 */2 * * * *", func() { workflow.MinutelyMaintenance(user, appkey, authtoken) })
+	// moved to AWS lambda
+	// c.AddFunc("0 */2 * * * *", func() { workflow.MinutelyMaintenance(user, appkey, authtoken) })
 	c.Start()
 	for {
 		log.Println("wait 10 minutes...")
