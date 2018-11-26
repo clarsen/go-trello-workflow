@@ -34,13 +34,12 @@ func main() {
 
 	c := cron.New()
 	// every night at 5:30 GMT (9:30PST)
-	// c.AddFunc("0 30 5 * * *", func() { workflow.DailyMaintenance(user, appkey, authtoken) })
+	c.AddFunc("0 30 5 * * *", func() { workflow.DailyMaintenance(user, appkey, authtoken) })
 	// every morning at 14:00 GMT (6AM PST)
 	c.AddFunc("0 0 14 * * *", func() { workflow.MorningRemind(user, appkey, authtoken, sendgridKey, userEmail) })
 
 	// every other minute
-	// moved to AWS Lambda
-	// c.AddFunc("0 */2 * * * *", func() { workflow.MinutelyMaintenance(user, appkey, authtoken) })
+	c.AddFunc("0 */2 * * * *", func() { workflow.MinutelyMaintenance(user, appkey, authtoken) })
 	c.Start()
 	for {
 		log.Println("wait 10 minutes...")
