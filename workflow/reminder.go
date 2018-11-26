@@ -233,6 +233,9 @@ func MorningRemind(user, appkey, authtoken, sendgridAPIKey, userEmail string) er
 	}
 	subject := fmt.Sprintf("Reminder for %d week %d", summary.Year, summary.Week)
 
-	// return sendgridEmail(sendgridAPIKey, userEmail, userEmail, subject, content, "This contains HTML")
-	return awsEmail(userEmail, userEmail, subject, content, "This contains HTML")
+	if sendgridAPIKey != "" {
+		return sendgridEmail(sendgridAPIKey, userEmail, userEmail, subject, content, "This contains HTML")
+	} else {
+		return awsEmail(userEmail, userEmail, subject, content, "This contains HTML")
+	}
 }
