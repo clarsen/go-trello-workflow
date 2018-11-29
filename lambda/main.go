@@ -3,9 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/clarsen/go-trello-workflow/workflow"
 )
@@ -16,6 +19,12 @@ var (
 	user      string
 	userEmail string
 )
+
+// Response is of type APIGatewayProxyResponse since we're leveraging the
+// AWS Lambda Proxy Request functionality (default behavior)
+//
+// https://serverless.com/framework/docs/providers/aws/events/apigateway/#lambda-proxy-integration
+type Response events.APIGatewayProxyResponse
 
 func init() {
 	appkey = os.Getenv("appkey")
@@ -42,16 +51,35 @@ type myEvent struct {
 }
 
 // HandleRequest accepts the lambda event
-func HandleRequest(ctx context.Context, event myEvent) (string, error) {
+func HandleRequest(ctx context.Context, event myEvent) (Response, error) {
 	if event.Action == "minutely" {
 		workflow.MinutelyMaintenance(user, appkey, authtoken)
 	} else if event.Action == "daily" {
 		workflow.DailyMaintenance(user, appkey, authtoken)
 	} else if event.Action == "morning-reminder" {
 		workflow.MorningRemind(user, appkey, authtoken, "", userEmail)
+	} else if event.Action == "test" {
+		resp1, err := http.Get("http://example.com/")
+		if err != nil {
+			return Response{StatusCode: 404}, err
+		}
+		_, err = ioutil.ReadAll(resp1.Body)
+		resp1.Body.Close()
+		if err != nil {
+			return Response{StatusCode: 404}, err
+		}
+
 	}
 	log.Printf("Handled event %s", event.Action)
-	return fmt.Sprintf("Handled event %s!", event.Action), nil
+	resp := Response{
+		StatusCode:      200,
+		IsBase64Encoded: false,
+		Body:            fmt.Sprintf("Handled event %s!", event.Action),
+		Headers: map[string]string{
+			"Content-Type": "text/plain",
+		},
+	}
+	return resp, nil
 }
 
 func main() {
