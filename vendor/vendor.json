@@ -15,6 +15,12 @@
 			"revisionTime": "2018-11-02T09:48:10Z"
 		},
 		{
+			"checksumSHA1": "mwG/Mtjh6wshBS/REGxPAn5WQSQ=",
+			"path": "github.com/aws/aws-lambda-go/events",
+			"revision": "fb8f88d824489a878aee1e0badde7d8e129f8767",
+			"revisionTime": "2018-11-02T09:48:10Z"
+		},
+		{
 			"checksumSHA1": "RelVtlYNz5POqozatSX/Gg/O3+4=",
 			"path": "github.com/aws/aws-lambda-go/lambda",
 			"revision": "fb8f88d824489a878aee1e0badde7d8e129f8767",
