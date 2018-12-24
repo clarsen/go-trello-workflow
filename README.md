@@ -10,7 +10,7 @@ Generate Trello app key by https://trello.com/1/appKey/generate
 
 Get auth token from https://trello.com/1/connect?key=<YOUR TRELLO APP KEY>&name=trellow-workflow&response_type=token
 
-Trello boards should be set up as per expectations of code.
+Trello boards should be set up as per expectations of the code.
 
 ## Deploy to heroku
     $ heroku config:set appkey=<YOUR TRELLO APP KEY>
@@ -25,6 +25,11 @@ Turn on `longrun` dyno which runs go-trello-workflow
 if you run out of free dyno hours
 
     heroku ps:scale longrun=1:hobby
+
+## Deploy to AWS serverless
+
+- automatic on git push via CircleCI
+- ensure envrionment variables with API keys, email address are set up.
 
 ## Use in CLI
 Create .env with:

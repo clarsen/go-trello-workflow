@@ -140,6 +140,35 @@ func main() {
 			},
 		},
 		{
+			Name:    "monthly-review-input",
+			Aliases: []string{"mri"},
+			Usage:   "Generate weekly review summary \"visualization\" for filling in monthly review",
+			Action: func(*cli.Context) {
+				year := time.Now().Year()
+
+				for month := 1; month <= 12; month++ {
+					log.Println("Month", month)
+					inSummary, err := os.Open(fmt.Sprintf("%s/monthly-%d-%02d.yaml", summarydir, year, month))
+					if err != nil {
+						log.Println(err)
+						continue
+					}
+
+					out, err := os.Create(fmt.Sprintf("%s/monthlyinput-%d-%02d.md", reviewvisdir, year, month))
+					if err != nil {
+						log.Fatal(err)
+					}
+
+					err = workflow.VisualizeWeeklySummariesForMonthly(inSummary, out)
+					if err != nil {
+						log.Fatal(err)
+					}
+
+				}
+
+			},
+		},
+		{
 			Name:    "monthly-review",
 			Aliases: []string{"m"},
 			Usage:   "Generate monthly review \"visualization\"",

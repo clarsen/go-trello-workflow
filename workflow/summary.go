@@ -50,24 +50,51 @@ type WeeklySummary struct {
 	MonthlySprints []MonthlyGoalInfo `yaml:"monthlySprints"`
 }
 
+// WeeklySummaryItems is array of feedback from a particular week
+type WeeklySummaryItems struct {
+	Week    int      `yaml:"week"`
+	Content []string `yaml:"content"`
+}
+
+// PerGoalWeeklySummaryItems is array of feedback from a particular week for a particular goal
+type PerGoalWeeklySummaryItems struct {
+	Goal               string               `yaml:"goal"`
+	DidToCreateOutcome []WeeklySummaryItems `yaml:"didToCreateOutcome"`
+	KeepDoing          []WeeklySummaryItems `yaml:"keepDoing"`
+	DoDifferently      []WeeklySummaryItems `yaml:"doDifferently"`
+}
+
 // MonthlySummary defines the summarization data that is dumped for downstream
 // consumption independent of task management tool (in this case Trello).
 //
 // for monthly summary, monthly goal and monthly sprint info will merge together
 // weekly goals
 type MonthlySummary struct {
-	Year           int               `yaml:"year"`
-	Month          int               `yaml:"month"`
-	WeeksOfYear    string            `yaml:"weeksOfYear"`
-	MonthlyGoals   []MonthlyGoalInfo `yaml:"monthlyGoals"`
-	MonthlySprints []MonthlyGoalInfo `yaml:"monthlySprints"`
-	Events         []string          `yaml:"events"`
+	Year                 int                         `yaml:"year"`
+	Month                int                         `yaml:"month"`
+	WeeksOfYear          string                      `yaml:"weeksOfYear"`
+	MonthlyGoals         []MonthlyGoalInfo           `yaml:"monthlyGoals"`
+	MonthlySprints       []MonthlyGoalInfo           `yaml:"monthlySprints"`
+	Events               []string                    `yaml:"events"`
+	GoingWell            []WeeklySummaryItems        `yaml:"goingWell"`
+	NeedsImprovement     []WeeklySummaryItems        `yaml:"needsImprovement"`
+	Successes            []WeeklySummaryItems        `yaml:"successes"`
+	Challenges           []WeeklySummaryItems        `yaml:"challenges"`
+	MonthlyGoalSummaries []PerGoalWeeklySummaryItems `yaml:"monthlyGoalSummaries"`
 }
 
 // YearlySummary defines what's dumped for rolling up into the yearly plan summary
 type YearlySummary struct {
 	Year             int              `yaml:"year"`
 	MonthlySummaries []MonthlySummary `yaml:"monthlySummaries"`
+}
+
+// WeeklyReviewData holds raw review content and extra info about the year, month, week it is from
+type WeeklyReviewData struct {
+	Year    int
+	Month   int
+	Week    int
+	Content []byte
 }
 
 func dumpMonthlyGoalInfo(card *trello.Card, weekNumber *int) (MonthlyGoalInfo, error) {
@@ -346,7 +373,7 @@ func arrayToString(a []int, delim string) string {
 }
 
 // GenerateSummaryForMonth rolls up weekly summaries to month level
-func GenerateSummaryForMonth(user, appkey, authtoken string, year, month int, summaryIn [][]byte, out io.Writer) error {
+func GenerateSummaryForMonth(user, appkey, authtoken string, year, month int, summaryIn [][]byte, reviewIn []WeeklyReviewData, out io.Writer) error {
 
 	cl, err := New(user, appkey, authtoken)
 	if err != nil {
@@ -413,6 +440,69 @@ func GenerateSummaryForMonth(user, appkey, authtoken string, year, month int, su
 	}
 	summary.WeeksOfYear = arrayToString(weeknums, ",")
 
+	var goingWell []WeeklySummaryItems
+	var needsImprovement []WeeklySummaryItems
+	var successes []WeeklySummaryItems
+	var challenges []WeeklySummaryItems
+	goalReviews := make(map[string]PerGoalWeeklySummaryItems)
+
+	for _, wrd := range reviewIn {
+		var weekly WeeklyReview
+		err2 := yaml.Unmarshal(wrd.Content, &weekly)
+		if err2 != nil {
+			return err2
+		}
+		if wrd.Year == year && wrd.Month == month {
+			goingWell = append(goingWell, WeeklySummaryItems{
+				Week:    wrd.Week,
+				Content: weekly.GoingWell,
+			})
+			needsImprovement = append(needsImprovement, WeeklySummaryItems{
+				Week:    wrd.Week,
+				Content: weekly.NeedsImprovement,
+			})
+			successes = append(successes, WeeklySummaryItems{
+				Week:    wrd.Week,
+				Content: weekly.Successes,
+			})
+			challenges = append(challenges, WeeklySummaryItems{
+				Week:    wrd.Week,
+				Content: weekly.Challenges,
+			})
+
+			for _, goal := range weekly.PerGoalReviews {
+				var title string
+				var ginfo PerGoalWeeklySummaryItems
+				if len(goal.DidToCreateOutcome) == 0 {
+					title = "no goal specified"
+					ginfo = goalReviews[title]
+					ginfo.Goal = title
+				} else {
+					title = goal.DidToCreateOutcome[0]
+					ginfo = goalReviews[title]
+					ginfo.Goal = title
+					ginfo.DidToCreateOutcome = append(ginfo.DidToCreateOutcome, WeeklySummaryItems{
+						Week:    wrd.Week,
+						Content: goal.DidToCreateOutcome[1:],
+					})
+				}
+				if len(goal.KeepDoing) > 0 {
+					ginfo.KeepDoing = append(ginfo.KeepDoing, WeeklySummaryItems{
+						Week:    wrd.Week,
+						Content: goal.KeepDoing,
+					})
+				}
+				if len(goal.DoDifferently) > 0 {
+					ginfo.DoDifferently = append(ginfo.DoDifferently, WeeklySummaryItems{
+						Week:    wrd.Week,
+						Content: goal.DoDifferently,
+					})
+				}
+				goalReviews[title] = ginfo
+			}
+		}
+	}
+
 	if len(weeklies) > 0 {
 		var allMonthlyGoals []MonthlyGoalInfo
 		for _, ws := range weeklies {
@@ -426,6 +516,13 @@ func GenerateSummaryForMonth(user, appkey, authtoken string, year, month int, su
 		}
 		summary.MonthlySprints = mergeMonthlyGoalInfo(allMonthlyGoals)
 		// log.Printf("filtered to %+v\n", weeklies)
+		summary.GoingWell = goingWell
+		summary.NeedsImprovement = needsImprovement
+		summary.Successes = successes
+		summary.Challenges = challenges
+		for _, gs := range goalReviews {
+			summary.MonthlyGoalSummaries = append(summary.MonthlyGoalSummaries, gs)
+		}
 	}
 
 	buf, err := yaml.Marshal(summary)

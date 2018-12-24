@@ -31,11 +31,11 @@ type MonthlySprintReview struct {
 // MonthlyReview defines the manually input data that goes into the monthly
 // review visualization
 type MonthlyReview struct {
-	MonthlyGoalReviews   []MonthlyGoalReview   `yaml:"monthlyGoalReviews"`
-	MonthlySprintReviews []MonthlySprintReview `yaml:"monthlySprintReviews"`
+	Highlights           []string              `yaml:"highlights"`
 	Continue             []string              `yaml:"continue"`
 	DoDifferently        []string              `yaml:"doDifferently"`
+	MonthlyGoalReviews   []MonthlyGoalReview   `yaml:"monthlyGoalReviews"`
+	MonthlySprintReviews []MonthlySprintReview `yaml:"monthlySprintReviews"`
 	CandidateGoals       []string              `yaml:"candidateGoals"`
 	CandidateSprints     []string              `yaml:"candidateSprints"`
-	Highlights           []string              `yaml:"highlights"`
 }

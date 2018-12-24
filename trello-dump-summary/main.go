@@ -10,6 +10,7 @@ import (
 	"github.com/clarsen/go-trello-workflow/workflow"
 	"github.com/joho/godotenv"
 	"github.com/urfave/cli"
+	yaml "gopkg.in/yaml.v2"
 )
 
 func main() {
@@ -33,6 +34,11 @@ func main() {
 	summarydir := os.Getenv("summarydir")
 	if summarydir == "" {
 		log.Fatal("$summarydir must be set")
+	}
+
+	reviewdir := os.Getenv("reviewdir")
+	if reviewdir == "" {
+		log.Fatal("$reviewdir must be set")
 	}
 
 	app := cli.NewApp()
@@ -92,9 +98,11 @@ func main() {
 			Action: func(*cli.Context) {
 				year := time.Now().Year()
 				var inSummaries [][]byte
+				var inReviews []workflow.WeeklyReviewData
+
 				for week := 1; week <= 53; week++ {
 					weekSummary := fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, year, week)
-					if _, err := os.Stat(weekSummary); os.IsNotExist(err) {
+					if _, err1 := os.Stat(weekSummary); os.IsNotExist(err1) {
 						continue
 					}
 					inSummary, err2 := os.Open(weekSummary)
@@ -106,14 +114,45 @@ func main() {
 						log.Fatal(err2)
 					}
 					inSummaries = append(inSummaries, buf)
+
+					// get month
+					var weekly workflow.WeeklySummary
+					err3 := yaml.Unmarshal(buf, &weekly)
+					if err3 != nil {
+						log.Fatal(err3)
+					}
+
+					reviewFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", reviewdir, year, week)
+					if _, err = os.Stat(reviewFname); os.IsNotExist(err) {
+						continue
+					}
+
+					inReview, err2 := os.Open(reviewFname)
+					if err2 != nil {
+						log.Fatal(err2)
+						continue
+					}
+					buf2, err2 := ioutil.ReadAll(inReview)
+					if err2 != nil {
+						log.Fatal(err2)
+					}
+
+					inReviews = append(inReviews, workflow.WeeklyReviewData{
+						Week:    week,
+						Month:   weekly.Month,
+						Year:    weekly.Year,
+						Content: buf2,
+					})
+
 				}
+
 				for month := 1; month <= 12; month++ {
 					monthlySummary := fmt.Sprintf("%s/monthly-%d-%02d.yaml", summarydir, year, month)
 					out, err := os.Create(monthlySummary)
 					if err != nil {
 						log.Fatal(err)
 					}
-					err = workflow.GenerateSummaryForMonth(user, appkey, authtoken, year, month, inSummaries, out)
+					err = workflow.GenerateSummaryForMonth(user, appkey, authtoken, year, month, inSummaries, inReviews, out)
 					if err != nil {
 						os.Remove(monthlySummary)
 					}

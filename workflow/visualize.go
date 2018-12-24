@@ -251,6 +251,24 @@ func VisualizeWeeklyRetrospective(summaryIn, reviewIn io.Reader, visOut io.Write
 	return nil
 }
 
+// VisualizeMonthlyInput writes out report of weekly review items collated for preparing monthly review
+func VisualizeWeeklySummariesForMonthly(summaryIn io.Reader, visOut io.Writer) error {
+	buf, err := ioutil.ReadAll(summaryIn)
+	if err != nil {
+		return err
+	}
+	var summary MonthlySummary
+	err = yaml.Unmarshal(buf, &summary)
+	if err != nil {
+		return err
+	}
+
+	t, _ := template.ParseFiles("templates/monthly-input.md")
+	t.Execute(visOut, summary)
+
+	return nil
+}
+
 // VisualizeMonthlyRetrospective writes out report of monthly goals, sprints
 func VisualizeMonthlyRetrospective(summaryIn, reviewIn io.Reader, visOut io.Writer) error {
 	buf, err := ioutil.ReadAll(summaryIn)

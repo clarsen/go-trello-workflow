@@ -35,26 +35,9 @@ What did i learn this week?
     - {{ . -}}
 {{ end }}
 
-Compared to outcomes planned for the week,
-
-- what actually was or wasn’t done:
-{{- range .MonthlyGoals }}
-    - {{ .Title }}
-    {{- range .WeeklyGoals }}
-        - week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}
-    {{ end -}}
-{{ end }}
-
-- How did sprints go:
-{{- range .MonthlySprints }}
-    - {{ .Title }}
-    {{- range .WeeklyGoals }}
-        - week {{ .Week }}: {{ .Title }} ({{ .Created }}) {{ .Status -}}
-    {{ end -}}
-{{ end }}
-
-{{- range $index, $ := .PerGoalReviews }}
-- {{ $index }}
+The outcomes planned for the week,
+{{ range $index, $ := .PerGoalReviews }}
+- {{ index .DidToCreateOutcome 0 }}
     - What did I do to create that particular outcome or situation?
 {{- range .DidToCreateOutcome }}
         - {{ . }}
