@@ -293,6 +293,10 @@ func prepareSummaryForWeek(
 		{2018, 10, 40, 44},
 		{2018, 11, 45, 48},
 		{2018, 12, 49, 52},
+		{2019, 1, 1, 5},
+		{2019, 2, 6, 9},
+		{2019, 3, 10, 13},
+		{2019, 4, 14, 17},
 	}
 
 	// Although this would allow us to do review on monday or tuesday instead of
