@@ -110,6 +110,13 @@ func (c *Card) RemoveLabel(labelID string) error {
 	return c.client.Delete(path, Defaults(), nil)
 }
 
+func (c *Card) AddLabel(labelID string) error {
+	path := fmt.Sprintf("cards/%s/idLabels", c.ID)
+	args := Arguments{"value": labelID}
+
+	return c.client.Post(path, args, nil)
+}
+
 func (c *Card) MoveToTopOfList() error {
 	path := fmt.Sprintf("cards/%s", c.ID)
 	return c.client.Put(path, Arguments{"pos": "top"}, c)
@@ -392,6 +399,12 @@ func (c *Card) populateChecklists(args Arguments) (err error) {
 	err = c.client.Get(path, args, &c.Checklists)
 	if err != nil {
 		return err
+	}
+	for i := range c.Checklists {
+		for j := range c.Checklists[i].CheckItems {
+			c.Checklists[i].CheckItems[j].client = c.client
+			c.Checklists[i].CheckItems[j].IDCard = c.ID
+		}
 	}
 	c.client.log("got checklist %+v", c.Checklists[0])
 	return

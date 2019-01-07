@@ -400,6 +400,20 @@ func sortList(m *trello.Member, list *trello.List) error {
 	return nil
 }
 
+func sortChecklist(m *trello.Member, card *trello.Card) error {
+	for _, cl := range card.Checklists {
+		sort.Stable(byDescWeek(cl.CheckItems))
+		for idx, item := range cl.CheckItems {
+			newPos := int(idx + 1)
+			if int(item.Pos) != newPos {
+				fmt.Printf("id %s idCheckItem %s %f -> %d: %v\n", item.IDChecklist, item.ID, item.Pos, newPos, item.Name)
+				(&item).SetPos(newPos)
+			}
+		}
+	}
+	return nil
+}
+
 func boardFor(m *trello.Member, s string) (board *trello.Board, err error) {
 	if boards == nil {
 		boards, err = m.GetBoards(trello.Defaults())
@@ -411,12 +425,15 @@ func boardFor(m *trello.Member, s string) (board *trello.Board, err error) {
 		// fmt.Println("got", boards)
 		for _, b := range boards {
 			// fmt.Println("examining board ", b)
-			// fmt.Println(b.Name, "->", b)
+			// fmt.Println(b.Name)
 			boardmap[b.Name] = b
 		}
 		// fmt.Println(boardmap)
 	}
 	board = boardmap[s]
+	if listmap[board.Name] == nil {
+		listmap[board.Name] = map[string]*trello.List{}
+	}
 	return
 }
 
@@ -532,6 +549,9 @@ func listFor(m *trello.Member, b string, l string) (*trello.List, error) {
 		// handle error
 		return nil, err
 	}
+	if listmap[board.Name] == nil {
+		listmap[board.Name] = map[string]*trello.List{}
+	}
 	for _, li := range lists {
 		// fmt.Println("examining board ", b)
 		// fmt.Println(b.Name, "->", b)
@@ -539,9 +559,6 @@ func listFor(m *trello.Member, b string, l string) (*trello.List, error) {
 		//   listmap[board.Name] = map[string]*trello.List{}
 		// }
 		// fmt.Println("list ", li.Name)
-		if listmap[board.Name] == nil {
-			listmap[board.Name] = map[string]*trello.List{}
-		}
 		listmap[board.Name][li.Name] = li
 	}
 	list := listmap[b][l]
@@ -634,6 +651,11 @@ func (cl *Client) doMinutely() error {
 		{"Periodic board", "Weekly"},
 		{"Periodic board", "Bi-weekly to monthly"},
 		{"Periodic board", "Quarterly to Yearly"},
+	}
+
+	checklistSortBoardsAndLists := []boardAndList{
+		{"Kanban daily/weekly", "Monthly Goals"},
+		{"Kanban daily/weekly", "Monthly Sprints"},
 	}
 
 	for _, boardlist := range dateBoardsAndLists {
@@ -762,6 +784,25 @@ func (cl *Client) doMinutely() error {
 		err = sortList(cl.member, list)
 		if err != nil {
 			return err
+		}
+	}
+
+	for _, boardlist := range checklistSortBoardsAndLists {
+		list, err := listFor(cl.member, boardlist.Board, boardlist.List)
+		if err != nil {
+			// handle error
+			return err
+		}
+		cards, err := list.GetCards(trello.Defaults())
+		if err != nil {
+			// handle error
+			return err
+		}
+		for _, card := range cards {
+			err = sortChecklist(cl.member, card)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

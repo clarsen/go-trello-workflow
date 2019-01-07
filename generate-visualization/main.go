@@ -96,12 +96,13 @@ func main() {
 						log.Fatal(err2)
 						continue
 					}
-
-					out, err2 := os.Create(fmt.Sprintf("%s/weekly-%d-%02d.md", reviewvisdir, year, week))
+					fn := fmt.Sprintf("%s/weekly-%d-%02d.md", reviewvisdir, year, week)
+					out, err2 := os.Create(fn)
 					if err2 != nil {
 						log.Fatal(err2)
 					}
 
+					log.Printf("generating %s\n", fn)
 					err2 = workflow.VisualizeWeeklyRetrospective(inSummary, inReview, out)
 					if err2 != nil {
 						log.Fatal(err2)
