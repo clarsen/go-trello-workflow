@@ -841,25 +841,27 @@ func (cl *Client) prepareToday() error {
 
 // MinutelyMaintenance does things like cherry picking, moving, adding dates to
 // titles
-func MinutelyMaintenance(user, appkey, authtoken string) {
+func MinutelyMaintenance(user, appkey, authtoken string) error {
 	// log.Println("Running MinutelyMaintenance")
 	wf, err := New(user, appkey, authtoken)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	wf.doMinutely()
+	return nil
 }
 
 // DailyMaintenance moves cards in kanban board back to their homes at the end
 // of the day
-func DailyMaintenance(user, appkey, authtoken string) {
+func DailyMaintenance(user, appkey, authtoken string) error {
 	log.Println("Running DailyMaintenance")
 	wf, err := New(user, appkey, authtoken)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	wf.prepareToday()
 	log.Println("Finished running DailyMaintenance")
+	return nil
 }
 
 // New create new client

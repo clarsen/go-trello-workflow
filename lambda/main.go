@@ -52,12 +52,13 @@ type myEvent struct {
 
 // HandleRequest accepts the lambda event
 func HandleRequest(ctx context.Context, event myEvent) (Response, error) {
+	var err error
 	if event.Action == "minutely" {
-		workflow.MinutelyMaintenance(user, appkey, authtoken)
+		err = workflow.MinutelyMaintenance(user, appkey, authtoken)
 	} else if event.Action == "daily" {
-		workflow.DailyMaintenance(user, appkey, authtoken)
+		err = workflow.DailyMaintenance(user, appkey, authtoken)
 	} else if event.Action == "morning-reminder" {
-		workflow.MorningRemind(user, appkey, authtoken, "", userEmail)
+		err = workflow.MorningRemind(user, appkey, authtoken, "", userEmail)
 	} else if event.Action == "test" {
 		resp1, err := http.Get("http://example.com/")
 		if err != nil {
@@ -69,6 +70,18 @@ func HandleRequest(ctx context.Context, event myEvent) (Response, error) {
 			return Response{StatusCode: 404}, err
 		}
 
+	}
+	if err != nil {
+		log.Printf("Handled event %s with error %+v", event.Action, err)
+		resp := Response{
+			StatusCode:      500,
+			IsBase64Encoded: false,
+			Body:            fmt.Sprintf("Handled event %s with error %+v!", event.Action, err),
+			Headers: map[string]string{
+				"Content-Type": "text/plain",
+			},
+		}
+		return resp, nil
 	}
 	log.Printf("Handled event %s", event.Action)
 	resp := Response{
