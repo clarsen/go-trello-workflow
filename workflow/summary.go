@@ -1,7 +1,6 @@
 package workflow
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -104,7 +103,8 @@ func dumpMonthlyGoalInfo(card *trello.Card, weekNumber *int) (MonthlyGoalInfo, e
 	reMDY := regexp.MustCompile(`\((\d{4}-\d{2}-\d{2})\)`)
 	exprGoalMDY := reMDY.FindStringSubmatch(card.Name)
 	if len(exprGoalMDY) <= 0 {
-		return g, errors.New("Couldn't parse date out of title")
+		err := fmt.Errorf("Couldn't parse date out of title %s", card.Name)
+		return g, err
 	}
 	g.Created = exprGoalMDY[1]
 
