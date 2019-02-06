@@ -177,9 +177,10 @@ func awsEmail(from, to, subject, htmlbody, textbody string) error {
 		// Uncomment to use a configuration set
 		//ConfigurationSetName: aws.String(ConfigurationSet),
 	}
-
+	log.Println("sending email...")
 	// Attempt to send the email.
 	_, err = svc.SendEmail(input)
+	log.Printf("sent email, got %+v\n", err)
 
 	// Display error messages if they occur.
 	if err != nil {
