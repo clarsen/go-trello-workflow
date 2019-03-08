@@ -17,6 +17,7 @@ build:
 	env GOOS=linux go build -ldflags="-s -w" -o bin/auth auth/main.go
 	env GOOS=linux go build -ldflags="-s -w" -o bin/handle_graphql handle_graphql/lambda/main.go
 	env GOOS=linux go build -ldflags="-s -w" -o bin/lambda_scheduled lambda_scheduled/main.go
+	cd ../..; env GOOS=linux packr2 clean
 
 .PHONY: deploy
 deploy: clean build
