@@ -14,7 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/clarsen/trello"
-	"github.com/gobuffalo/packr"
+	"github.com/gobuffalo/packr/v2"
 
 	sendgrid "github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
@@ -112,7 +112,7 @@ func MorningRemindHtml(user, appkey, authtoken string) (*WeeklySummary, string, 
 		"durationUntilDue": durationUntilDue,
 	}
 
-	box := packr.NewBox("../templates")
+	box := packr.New("workflow", "../templates")
 	tmpl, err := box.FindString("morning-reminder.html")
 	if err != nil {
 		return nil, "", err

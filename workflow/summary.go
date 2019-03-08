@@ -435,6 +435,7 @@ func GenerateSummaryForMonth(user, appkey, authtoken string, year, month int, su
 		var weekly WeeklySummary
 		err2 := yaml.Unmarshal(buf, &weekly)
 		if err2 != nil {
+			log.Fatal(err2)
 			return err2
 		}
 		if weekly.Year == year && weekly.Month == month {
@@ -454,6 +455,8 @@ func GenerateSummaryForMonth(user, appkey, authtoken string, year, month int, su
 		var weekly WeeklyReview
 		err2 := yaml.Unmarshal(wrd.Content, &weekly)
 		if err2 != nil {
+			log.Println(string(wrd.Content))
+			log.Fatal(err2)
 			return err2
 		}
 		if wrd.Year == year && wrd.Month == month {

@@ -3,3 +3,7 @@
 /.env.serverless
 /.serverless
 /bin
+/server/go/.env.production.nocommit
+/server/go/node_modules
+/server/go/.serverless
+/server/go/bin

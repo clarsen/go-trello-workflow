@@ -8,7 +8,7 @@ jobs:
     docker:
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-      - image: circleci/golang:1.10-stretch
+      - image: circleci/golang:1.12-stretch
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -22,12 +22,18 @@ jobs:
       - run:
           name: dependencies
           command: |
-            go get -u github.com/gobuffalo/packr/packr
+            go get -u github.com/gobuffalo/packr/v2/packr2
 
-      - run: make build
+      - run:
+          name: build go binaries
+          command: |
+            cd server/go
+            export GO111MODULE=on  # for packr
+            make build
+
 
       - persist_to_workspace:
-          root: .
+          root: server/go
           paths:
             - bin
 
@@ -47,7 +53,7 @@ jobs:
       - run:
           name: grab built binary
           command: |
-            cp -rp workspace/bin .
+            cp -rp workspace/bin server/go/.
 
       - run:
           name: dependencies
@@ -57,6 +63,8 @@ jobs:
       - run:
           name: deploy
           command: |
+            source ./circleci_branch_config.sh
+            cd server/go
             serverless deploy --verbose
 
 workflows:
@@ -65,6 +73,7 @@ workflows:
     jobs:
       - build
       - deploy:
+          context: org-aws-deploy
           requires:
             - build
           filters:

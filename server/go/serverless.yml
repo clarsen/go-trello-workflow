@@ -1,0 +1,80 @@
+service: go-trello-workflow
+
+# frameworkVersion: ">=1.28.0 <2.0.0"
+plugins:
+  - serverless-domain-manager
+
+custom:
+  customDomain:
+    domainName: ${file(./secrets.js):getEnvVars.DOMAIN}
+    basePath: ''
+    stage: ${file(./secrets.js):getEnvVars.STAGE}
+    createRoute53Record: true
+
+provider:
+  name: aws
+  runtime: go1.x
+  stage: ${file(./secrets.js):getEnvVars.STAGE}
+  memorySize: 128
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "ses:*"
+      Resource:
+        - "*"
+  timeout: 10
+
+functions:
+  scheduled:
+    handler: bin/lambda_scheduled
+    environment:
+      appkey: ${file(./secrets.js):getEnvVars.appkey}
+      authtoken: ${file(./secrets.js):getEnvVars.authtoken}
+      user: ${file(./secrets.js):getEnvVars.user}
+      USER_EMAIL: ${file(./secrets.js):getEnvVars.USER_EMAIL}
+    timeout: 25
+    events:
+      - schedule:
+          name: two-minutely
+          rate: rate(2 minutes)
+          input:
+            action: minutely
+      - schedule:
+          name: nightly
+          description: "every night at 5:30 GMT (9:30PST)"
+          rate: cron(30 5 * * ? *)
+          input:
+            action: daily
+      - schedule:
+          name: morning-reminder
+          description: "every morning at 14:00 GMT (6AM PST)"
+          rate: cron(0 14 * * ? *)
+          input:
+            action: morning-reminder
+
+  authorize:
+    handler: bin/auth
+    environment:
+      AUTH0_CLIENT_ID: ${file(./secrets.js):getEnvVars.AUTH0_CLIENT_ID}
+      AUTH0_CLIENT_PUBLIC_KEY: ${file(./public_key)}
+
+  handle_graphql:
+    handler: bin/handle_graphql
+    events:
+      - http:
+          path: /api/gql
+          method: post
+          cors: true
+          authorizer:
+            name: authorize
+            resultTtlInSeconds: 0
+    environment:
+      AUTH0_CLIENT_ID: ${file(./secrets.js):getEnvVars.AUTH0_CLIENT_ID}
+      AUTH0_CLIENT_PUBLIC_KEY: ${file(./public_key)}
+
+package:
+ exclude:
+   - ./**
+ include:
+   - ./bin/**
