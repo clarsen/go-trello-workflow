@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/99designs/gqlgen/handler"
 	"github.com/aws/aws-lambda-go/events"
@@ -18,7 +19,10 @@ var muxAdapter *gorillamux.GorillaMuxAdapter
 func addCors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Required for CORS support to work
-		w.Header().Set("Access-Control-Allow-Origin", "https://enchilada-serverless-next-auth0.app.caselarsen.com")
+		w.Header().Set("Access-Control-Allow-Origin", "https://https://workflow.app.caselarsen.com")
+		if strings.HasPrefix(r.Header.Get("Origin"), "http://localhost") {
+			w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+		}
 		// Required for cookies, authorization headers with HTTPS
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
