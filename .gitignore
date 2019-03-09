@@ -7,3 +7,6 @@
 /server/go/node_modules
 /server/go/.serverless
 /server/go/bin
+/web/node_modules
+/web/.serverless
+/web/.next

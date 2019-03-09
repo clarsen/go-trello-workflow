@@ -1,4 +1,4 @@
-package handle_graphql_gqlgen
+package handle_graphql
 
 import (
 	"context"

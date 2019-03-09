@@ -41,8 +41,8 @@ func init() {
 	// start the mux router
 	r := mux.NewRouter()
 	r.Use(addCors)
-	r.Use(handle_graphql_gqlgen.GetAuthID)
-	r.HandleFunc("/api/handle_graphql_private_gqlgen", handler.GraphQL(handle_graphql_gqlgen.NewExecutableSchema(handle_graphql_gqlgen.Config{Resolvers: &handle_graphql_gqlgen.Resolver{}})))
+	r.Use(handle_graphql.GetAuthID)
+	r.HandleFunc("/api/gql", handler.GraphQL(handle_graphql.NewExecutableSchema(handle_graphql.Config{Resolvers: &handle_graphql.Resolver{}})))
 	// api.Routes(r) // routes just accepts a mux router to bind routes to and that's where our gqlgen handlers live
 	// initialize the mux adapter so that we can use mux with lambda
 	muxAdapter = gorillamux.New(r)

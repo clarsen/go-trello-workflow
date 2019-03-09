@@ -1,5 +1,5 @@
 //go:generate go run github.com/99designs/gqlgen
-package handle_graphql_gqlgen
+package handle_graphql
 
 import (
 	"context"
@@ -13,13 +13,12 @@ func (r *Resolver) Query() QueryResolver {
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) User(ctx context.Context, id *string) (*User, error) {
-	userClaims := ForContext(ctx)
-	name := "a name"
-	var email = "undefined"
-	if userClaims != nil {
-		email, _ = userClaims.String("email")
-	}
-	name = name + " " + email
-	return &User{ID: id, Name: &name}, nil
+func (r *queryResolver) Tasks(ctx context.Context, dueBefore *int) ([]Task, error) {
+	return []Task{
+		Task{
+			ID:    "an id",
+			Title: "A title",
+		},
+	}, nil
+
 }
