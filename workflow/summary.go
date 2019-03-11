@@ -242,7 +242,7 @@ func prepareSummaryForWeek(
 		log.Fatal(err)
 	}
 
-	doneList, err := listFor(cl.member, "Kanban daily/weekly", "Done this week")
+	doneList, err := ListFor(cl, "Kanban daily/weekly", "Done this week")
 	if err != nil {
 		return
 	}
@@ -253,7 +253,7 @@ func prepareSummaryForWeek(
 		return
 	}
 
-	monthlyGoalsList, err := listFor(cl.member, "Kanban daily/weekly", "Monthly Goals")
+	monthlyGoalsList, err := ListFor(cl, "Kanban daily/weekly", "Monthly Goals")
 	if err != nil {
 		return
 	}
@@ -263,7 +263,7 @@ func prepareSummaryForWeek(
 		return
 	}
 
-	monthlySprintsList, err := listFor(cl.member, "Kanban daily/weekly", "Monthly Sprints")
+	monthlySprintsList, err := ListFor(cl, "Kanban daily/weekly", "Monthly Sprints")
 	if err != nil {
 		return
 	}
@@ -384,7 +384,7 @@ func GenerateSummaryForMonth(user, appkey, authtoken string, year, month int, su
 		log.Fatal(err)
 	}
 
-	eventsList, err := listFor(cl.member, "Kanban daily/weekly", "Upcoming events")
+	eventsList, err := ListFor(cl, "Kanban daily/weekly", "Upcoming events")
 	if err != nil {
 		return err
 	}
@@ -586,7 +586,7 @@ func DumpSummaryForWeekFromHistory(user, appkey, authtoken string, week int, out
 	var doneCards, goalCards, sprintCards []*trello.Card
 
 	for idx, month := range months {
-		olderMonthlyDoneList, err := listFor(cl.member, "History 2018", fmt.Sprintf("%02d %s", week, month))
+		olderMonthlyDoneList, err := ListFor(cl, "History 2018", fmt.Sprintf("%02d %s", week, month))
 		if err != nil {
 			return err
 		}
@@ -598,7 +598,7 @@ func DumpSummaryForWeekFromHistory(user, appkey, authtoken string, week int, out
 			return err
 		}
 
-		monthlyGoalsList, err := listFor(cl.member, "History 2018", fmt.Sprintf("%02d %s goals", week, month))
+		monthlyGoalsList, err := ListFor(cl, "History 2018", fmt.Sprintf("%02d %s goals", week, month))
 		if err != nil {
 			return err
 		}
@@ -612,9 +612,9 @@ func DumpSummaryForWeekFromHistory(user, appkey, authtoken string, week int, out
 		if week >= 5 {
 			// for the one-off capture, we're mid-february where there is no sprints
 			// list (only created at monthly review)
-			monthlySprintsList, err = listFor(cl.member, "Kanban daily/weekly", "Monthly Sprints")
+			monthlySprintsList, err = ListFor(cl, "Kanban daily/weekly", "Monthly Sprints")
 		} else {
-			monthlySprintsList, err = listFor(cl.member, "History 2018", fmt.Sprintf("%s sprints", month))
+			monthlySprintsList, err = ListFor(cl, "History 2018", fmt.Sprintf("%s sprints", month))
 		}
 		if err != nil {
 			return err

@@ -5,4 +5,9 @@ type Task {
 
 type Query {
   tasks(dueBefore: Int): [Task!]
+  weeklyVisualization: String
+}
+type Mutation {
+  generateWeeklySummary(year: Int, week: Int): Boolean
+  generateWeeklyReviewTemplate(year: Int, week: Int): Boolean
 }

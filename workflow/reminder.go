@@ -58,7 +58,7 @@ func MorningRemindHtml(user, appkey, authtoken string) (*WeeklySummary, string, 
 	}
 
 	// today cards
-	list, err := listFor(cl.member, "Kanban daily/weekly", "Today")
+	list, err := ListFor(cl, "Kanban daily/weekly", "Today")
 	if err != nil {
 		// handle error
 		return nil, "", err
@@ -87,7 +87,7 @@ func MorningRemindHtml(user, appkey, authtoken string) (*WeeklySummary, string, 
 
 	var dueSoon []*trello.Card
 	for _, boardlist := range overdueBoardsAndLists {
-		list, err2 := listFor(cl.member, boardlist.Board, boardlist.List)
+		list, err2 := ListFor(cl, boardlist.Board, boardlist.List)
 		if err2 != nil {
 			// handle error
 			return nil, "", err2

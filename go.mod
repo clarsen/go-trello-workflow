@@ -8,6 +8,7 @@ require (
 	github.com/99designs/gqlgen v0.0.0-20190306232736-d872af63addc
 	github.com/BurntSushi/toml v0.3.1
 	github.com/Shopify/sarama v1.21.0 // indirect
+	github.com/adlio/trello v0.0.0-20190223210940-b0faddb69566
 	github.com/agnivade/levenshtein v1.0.1
 	github.com/aws/aws-lambda-go v1.9.0
 	github.com/aws/aws-sdk-go v0.0.0-20181118003551-50e2f0627dec
@@ -99,6 +100,8 @@ require (
 	golang.org/x/tools v0.0.0-20190307163923-6a08e3108db3
 	google.golang.org/genproto v0.0.0-20190307195333-5fe7a883aa19 // indirect
 	gopkg.in/kyokomi/emoji.v1 v1.5.1
+	gopkg.in/src-d/go-billy.v4 v4.3.0
+	gopkg.in/src-d/go-git.v4 v4.10.0
 	gopkg.in/yaml.v2 v2.2.2
 	honnef.co/go/tools v0.0.0-20190215041234-466a0476246c // indirect
 	sourcegraph.com/sqs/pbtypes v1.0.0 // indirect

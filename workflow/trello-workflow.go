@@ -129,7 +129,7 @@ func MonthlyCleanup(user, appkey, authtoken string) error {
 
 	year, month, _ := ymwForTime(time.Now())
 
-	monthlyGoalsList, err := listFor(cl.member, "Kanban daily/weekly", "Monthly Goals")
+	monthlyGoalsList, err := ListFor(cl, "Kanban daily/weekly", "Monthly Goals")
 	if err != nil {
 		return err
 	}
@@ -139,7 +139,7 @@ func MonthlyCleanup(user, appkey, authtoken string) error {
 		return err
 	}
 	destGoalsListName := fmt.Sprintf("%s goals", month)
-	destGoalsList, err := listForCreate(cl.member, fmt.Sprintf("History %d", year), destGoalsListName)
+	destGoalsList, err := listForCreate(cl, fmt.Sprintf("History %d", year), destGoalsListName)
 	if err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func MonthlyCleanup(user, appkey, authtoken string) error {
 			trello.Arguments{"idBoard": destGoalsList.IDBoard, "pos": "bottom", "keepFromSource": "all"})
 	}
 
-	monthlySprintsList, err := listFor(cl.member, "Kanban daily/weekly", "Monthly Sprints")
+	monthlySprintsList, err := ListFor(cl, "Kanban daily/weekly", "Monthly Sprints")
 	if err != nil {
 		return err
 	}
@@ -161,7 +161,7 @@ func MonthlyCleanup(user, appkey, authtoken string) error {
 	}
 
 	destSprintsListName := fmt.Sprintf("%s sprints", month)
-	destSprintsList, err := listForCreate(cl.member, fmt.Sprintf("History %d", year), destSprintsListName)
+	destSprintsList, err := listForCreate(cl, fmt.Sprintf("History %d", year), destSprintsListName)
 	if err != nil {
 		return err
 	}
@@ -189,7 +189,7 @@ func WeeklyCleanup(user, appkey, authtoken string) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	doneList, err := listFor(cl.member, "Kanban daily/weekly", "Done this week")
+	doneList, err := ListFor(cl, "Kanban daily/weekly", "Done this week")
 	if err != nil {
 		return err
 	}
@@ -197,12 +197,12 @@ func WeeklyCleanup(user, appkey, authtoken string) error {
 	year, month, week := ymwForTime(time.Now())
 	destListName := fmt.Sprintf("%02d %s", week, month)
 
-	destList, err := listForCreate(cl.member, fmt.Sprintf("History %d", year), destListName)
+	destList, err := listForCreate(cl, fmt.Sprintf("History %d", year), destListName)
 	if err != nil {
 		return err
 	}
 	destGoalsListName := fmt.Sprintf("%02d %s goals", week, month)
-	destGoalsList, err := listForCreate(cl.member, fmt.Sprintf("History %d", year), destGoalsListName)
+	destGoalsList, err := listForCreate(cl, fmt.Sprintf("History %d", year), destGoalsListName)
 	if err != nil {
 		return err
 	}
@@ -227,13 +227,13 @@ func WeeklyCleanup(user, appkey, authtoken string) error {
 	for _, card := range cards {
 		if isPeriodic(card) {
 			log.Println("moving", card.Name, "back to periodic")
-			err2 := moveBackPeriodic(cl.member, card)
+			err2 := moveBackPeriodic(cl, card)
 			if err2 != nil {
 				return err2
 			}
 		}
 	}
-	monthlyGoalsList, err := listFor(cl.member, "Kanban daily/weekly", "Monthly Goals")
+	monthlyGoalsList, err := ListFor(cl, "Kanban daily/weekly", "Monthly Goals")
 	if err != nil {
 		return err
 	}
@@ -259,7 +259,7 @@ func Weekly(user, appkey, authtoken string) error {
 		log.Fatal(err)
 	}
 
-	doneList, err := listFor(cl.member, "Kanban daily/weekly", "Done this week")
+	doneList, err := ListFor(cl, "Kanban daily/weekly", "Done this week")
 	if err != nil {
 		return err
 	}
@@ -309,7 +309,7 @@ func Weekly(user, appkey, authtoken string) error {
 	var currentMonth string
 
 	for _, month := range months {
-		olderMonthlyGoals, err := listFor(cl.member, "History 2018", month+" goals")
+		olderMonthlyGoals, err := ListFor(cl, "History 2018", month+" goals")
 		if err != nil {
 			return err
 		}
@@ -335,7 +335,7 @@ func Weekly(user, appkey, authtoken string) error {
 		report.MonthlyGoalsByMonth = append(report.MonthlyGoalsByMonth, monthlyGoals)
 	}
 
-	monthlyGoalsList, err := listFor(cl.member, "Kanban daily/weekly", "Monthly Goals")
+	monthlyGoalsList, err := ListFor(cl, "Kanban daily/weekly", "Monthly Goals")
 	if err != nil {
 		return err
 	}
@@ -357,7 +357,7 @@ func Weekly(user, appkey, authtoken string) error {
 	report.MonthlyGoalsByMonth = append(report.MonthlyGoalsByMonth, monthlyGoals)
 	report.LatestMonthGoals = monthlyGoals
 
-	monthlySprintsList, err := listFor(cl.member, "Kanban daily/weekly", "Monthly Sprints")
+	monthlySprintsList, err := ListFor(cl, "Kanban daily/weekly", "Monthly Sprints")
 	if err != nil {
 		return err
 	}
@@ -437,7 +437,7 @@ func boardFor(m *trello.Member, s string) (board *trello.Board, err error) {
 	return
 }
 
-func moveBackPeriodic(m *trello.Member, c *trello.Card) (err error) {
+func moveBackPeriodic(cl *Client, c *trello.Card) (err error) {
 	periodicToList := map[string]string{
 		"(po)":   "Often",
 		"(p1w)":  "Weekly",
@@ -453,7 +453,7 @@ func moveBackPeriodic(m *trello.Member, c *trello.Card) (err error) {
 
 	for substr, listname := range periodicToList {
 		if strings.Contains(name, substr) {
-			destlist, err = listFor(m, "Periodic board", listname)
+			destlist, err = ListFor(cl, "Periodic board", listname)
 			if err != nil {
 				return
 			}
@@ -468,7 +468,7 @@ func moveBackPeriodic(m *trello.Member, c *trello.Card) (err error) {
 	return
 }
 
-func moveBackCard(m *trello.Member, c *trello.Card) (err error) {
+func moveBackCard(cl *Client, c *trello.Card) (err error) {
 	var destlist *trello.List
 
 	// first do periodics which also have personal/work labels
@@ -477,7 +477,7 @@ func moveBackCard(m *trello.Member, c *trello.Card) (err error) {
 		switch label.Name {
 		case "Periodic":
 			fmt.Println("  ", label.Name, label.Color)
-			return moveBackPeriodic(m, c)
+			return moveBackPeriodic(cl, c)
 		}
 	}
 
@@ -485,19 +485,19 @@ func moveBackCard(m *trello.Member, c *trello.Card) (err error) {
 		fmt.Println("  ", label.Name, label.Color)
 		switch label.Name {
 		case "Personal":
-			destlist, err = listFor(m, "Backlog (Personal)", "Backlog")
+			destlist, err = ListFor(cl, "Backlog (Personal)", "Backlog")
 			if err != nil {
 				// handle error
 				return err
 			}
 		case "Process":
-			destlist, err = listFor(m, "Backlog (Personal)", "Backlog")
+			destlist, err = ListFor(cl, "Backlog (Personal)", "Backlog")
 			if err != nil {
 				// handle error
 				return err
 			}
 		case "Work":
-			destlist, err = listFor(m, "Backlog (work)", "Backlog")
+			destlist, err = ListFor(cl, "Backlog (work)", "Backlog")
 			if err != nil {
 				// handle error
 				return err
@@ -513,12 +513,12 @@ func moveBackCard(m *trello.Member, c *trello.Card) (err error) {
 	return
 }
 
-func listForCreate(m *trello.Member, b string, l string) (*trello.List, error) {
-	list, err := listFor(m, b, l)
+func listForCreate(cl *Client, b string, l string) (*trello.List, error) {
+	list, err := ListFor(cl, b, l)
 	if list != nil {
 		return list, err
 	}
-	board, err := boardFor(m, b)
+	board, err := boardFor(cl.member, b)
 	if err != nil {
 		return nil, err
 	}
@@ -530,7 +530,9 @@ func listForCreate(m *trello.Member, b string, l string) (*trello.List, error) {
 	return list, nil
 }
 
-func listFor(m *trello.Member, b string, l string) (*trello.List, error) {
+// ListFor finds trello list for board and list with caching -- candidate for pushing into library
+func ListFor(cl *Client, b string, l string) (*trello.List, error) {
+	m := cl.member
 	if list, ok := listmap[b][l]; ok {
 		return list, nil
 	}
@@ -659,7 +661,7 @@ func (cl *Client) doMinutely() error {
 	}
 
 	for _, boardlist := range dateBoardsAndLists {
-		list, err := listFor(cl.member, boardlist.Board, boardlist.List)
+		list, err := ListFor(cl, boardlist.Board, boardlist.List)
 		if err != nil {
 			// handle error
 			return err
@@ -682,7 +684,7 @@ func (cl *Client) doMinutely() error {
 	for _, boardlist := range []string{"Inbox"} {
 		// fmt.Printf("move items from %s to backlog based on label color\n", boardlist)
 
-		list, err := listFor(cl.member, "Kanban daily/weekly", boardlist)
+		list, err := ListFor(cl, "Kanban daily/weekly", boardlist)
 		if err != nil {
 			// handle error
 			return err
@@ -694,7 +696,7 @@ func (cl *Client) doMinutely() error {
 			return err
 		}
 
-		somedaylist, err := listFor(cl.member, "Someday/Maybe", "Maybe")
+		somedaylist, err := ListFor(cl, "Someday/Maybe", "Maybe")
 		if err != nil {
 			return err
 		}
@@ -708,18 +710,18 @@ func (cl *Client) doMinutely() error {
 
 			} else {
 				fmt.Printf("move %s %+v to backlog\n", card.Name, card.Labels)
-				moveBackCard(cl.member, card)
+				moveBackCard(cl, card)
 			}
 		}
 	}
 
-	cherryPickDestlist, err := listFor(cl.member, "Kanban daily/weekly", "Today")
+	cherryPickDestlist, err := ListFor(cl, "Kanban daily/weekly", "Today")
 	if err != nil {
 		return err
 	}
 
 	for _, boardlist := range cherryPickBoardsAndLists {
-		list, err2 := listFor(cl.member, boardlist.Board, boardlist.List)
+		list, err2 := ListFor(cl, boardlist.Board, boardlist.List)
 		if err2 != nil {
 			// handle error
 			return err2
@@ -741,17 +743,17 @@ func (cl *Client) doMinutely() error {
 		}
 	}
 
-	somedayDestlist, err := listFor(cl.member, "Someday/Maybe", "Maybe")
+	somedayDestlist, err := ListFor(cl, "Someday/Maybe", "Maybe")
 	if err != nil {
 		return err
 	}
-	doneDestList, err := listFor(cl.member, "Kanban daily/weekly", "Done this week")
+	doneDestList, err := ListFor(cl, "Kanban daily/weekly", "Done this week")
 	if err != nil {
 		return err
 	}
 
 	for _, boardlist := range reorderBoardsAndLists {
-		list, err := listFor(cl.member, boardlist.Board, boardlist.List)
+		list, err := ListFor(cl, boardlist.Board, boardlist.List)
 		if err != nil {
 			// handle error
 			return err
@@ -788,7 +790,7 @@ func (cl *Client) doMinutely() error {
 	}
 
 	for _, boardlist := range checklistSortBoardsAndLists {
-		list, err := listFor(cl.member, boardlist.Board, boardlist.List)
+		list, err := ListFor(cl, boardlist.Board, boardlist.List)
 		if err != nil {
 			// handle error
 			return err
@@ -820,7 +822,7 @@ func (cl *Client) prepareToday() error {
 	for _, boardlist := range []string{"Today"} {
 		fmt.Printf("move items from %s to backlog based on label color\n", boardlist)
 
-		list, err := listFor(cl.member, "Kanban daily/weekly", boardlist)
+		list, err := ListFor(cl, "Kanban daily/weekly", boardlist)
 		if err != nil {
 			// handle error
 			return err
@@ -833,7 +835,7 @@ func (cl *Client) prepareToday() error {
 		}
 		for _, card := range cards {
 			fmt.Println(card.Name, card.Labels)
-			moveBackCard(cl.member, card)
+			moveBackCard(cl, card)
 		}
 	}
 	return nil
@@ -867,7 +869,7 @@ func DailyMaintenance(user, appkey, authtoken string) error {
 // New create new client
 func New(user string, appKey string, token string) (c *Client, err error) {
 	logger := logrus.New()
-	logger.SetLevel(logrus.InfoLevel)
+	logger.SetLevel(logrus.DebugLevel)
 
 	client := trello.NewClient(appKey, token)
 	client.Logger = logger
@@ -877,6 +879,7 @@ func New(user string, appKey string, token string) (c *Client, err error) {
 		// Handle error
 		return nil, err
 	}
+	client.Logger.Debugf("member %+v", member)
 	c = &Client{
 		member,
 	}

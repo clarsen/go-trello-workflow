@@ -10,5 +10,5 @@ exec:
 model:
   filename: models_gen.go
 resolver:
-  filename: resolver.go
+  filename: resolver_example.go
   type: Resolver
