@@ -13,10 +13,12 @@ import MarkdownRenderer from 'react-markdown-renderer'
 
 
 export const taskQuery = gql`
-  query tasks {
-    tasks {
+  query tasks($inBoardList: BoardList) {
+    tasks(inBoardList: $inBoardList) {
       id
       title
+      createdDate
+      url
     }
   }
 `
@@ -59,7 +61,7 @@ const weeklyVisualizationQuery = gql`
 /* eslint-disable react/prop-types */
 
 const QueryContainer = adopt({
-  query: ({ render }) => (
+  queryAll: ({ render }) => (
     <Query query={taskQuery} ssr={false} variables={{ }}>
       {render}
     </Query>
@@ -85,7 +87,7 @@ class IndexPage extends React.Component {
     return (
       <QueryContainer>
         {({
-          query: { loading, data },
+          queryAll: { loading: loadingAll, data: allTasks },
           weeklyVisualizationQuery: { loading : weeklyLoading, data: weeklyVisualizationData },
           generateWeeklySummary,
           generateWeeklyReviewTemplate,
@@ -111,8 +113,10 @@ class IndexPage extends React.Component {
               {generateWeeklyReviewTemplate.errors.map((e) => e.message)}
               </Alert>
             }
-            {loading && <div>loading...</div>}
-            {!loading && <TaskList tasks={data.tasks}/>}
+            {loadingAll && <div>loading...</div>}
+            {!loadingAll && console.log('got data', allTasks)}
+            {!loadingAll && <TaskList tasks={allTasks.tasks}/>}
+
             {weeklyLoading && <div>loading...</div>}
             {!weeklyLoading &&
               <MarkdownRenderer markdown={weeklyVisualizationData.weeklyVisualization} />}

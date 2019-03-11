@@ -8,6 +8,7 @@ import (
 	"errors"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -47,13 +48,15 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Tasks               func(childComplexity int, dueBefore *int) int
+		Tasks               func(childComplexity int, dueBefore *int, inBoardList *BoardList) int
 		WeeklyVisualization func(childComplexity int) int
 	}
 
 	Task struct {
-		ID    func(childComplexity int) int
-		Title func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Title       func(childComplexity int) int
+		CreatedDate func(childComplexity int) int
+		URL         func(childComplexity int) int
 	}
 }
 
@@ -62,7 +65,7 @@ type MutationResolver interface {
 	GenerateWeeklyReviewTemplate(ctx context.Context, year *int, week *int) (*bool, error)
 }
 type QueryResolver interface {
-	Tasks(ctx context.Context, dueBefore *int) ([]Task, error)
+	Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardList) ([]Task, error)
 	WeeklyVisualization(ctx context.Context) (*string, error)
 }
 
@@ -115,7 +118,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Tasks(childComplexity, args["dueBefore"].(*int)), true
+		return e.complexity.Query.Tasks(childComplexity, args["dueBefore"].(*int), args["inBoardList"].(*BoardList)), true
 
 	case "Query.WeeklyVisualization":
 		if e.complexity.Query.WeeklyVisualization == nil {
@@ -137,6 +140,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Task.Title(childComplexity), true
+
+	case "Task.CreatedDate":
+		if e.complexity.Task.CreatedDate == nil {
+			break
+		}
+
+		return e.complexity.Task.CreatedDate(childComplexity), true
+
+	case "Task.URL":
+		if e.complexity.Task.URL == nil {
+			break
+		}
+
+		return e.complexity.Task.URL(childComplexity), true
 
 	}
 	return 0, false
@@ -215,15 +232,25 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `type Task {
+	&ast.Source{Name: "schema.graphql", Input: `scalar Timestamp
+
+type Task {
   id: String!
   title: String!
+  createdDate: Timestamp
+  url: String
+}
+
+input BoardList {
+  board: String!
+  list: String!
 }
 
 type Query {
-  tasks(dueBefore: Int): [Task!]
+  tasks(dueBefore: Int, inBoardList: BoardList): [Task!]
   weeklyVisualization: String
 }
+
 type Mutation {
   generateWeeklySummary(year: Int, week: Int): Boolean
   generateWeeklyReviewTemplate(year: Int, week: Int): Boolean
@@ -304,6 +331,14 @@ func (ec *executionContext) field_Query_tasks_args(ctx context.Context, rawArgs 
 		}
 	}
 	args["dueBefore"] = arg0
+	var arg1 *BoardList
+	if tmp, ok := rawArgs["inBoardList"]; ok {
+		arg1, err = ec.unmarshalOBoardList2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐBoardList(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["inBoardList"] = arg1
 	return args, nil
 }
 
@@ -418,7 +453,7 @@ func (ec *executionContext) _Query_tasks(ctx context.Context, field graphql.Coll
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Tasks(rctx, args["dueBefore"].(*int))
+		return ec.resolvers.Query().Tasks(rctx, args["dueBefore"].(*int), args["inBoardList"].(*BoardList))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -555,6 +590,52 @@ func (ec *executionContext) _Task_title(ctx context.Context, field graphql.Colle
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Task_createdDate(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Task",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedDate, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOTimestamp2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Task_url(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Task",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
@@ -1356,6 +1437,30 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputBoardList(ctx context.Context, v interface{}) (BoardList, error) {
+	var it BoardList
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "board":
+			var err error
+			it.Board, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "list":
+			var err error
+			it.List, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -1467,6 +1572,10 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "createdDate":
+			out.Values[i] = ec._Task_createdDate(ctx, field, obj)
+		case "url":
+			out.Values[i] = ec._Task_url(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1957,6 +2066,18 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return graphql.MarshalString(v)
 }
 
+func (ec *executionContext) unmarshalOBoardList2githubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐBoardList(ctx context.Context, v interface{}) (BoardList, error) {
+	return ec.unmarshalInputBoardList(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOBoardList2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐBoardList(ctx context.Context, v interface{}) (*BoardList, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOBoardList2githubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐBoardList(ctx, v)
+	return &res, err
+}
+
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
@@ -2061,6 +2182,32 @@ func (ec *executionContext) marshalOTask2ᚕgithubᚗcomᚋclarsenᚋgoᚑtrello
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) unmarshalOTimestamp2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
+	return UnmarshalTimestamp(v)
+}
+
+func (ec *executionContext) marshalOTimestamp2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	if v.IsZero() {
+		return graphql.Null
+	}
+	return MarshalTimestamp(v)
+}
+
+func (ec *executionContext) unmarshalOTimestamp2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOTimestamp2timeᚐTime(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOTimestamp2ᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v *time.Time) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOTimestamp2timeᚐTime(ctx, sel, *v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

@@ -248,8 +248,9 @@ func (r *queryResolver) WeeklyVisualization(ctx context.Context) (*string, error
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Tasks(ctx context.Context, dueBefore *int) ([]Task, error) {
-	tasks, err := GetTasks(user, appkey, authtoken)
+func (r *queryResolver) Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardList) ([]Task, error) {
+
+	tasks, err := GetTasks(user, appkey, authtoken, inBoardList)
 	if err != nil {
 		return nil, err
 	}

@@ -2,7 +2,18 @@
 
 package handle_graphql
 
+import (
+	"time"
+)
+
+type BoardList struct {
+	Board string `json:"board"`
+	List  string `json:"list"`
+}
+
 type Task struct {
-	ID    string `json:"id"`
-	Title string `json:"title"`
+	ID          string     `json:"id"`
+	Title       string     `json:"title"`
+	CreatedDate *time.Time `json:"createdDate"`
+	URL         *string    `json:"url"`
 }

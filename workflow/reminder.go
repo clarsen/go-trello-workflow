@@ -71,7 +71,7 @@ func MorningRemindHtml(user, appkey, authtoken string) (*WeeklySummary, string, 
 	}
 
 	// overdue check
-	overdueBoardsAndLists := []boardAndList{
+	overdueBoardsAndLists := []BoardAndList{
 		{"Kanban daily/weekly", "Today"},
 		{"Kanban daily/weekly", "Waiting on"},
 		{"Backlog (Personal)", "Backlog"},

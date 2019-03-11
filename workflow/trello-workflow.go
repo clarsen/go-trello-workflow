@@ -61,6 +61,20 @@ type WeeklyReport struct {
 	NowHHMM              string
 }
 
+var (
+	AllLists = []BoardAndList{
+		{"Kanban daily/weekly", "Today"},
+		{"Kanban daily/weekly", "Waiting on"},
+		{"Backlog (Personal)", "Backlog"},
+		{"Backlog (Personal)", "Projects"},
+		{"Backlog (work)", "Backlog"},
+		{"Periodic board", "Often"},
+		{"Periodic board", "Weekly"},
+		{"Periodic board", "Bi-weekly to monthly"},
+		{"Periodic board", "Quarterly to Yearly"},
+	}
+)
+
 var boards []*trello.Board
 var boardmap = make(map[string]*trello.Board)
 var listmap = make(map[string]map[string]*trello.List)
@@ -589,7 +603,7 @@ func addDateToName(card *trello.Card) {
 	card.Update(trello.Arguments{"name": card.Name + " " + s})
 }
 
-type boardAndList struct {
+type BoardAndList struct {
 	Board string
 	List  string
 }
@@ -625,12 +639,12 @@ func titleStartsWith(card *trello.Card, prefix string) bool {
 }
 
 func (cl *Client) doMinutely() error {
-	dateBoardsAndLists := []boardAndList{
+	dateBoardsAndLists := []BoardAndList{
 		{"Kanban daily/weekly", "Inbox"},
 		{"Kanban daily/weekly", "Today"},
 		{"Backlog (Personal)", "Backlog"},
 	}
-	cherryPickBoardsAndLists := []boardAndList{
+	cherryPickBoardsAndLists := []BoardAndList{
 		{"Backlog (Personal)", "Backlog"},
 		{"Backlog (Personal)", "Projects"},
 		{"Backlog (work)", "Backlog"},
@@ -639,7 +653,7 @@ func (cl *Client) doMinutely() error {
 		{"Periodic board", "Bi-weekly to monthly"},
 		{"Periodic board", "Quarterly to Yearly"},
 	}
-	reorderBoardsAndLists := []boardAndList{
+	reorderBoardsAndLists := []BoardAndList{
 		{"Kanban daily/weekly", "Waiting on"},
 		{"Backlog (Personal)", "Backlog"},
 		{"Backlog (Personal)", "Projects"},
@@ -655,7 +669,7 @@ func (cl *Client) doMinutely() error {
 		{"Periodic board", "Quarterly to Yearly"},
 	}
 
-	checklistSortBoardsAndLists := []boardAndList{
+	checklistSortBoardsAndLists := []BoardAndList{
 		{"Kanban daily/weekly", "Monthly Goals"},
 		{"Kanban daily/weekly", "Monthly Sprints"},
 	}

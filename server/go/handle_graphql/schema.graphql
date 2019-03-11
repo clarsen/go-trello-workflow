@@ -1,12 +1,22 @@
+scalar Timestamp
+
 type Task {
   id: String!
   title: String!
+  createdDate: Timestamp
+  url: String
+}
+
+input BoardList {
+  board: String!
+  list: String!
 }
 
 type Query {
-  tasks(dueBefore: Int): [Task!]
+  tasks(dueBefore: Int, inBoardList: BoardList): [Task!]
   weeklyVisualization: String
 }
+
 type Mutation {
   generateWeeklySummary(year: Int, week: Int): Boolean
   generateWeeklyReviewTemplate(year: Int, week: Int): Boolean
