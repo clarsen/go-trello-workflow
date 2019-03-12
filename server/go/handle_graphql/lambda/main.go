@@ -19,7 +19,7 @@ var muxAdapter *gorillamux.GorillaMuxAdapter
 func addCors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Required for CORS support to work
-		w.Header().Set("Access-Control-Allow-Origin", "https://https://workflow.app.caselarsen.com")
+		w.Header().Set("Access-Control-Allow-Origin", "https://workflow.app.caselarsen.com")
 		if strings.HasPrefix(r.Header.Get("Origin"), "http://localhost") {
 			w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 		}
