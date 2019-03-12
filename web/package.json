@@ -29,6 +29,7 @@
     "react-alert-template-basic": "^1.0.0",
     "react-apollo": "^2.5.1",
     "react-dom": "^16.8.3",
+    "react-icons": "^3.5.0",
     "react-markdown-renderer": "^1.4.0",
     "react-moment": "^0.8.4",
     "react-transition-group": "^2.6.0",

@@ -1,5 +1,11 @@
 import React from 'react'
-import { Alert, Button } from 'reactstrap'
+import {
+  Alert,
+  Button,
+  Container,
+  Row,
+  Col
+} from 'reactstrap'
 
 import { Query, Mutation } from 'react-apollo'
 import { adopt } from 'react-adopt'
@@ -161,15 +167,44 @@ class IndexPage extends React.Component {
                 {generateWeeklyReviewTemplate.errors.map((e) => e.message)}
               </Alert>
             }
-            {loadingAll && <div>loading...</div>}
-            {!loadingAll && console.log('got data', allTasks)}
-            {(!loadingAll && !queryAllError) && <TaskList setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
-            {queryAllError && <div>Tasks: {queryAllError.message}</div>}
-
-            {weeklyLoading && <div>loading...</div>}
-            {(!weeklyLoading && !weeklyError) &&
-              <MarkdownRenderer markdown={weeklyVisualizationData.weeklyVisualization} />}
-            {weeklyError && <div>Weekly review: {weeklyError.message}</div>}
+            <Container>
+              <Row>
+                <Col lg={6}>
+                  Backlog
+                  {loadingAll && <div>loading...</div>}
+                  {!loadingAll && console.log('got data', allTasks)}
+                  {queryAllError && <div>Tasks: {queryAllError.message}</div>}
+                  {(!loadingAll && !queryAllError) && <TaskList listFilter={['Backlog']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                </Col>
+                <Col lg={6}>
+                  <Row>
+                    Periodic
+                    Often
+                    {(!loadingAll && !queryAllError) && <TaskList listFilter={['Often']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                  </Row>
+                  <Row>
+                    Weekly
+                    {(!loadingAll && !queryAllError) && <TaskList noHeader listFilter={['Weekly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                  </Row>
+                  <Row>
+                    Bi-weekly to monthly
+                    {(!loadingAll && !queryAllError) && <TaskList noHeader listFilter={['Bi-weekly to monthly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                  </Row>
+                  <Row>
+                    Quarterly to Yearly
+                    {(!loadingAll && !queryAllError) && <TaskList noHeader listFilter={['Quarterly to Yearly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                  </Row>
+                </Col>
+              </Row>
+              <Row>
+                <Col>
+                  {weeklyLoading && <div>loading...</div>}
+                  {(!weeklyLoading && !weeklyError) &&
+                    <MarkdownRenderer markdown={weeklyVisualizationData.weeklyVisualization} />}
+                  {weeklyError && <div>Weekly review: {weeklyError.message}</div>}
+                </Col>
+              </Row>
+            </Container>
           </React.Fragment>
         }
       </QueryContainer>

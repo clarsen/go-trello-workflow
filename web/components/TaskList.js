@@ -7,12 +7,13 @@ class TaskList extends React.Component {
     super(props)
   }
   render () {
-    let { tasks, setDueDate, setDone } = this.props
+    let { listFilter, noHeader, tasks, setDueDate, setDone } = this.props
     return (
       <Container>
-        {Task.header()}
+        {!noHeader && Task.header()}
         {
           tasks
+            .filter((t) => !listFilter || listFilter.count == 0 || listFilter.includes(t.list))
             .sort((a,b) => b.createdDate - a.createdDate)
             .sort((a,b) => {
               if (a.due && b.due) { // within tasks with due dates, earlier ones first

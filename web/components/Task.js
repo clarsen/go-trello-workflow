@@ -8,6 +8,7 @@ import {
 } from 'reactstrap'
 import Moment from 'react-moment'
 import moment from 'moment'
+import { MdCheckBoxOutlineBlank } from 'react-icons/md'
 
 class Task extends React.Component {
   constructor (props) {
@@ -22,10 +23,12 @@ class Task extends React.Component {
     return (
       <React.Fragment>
         <Row>
-          <Col xs='auto' lg={2}>Created</Col>
-          <Col xs='auto'lg={2}>Due</Col>
-          <Col xs='auto'lg={1}>List</Col>
-          <Col xs='auto'>Title</Col>
+          {//<Col xs={2} lg={2}>Created</Col>
+          }
+          { // <Col xs={1} lg={1}>List</Col>
+          }
+          <Col xs={9} lg={9}>Title</Col>
+          <Col xs={3} lg={3}>Due</Col>
         </Row>
       </React.Fragment>
     )
@@ -57,8 +60,24 @@ class Task extends React.Component {
     return (
       <React.Fragment key={task.id}>
         <Row key={'row0'+task.id}>
-          <Col xs='auto' lg={2} key={'1'+task.id}><Moment unix fromNow withTitle titleFormat={'LL'}>{task.createdDate}</Moment></Col>
-          <Col xs='auto' lg={2} key={'2'+task.id}>
+          {//<Col xs={2} lg={2} key={'1'+task.id}><Moment unix fromNow withTitle titleFormat={'LL'}>{task.createdDate}</Moment></Col>
+          }
+          <Col xs={9} lg={9} key={'3'+task.id}>
+            {!task.due && <MdCheckBoxOutlineBlank
+              size={20}
+              onClick={() => {
+                setDone.mutation({
+                  variables: {
+                    taskId: task.id,
+                    done: true,
+                  }
+                })
+              }}
+            />}
+            <a target="_blank" rel="noopener noreferrer" href={task.url}>
+              {task.title}
+            </a></Col>
+          <Col xs={2} lg={3} key={'2'+task.id}>
             { task.due &&
               <div>
                 {value>0
@@ -107,8 +126,8 @@ class Task extends React.Component {
               </div>
             }
           </Col>
-          <Col xs='auto' key={'list'+task.id}>{task.list}</Col>
-          <Col xs='auto' key={'3'+task.id}><a target="_blank" rel="noopener noreferrer" href={task.url}>{task.title}</a></Col>
+          { //<Col xs={1} lg={1} key={'list'+task.id}>{task.list}</Col>
+          }
         </Row>
       </React.Fragment>
 
