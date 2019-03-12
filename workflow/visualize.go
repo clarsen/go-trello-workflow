@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	packr "github.com/gobuffalo/packr/v2"
 	emoji "gopkg.in/kyokomi/emoji.v1"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -34,6 +35,12 @@ type WeeklyRetrospective struct {
 type MonthlyRetrospective struct {
 	MonthlySummary // mostly source
 	MonthlyReview  // populated, joined with source
+}
+
+var box *packr.Box
+
+func init() {
+	box = packr.New("workflow", "../templates")
 }
 
 func formatMonthAsString(month int) string {
@@ -245,7 +252,11 @@ func VisualizeWeeklyRetrospective(summaryIn, reviewIn io.Reader, visOut io.Write
 	}
 	// log.Printf("Got %+v\n", weekly)
 
-	t, _ := template.ParseFiles("templates/weekly-retrospective.md")
+	tmpl, err := box.FindString("weekly-retrospective.md")
+	if err != nil {
+		return err
+	}
+	t := template.Must(template.New("weekly-retrospective.md").Parse(tmpl))
 	t.Execute(visOut, weekly)
 
 	return nil
@@ -263,7 +274,11 @@ func VisualizeWeeklySummariesForMonthly(summaryIn io.Reader, visOut io.Writer) e
 		return err
 	}
 
-	t, _ := template.ParseFiles("templates/monthly-input.md")
+	tmpl, err := box.FindString("monthly-input.md")
+	if err != nil {
+		return err
+	}
+	t := template.Must(template.New("monthly-input.md").Parse(tmpl))
 	t.Execute(visOut, summary)
 
 	return nil
@@ -336,7 +351,11 @@ func VisualizeMonthlyRetrospective(summaryIn, reviewIn io.Reader, visOut io.Writ
 		return errors.New("Need comments")
 	}
 
-	t, _ := template.ParseFiles("templates/monthly-retrospective.md")
+	tmpl, err := box.FindString("monthly-retrospective.md")
+	if err != nil {
+		return err
+	}
+	t := template.Must(template.New("monthly-retrospective.md").Parse(tmpl))
 	t.Execute(visOut, retrospective)
 
 	return nil
@@ -357,7 +376,11 @@ func VisualizeYearlyPlanSummary(summaryIn io.Reader, visOut io.Writer) error {
 	fmap := template.FuncMap{
 		"formatMonthAsString": formatMonthAsString,
 	}
-	t := template.Must(template.New("yearly-plan-summary.md").Funcs(fmap).ParseFiles("templates/yearly-plan-summary.md"))
+	tmpl, err := box.FindString("yearly-plan-summary.md")
+	if err != nil {
+		return err
+	}
+	t := template.Must(template.New("yearly-plan-summary.md").Funcs(fmap).Parse(tmpl))
 	t.Execute(visOut, summary)
 
 	return nil

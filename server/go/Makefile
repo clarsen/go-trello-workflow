@@ -19,6 +19,13 @@ build:
 	env GOOS=linux go build -ldflags="-s -w" -o bin/lambda_scheduled lambda_scheduled/main.go
 	cd ../..; env GOOS=linux packr2 clean
 
+.PHONY: local
+local:
+	cd handle_graphql; go generate .
+	cd ../..; packr2
+	go build -ldflags="-s -w" -o bin/server handle_graphql/server/main.go
+	cd ../..; packr2 clean
+
 .PHONY: deploy
 deploy: clean build
 	sls deploy --verbose
