@@ -1,8 +1,11 @@
 package handle_graphql
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -20,8 +23,9 @@ func MarshalTimestamp(t time.Time) graphql.Marshaler {
 // Unmarshal{Typename} is only required if the scalar appears as an input. The raw values have already been decoded
 // from json into int/float64/bool/nil/map[string]interface/[]interface
 func UnmarshalTimestamp(v interface{}) (time.Time, error) {
-	if tmpStr, ok := v.(int64); ok {
-		return time.Unix(tmpStr, 0), nil
+	i64, err := v.(json.Number).Int64()
+	if err != nil {
+		return time.Time{}, errors.New(fmt.Sprintf("time should be a unix timestamp, not %+v", reflect.TypeOf(v)))
 	}
-	return time.Time{}, errors.New("time should be a unix timestamp")
+	return time.Unix(i64, 0), nil
 }

@@ -19,6 +19,9 @@ package handle_graphql
 // func (r *mutationResolver) GenerateWeeklyReviewTemplate(ctx context.Context, year *int, week *int) (*bool, error) {
 // 	panic("not implemented")
 // }
+// func (r *mutationResolver) SetDueDate(ctx context.Context, taskID string, due time.Time) (*Task, error) {
+// 	panic("not implemented")
+// }
 //
 // type queryResolver struct{ *Resolver }
 //

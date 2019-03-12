@@ -16,4 +16,6 @@ type Task struct {
 	Title       string     `json:"title"`
 	CreatedDate *time.Time `json:"createdDate"`
 	URL         *string    `json:"url"`
+	Due         *time.Time `json:"due"`
+	List        string     `json:"list"`
 }

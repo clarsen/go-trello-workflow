@@ -5,6 +5,8 @@ type Task {
   title: String!
   createdDate: Timestamp
   url: String
+  due: Timestamp
+  list: String!
 }
 
 input BoardList {
@@ -20,4 +22,5 @@ type Query {
 type Mutation {
   generateWeeklySummary(year: Int, week: Int): Boolean
   generateWeeklyReviewTemplate(year: Int, week: Int): Boolean
+  setDueDate(taskID: String!, due: Timestamp!): Task!
 }

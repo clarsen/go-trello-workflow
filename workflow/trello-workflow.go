@@ -18,6 +18,7 @@ import (
 
 // Client wraps logged in member
 type Client struct {
+	client *trello.Client
 	member *trello.Member
 }
 
@@ -825,6 +826,25 @@ func (cl *Client) doMinutely() error {
 	return nil
 }
 
+func (cl *Client) SetDue(cardId string, due time.Time) (*trello.Card, error) {
+	card, err := cl.client.GetCard(cardId, trello.Defaults())
+	if err != nil {
+		return nil, err
+	}
+	args := trello.Defaults()
+	args["due"] = due.Format(time.RFC3339)
+	// card.Due = &due
+	err = card.Update(args)
+	if err != nil {
+		return nil, err
+	}
+	card, err = cl.client.GetCard(cardId, trello.Defaults())
+	if err != nil {
+		return nil, err
+	}
+	return card, nil
+}
+
 // PrepareToday moves cards back to their respective boards at end of day
 func (cl *Client) prepareToday() error {
 	board, err := boardFor(cl.member, "Kanban daily/weekly")
@@ -895,6 +915,7 @@ func New(user string, appKey string, token string) (c *Client, err error) {
 	}
 	client.Logger.Debugf("member %+v", member)
 	c = &Client{
+		client,
 		member,
 	}
 	return

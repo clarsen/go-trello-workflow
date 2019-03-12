@@ -2,7 +2,6 @@
 package handle_graphql
 
 import (
-	"log"
 	"time"
 
 	"github.com/clarsen/go-trello-workflow/workflow"
@@ -21,20 +20,35 @@ func TaskFor(card *trello.Card) (*Task, error) {
 	}
 	createdDate := card.CreatedAt().In(local)
 	url := card.ShortUrl
+
 	return &Task{
 		ID:          card.ID,
 		Title:       card.Name,
 		CreatedDate: &createdDate,
 		URL:         &url,
+		Due:         card.Due,
 	}, nil
+}
+
+func SetTaskDue(taskId string, due time.Time) (*Task, error) {
+	cl, err := workflow.New(user, appkey, authtoken)
+	if err != nil {
+		return nil, err
+	}
+	card, err := cl.SetDue(taskId, due)
+	if err != nil {
+		return nil, err
+	}
+	return TaskFor(card)
 }
 
 func GetTasks(user, appkey, authtoken string,
 	boardlist *BoardList,
 ) (tasks []Task, err error) {
-	cl, err := workflow.New(user, appkey, authtoken)
-	if err != nil {
-		log.Fatal(err)
+	cl, err2 := workflow.New(user, appkey, authtoken)
+	if err2 != nil {
+		err = err2
+		return
 	}
 	var list *trello.List
 	if boardlist != nil {
@@ -55,6 +69,7 @@ func GetTasks(user, appkey, authtoken string,
 				err = err2
 				return
 			}
+			t.List = boardlist.List
 			tasks = append(tasks, *t)
 		}
 	} else {
@@ -77,6 +92,8 @@ func GetTasks(user, appkey, authtoken string,
 					err = err2
 					return
 				}
+				t.List = bl.List
+
 				tasks = append(tasks, *t)
 			}
 		}

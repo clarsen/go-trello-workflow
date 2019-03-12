@@ -208,6 +208,11 @@ func (r *mutationResolver) GenerateWeeklyReviewTemplate(ctx context.Context, yea
 	return &res, nil
 }
 
+func (r *mutationResolver) SetDueDate(ctx context.Context, taskID string, due time.Time) (*Task, error) {
+	t, err := SetTaskDue(taskID, due)
+	return t, err
+}
+
 func (r *queryResolver) WeeklyVisualization(ctx context.Context) (*string, error) {
 	// setup working directory
 	wd, err := getData()

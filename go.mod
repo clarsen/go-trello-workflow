@@ -13,7 +13,7 @@ require (
 	github.com/aws/aws-lambda-go v1.9.0
 	github.com/aws/aws-sdk-go v0.0.0-20181118003551-50e2f0627dec
 	github.com/awslabs/aws-lambda-go-api-proxy v0.0.0-20190219202933-eb5a49d3c0ad
-	github.com/clarsen/trello v0.0.0-20190107050409-c6c939bf6802
+	github.com/clarsen/trello v0.0.0-20190311213829-4bf40ba5da15
 	github.com/coreos/etcd v3.3.12+incompatible // indirect
 	github.com/coreos/go-systemd v0.0.0-20190212144455-93d5ec2c7f76 // indirect
 	github.com/gliderlabs/ssh v0.1.3 // indirect

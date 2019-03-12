@@ -45,6 +45,8 @@ github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnweb
 github.com/bradfitz/go-smtpd v0.0.0-20170404230938-deb6d6237625/go.mod h1:HYsPBTaaSFSlLx/70C2HPIMNZpVV8+vt/A+FMnYP11g=
 github.com/clarsen/trello v0.0.0-20190107050409-c6c939bf6802 h1:XsbgpTcNTPIq8J4kYgMIuW2Hk09VPiF7DUsGWU46w8g=
 github.com/clarsen/trello v0.0.0-20190107050409-c6c939bf6802/go.mod h1:9xDVD0X4DJ2aURLb3+x/ASLuqe5+5IEDGtuYLDpO/Ak=
+github.com/clarsen/trello v0.0.0-20190311213829-4bf40ba5da15 h1:vs1ZL13lPFmjYusTJ6vFTlKetqhXFUX8H40n3SQtUlY=
+github.com/clarsen/trello v0.0.0-20190311213829-4bf40ba5da15/go.mod h1:9xDVD0X4DJ2aURLb3+x/ASLuqe5+5IEDGtuYLDpO/Ak=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cockroachdb/apd v1.1.0/go.mod h1:8Sl8LxpKi29FqWXR16WEFZRNSz3SoPzUzeMeY4+DwBQ=
 github.com/cockroachdb/cockroach-go v0.0.0-20181001143604-e0a95dfd547c/go.mod h1:XGLbWH/ujMcbPbhZq52Nv6UrCghb1yGn//133kEsvDk=

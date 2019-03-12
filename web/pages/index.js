@@ -19,6 +19,8 @@ export const taskQuery = gql`
       title
       createdDate
       url
+      due
+      list
     }
   }
 `
@@ -42,6 +44,7 @@ const generateWeeklyReviewTemplateQuery = gql`
     generateWeeklyReviewTemplate
   }
 `
+
 const generateWeeklyReviewTemplate = ({ render }) => (
   <Mutation
     mutation={generateWeeklyReviewTemplateQuery}
@@ -50,6 +53,26 @@ const generateWeeklyReviewTemplate = ({ render }) => (
   </Mutation>
 )
 
+const setDueDateQuery = gql`
+mutation setDueDate($taskId: String!, $due: Timestamp!) {
+  setDueDate(taskID: $taskId, due: $due) {
+    id
+    title
+    createdDate
+    url
+    due
+    list
+  }
+}
+`
+
+const setDueDate = ({ render }) => (
+  <Mutation
+    mutation={setDueDateQuery}
+  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
 
 const weeklyVisualizationQuery = gql`
   query weeklyVisualization {
@@ -73,6 +96,7 @@ const QueryContainer = adopt({
   ),
   generateWeeklySummary,
   generateWeeklyReviewTemplate,
+  setDueDate,
 })
 
 class IndexPage extends React.Component {
@@ -91,15 +115,16 @@ class IndexPage extends React.Component {
           weeklyVisualizationQuery: { loading : weeklyLoading, data: weeklyVisualizationData },
           generateWeeklySummary,
           generateWeeklyReviewTemplate,
+          setDueDate
         }) =>
           <React.Fragment>
             <NavHeader/>
-            <Button color='primary' onClick={() => {
+            <Button color='primary' outline size='sm' onClick={() => {
               generateWeeklySummary.mutation()
             }}>
                 Generate Weekly Summary
-            </Button>
-            <Button color='primary' onClick={() => {
+            </Button>{' '}
+            <Button color='primary' outline size='sm' onClick={() => {
               generateWeeklyReviewTemplate.mutation()
                 .catch((e) => {
                   console.log('error', e)
@@ -110,12 +135,12 @@ class IndexPage extends React.Component {
             </Button>
             {generateWeeklyReviewTemplate.errors &&
               <Alert color="warning">
-              {generateWeeklyReviewTemplate.errors.map((e) => e.message)}
+                {generateWeeklyReviewTemplate.errors.map((e) => e.message)}
               </Alert>
             }
             {loadingAll && <div>loading...</div>}
             {!loadingAll && console.log('got data', allTasks)}
-            {!loadingAll && <TaskList tasks={allTasks.tasks}/>}
+            {!loadingAll && <TaskList setDueDate={setDueDate} tasks={allTasks.tasks}/>}
 
             {weeklyLoading && <div>loading...</div>}
             {!weeklyLoading &&
