@@ -31,7 +31,7 @@ class Task extends React.Component {
     )
   }
   render () {
-    let { task, setDueDate } = this.props
+    let { task, setDueDate, setDone } = this.props
     let color = ''
     let value = 0
     if (task.due) {
@@ -70,6 +70,15 @@ class Task extends React.Component {
                   <Moment unix fromNow withTitle titleFormat={'LL'} onClick={this.toggle}>{task.due}</Moment>
                 }
                 <Collapse isOpen={this.state.showDueDateControls}>
+                  <Button outline color='primary' size='sm' onClick={()=>{
+                    setDone.mutation({
+                      variables: {
+                        taskId: task.id,
+                        done: true,
+                        nextDue: moment.unix(task.due).add(1, 'month').unix(),
+                      }
+                    })
+                  }}>√+1m</Button>{' '}
                   <Button outline color='primary' size='sm' onClick={()=>{
                     setDueDate.mutation({
                       variables: {

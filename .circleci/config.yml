@@ -77,6 +77,13 @@ jobs:
             cd server/go
             serverless deploy --verbose
 
+      - run:
+          name: deploy web UI
+          command: |
+            source ./circleci_branch_config.sh
+            cd web
+            NODE_ENV=production npm run deploy
+
 workflows:
   version: 2
   build-deploy:

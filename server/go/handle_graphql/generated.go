@@ -46,6 +46,7 @@ type ComplexityRoot struct {
 		GenerateWeeklySummary        func(childComplexity int, year *int, week *int) int
 		GenerateWeeklyReviewTemplate func(childComplexity int, year *int, week *int) int
 		SetDueDate                   func(childComplexity int, taskID string, due time.Time) int
+		SetDone                      func(childComplexity int, taskID string, done bool, status *string, nextDue *time.Time) int
 	}
 
 	Query struct {
@@ -67,6 +68,7 @@ type MutationResolver interface {
 	GenerateWeeklySummary(ctx context.Context, year *int, week *int) (*bool, error)
 	GenerateWeeklyReviewTemplate(ctx context.Context, year *int, week *int) (*bool, error)
 	SetDueDate(ctx context.Context, taskID string, due time.Time) (*Task, error)
+	SetDone(ctx context.Context, taskID string, done bool, status *string, nextDue *time.Time) (*Task, error)
 }
 type QueryResolver interface {
 	Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardList) ([]Task, error)
@@ -123,6 +125,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SetDueDate(childComplexity, args["taskID"].(string), args["due"].(time.Time)), true
+
+	case "Mutation.SetDone":
+		if e.complexity.Mutation.SetDone == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setDone_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetDone(childComplexity, args["taskID"].(string), args["done"].(bool), args["status"].(*string), args["nextDue"].(*time.Time)), true
 
 	case "Query.Tasks":
 		if e.complexity.Query.Tasks == nil {
@@ -287,6 +301,8 @@ type Mutation {
   generateWeeklySummary(year: Int, week: Int): Boolean
   generateWeeklyReviewTemplate(year: Int, week: Int): Boolean
   setDueDate(taskID: String!, due: Timestamp!): Task!
+  setDone(taskID: String!, done: Boolean!, status: String, nextDue: Timestamp): Task!
+
 }
 `},
 )
@@ -336,6 +352,44 @@ func (ec *executionContext) field_Mutation_generateWeeklySummary_args(ctx contex
 		}
 	}
 	args["week"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_setDone_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["taskID"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["taskID"] = arg0
+	var arg1 bool
+	if tmp, ok := rawArgs["done"]; ok {
+		arg1, err = ec.unmarshalNBoolean2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["done"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["status"]; ok {
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["status"] = arg2
+	var arg3 *time.Time
+	if tmp, ok := rawArgs["nextDue"]; ok {
+		arg3, err = ec.unmarshalOTimestamp2ᚖtimeᚐTime(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["nextDue"] = arg3
 	return args, nil
 }
 
@@ -509,6 +563,39 @@ func (ec *executionContext) _Mutation_setDueDate(ctx context.Context, field grap
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().SetDueDate(rctx, args["taskID"].(string), args["due"].(time.Time))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Task)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNTask2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐTask(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_setDone(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_setDone_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SetDone(rctx, args["taskID"].(string), args["done"].(bool), args["status"].(*string), args["nextDue"].(*time.Time))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -1627,6 +1714,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_generateWeeklyReviewTemplate(ctx, field)
 		case "setDueDate":
 			out.Values[i] = ec._Mutation_setDueDate(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "setDone":
+			out.Values[i] = ec._Mutation_setDone(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}

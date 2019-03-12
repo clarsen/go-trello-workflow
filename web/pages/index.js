@@ -74,6 +74,27 @@ const setDueDate = ({ render }) => (
   </Mutation>
 )
 
+const setDoneQuery = gql`
+mutation setDone($taskId: String!, $done: Boolean!, $nextDue: Timestamp) {
+  setDone(taskID: $taskId, done: $done, nextDue: $nextDue) {
+    id
+    title
+    createdDate
+    url
+    due
+    list
+  }
+}
+`
+
+const setDone = ({ render }) => (
+  <Mutation
+    mutation={setDoneQuery}
+  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
 const weeklyVisualizationQuery = gql`
   query weeklyVisualization {
     weeklyVisualization
@@ -97,6 +118,7 @@ const QueryContainer = adopt({
   generateWeeklySummary,
   generateWeeklyReviewTemplate,
   setDueDate,
+  setDone,
 })
 
 class IndexPage extends React.Component {
@@ -111,11 +133,12 @@ class IndexPage extends React.Component {
     return (
       <QueryContainer>
         {({
-          queryAll: { loading: loadingAll, data: allTasks },
-          weeklyVisualizationQuery: { loading : weeklyLoading, data: weeklyVisualizationData },
+          queryAll: { loading: loadingAll, data: allTasks, error: queryAllError },
+          weeklyVisualizationQuery: { loading : weeklyLoading, data: weeklyVisualizationData, error: weeklyError },
           generateWeeklySummary,
           generateWeeklyReviewTemplate,
-          setDueDate
+          setDueDate,
+          setDone
         }) =>
           <React.Fragment>
             <NavHeader/>
@@ -140,11 +163,13 @@ class IndexPage extends React.Component {
             }
             {loadingAll && <div>loading...</div>}
             {!loadingAll && console.log('got data', allTasks)}
-            {!loadingAll && <TaskList setDueDate={setDueDate} tasks={allTasks.tasks}/>}
+            {(!loadingAll && !queryAllError) && <TaskList setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+            {queryAllError && <div>Tasks: {queryAllError.message}</div>}
 
             {weeklyLoading && <div>loading...</div>}
-            {!weeklyLoading &&
+            {(!weeklyLoading && !weeklyError) &&
               <MarkdownRenderer markdown={weeklyVisualizationData.weeklyVisualization} />}
+            {weeklyError && <div>Weekly review: {weeklyError.message}</div>}
           </React.Fragment>
         }
       </QueryContainer>

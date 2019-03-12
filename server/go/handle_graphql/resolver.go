@@ -213,6 +213,17 @@ func (r *mutationResolver) SetDueDate(ctx context.Context, taskID string, due ti
 	return t, err
 }
 
+func (r *mutationResolver) SetDone(ctx context.Context, taskID string, done bool, status *string, nextDue *time.Time) (*Task, error) {
+	t, err := SetTaskDone(taskID, done)
+	if err != nil {
+		return nil, err
+	}
+	if nextDue != nil {
+		t, err = SetTaskDue(taskID, *nextDue)
+	}
+	return t, err
+}
+
 func (r *queryResolver) WeeklyVisualization(ctx context.Context) (*string, error) {
 	// setup working directory
 	wd, err := getData()

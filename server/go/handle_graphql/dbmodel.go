@@ -42,6 +42,30 @@ func SetTaskDue(taskId string, due time.Time) (*Task, error) {
 	return TaskFor(card)
 }
 
+func SetTaskDone(taskId string, done bool) (*Task, error) {
+	cl, err := workflow.New(user, appkey, authtoken)
+	if err != nil {
+		return nil, err
+	}
+	var targetList *trello.List
+	if done {
+		targetList, err = workflow.ListFor(cl, "Kanban daily/weekly", "Done this week")
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		targetList, err = workflow.ListFor(cl, "Kanban daily/weekly", "Inbox")
+		if err != nil {
+			return nil, err
+		}
+	}
+	card, err := cl.MoveToListOnBoard(taskId, targetList.ID, targetList.IDBoard)
+	if err != nil {
+		return nil, err
+	}
+	return TaskFor(card)
+}
+
 func GetTasks(user, appkey, authtoken string,
 	boardlist *BoardList,
 ) (tasks []Task, err error) {

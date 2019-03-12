@@ -826,6 +826,20 @@ func (cl *Client) doMinutely() error {
 	return nil
 }
 
+func (cl *Client) MoveToListOnBoard(cardId string, listID, boardID string) (*trello.Card, error) {
+	card, err := cl.client.GetCard(cardId, trello.Defaults())
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("Move card=%+v to list=%+v/board=%+v\n", cardId, listID, boardID)
+	card.MoveToListOnBoard(listID, boardID, trello.Defaults())
+	card, err = cl.client.GetCard(cardId, trello.Defaults())
+	if err != nil {
+		return nil, err
+	}
+	return card, nil
+}
+
 func (cl *Client) SetDue(cardId string, due time.Time) (*trello.Card, error) {
 	card, err := cl.client.GetCard(cardId, trello.Defaults())
 	if err != nil {

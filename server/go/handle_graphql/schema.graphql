@@ -23,4 +23,6 @@ type Mutation {
   generateWeeklySummary(year: Int, week: Int): Boolean
   generateWeeklyReviewTemplate(year: Int, week: Int): Boolean
   setDueDate(taskID: String!, due: Timestamp!): Task!
+  setDone(taskID: String!, done: Boolean!, status: String, nextDue: Timestamp): Task!
+
 }

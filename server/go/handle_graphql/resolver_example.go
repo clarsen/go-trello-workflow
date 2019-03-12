@@ -22,6 +22,9 @@ package handle_graphql
 // func (r *mutationResolver) SetDueDate(ctx context.Context, taskID string, due time.Time) (*Task, error) {
 // 	panic("not implemented")
 // }
+// func (r *mutationResolver) SetDone(ctx context.Context, taskID string, done bool, status *string, nextDue *time.Time) (*Task, error) {
+// 	panic("not implemented")
+// }
 //
 // type queryResolver struct{ *Resolver }
 //
