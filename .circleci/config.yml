@@ -63,6 +63,10 @@ jobs:
           command: |
             cp -rp workspace/bin server/go/.
 
+      - restore_cache:
+          keys:
+            - node-v1-{{ checksum "server/go/package.json" }}-{{ checksum "web/package.json" }}
+
       - run:
           name: dependencies
           command: |
@@ -82,7 +86,14 @@ jobs:
           command: |
             source ./circleci_branch_config.sh
             cd web
+            npm i
             NODE_ENV=production npm run deploy
+
+      - save_cache:
+          key: node-v1-{{ checksum "server/go/package.json" }}-{{ checksum "web/package.json" }}
+          paths:
+            - "server/go/node_modules"
+            - "web/node_modules"
 
 workflows:
   version: 2
