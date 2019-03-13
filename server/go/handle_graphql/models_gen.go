@@ -16,6 +16,11 @@ type BoardListInput struct {
 	List  string `json:"list"`
 }
 
+type FinishResult struct {
+	Message *string `json:"message"`
+	Ok      bool    `json:"ok"`
+}
+
 type GenerateResult struct {
 	Message *string `json:"message"`
 	Ok      bool    `json:"ok"`

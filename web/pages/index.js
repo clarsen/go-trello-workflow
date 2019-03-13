@@ -51,6 +51,23 @@ const prepareWeeklyReview = ({ render }) => (
   </Mutation>
 )
 
+const finishWeeklyReviewQuery = gql`
+  mutation finishWeeklyReview($year: Int, $week: Int) {
+    finishWeeklyReview(year: $year, week: $week) {
+      message
+      ok
+    }
+  }
+`
+
+const finishWeeklyReview = ({ render }) => (
+  <Mutation
+    mutation={finishWeeklyReviewQuery}
+  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
 const setDueDateQuery = gql`
 mutation setDueDate($taskId: String!, $due: Timestamp!) {
   setDueDate(taskID: $taskId, due: $due) {
@@ -122,6 +139,7 @@ const QueryContainer = adopt({
     </Query>
   ),
   prepareWeeklyReview,
+  finishWeeklyReview,
   setDueDate,
   setDone,
 })
@@ -144,6 +162,7 @@ class IndexPage extends React.Component {
           queryAll: { loading: loadingAll, data: allTasks, error: queryAllError },
           weeklyVisualizationQuery: { loading : weeklyLoading, data: weeklyVisualizationData, error: weeklyError, refetch: weeklyVisualizationRefetch },
           prepareWeeklyReview,
+          finishWeeklyReview,
           setDueDate,
           setDone
         }) =>
@@ -172,6 +191,18 @@ class IndexPage extends React.Component {
                 .then(({ data }) => alert.show(data.prepareWeeklyReview.message))
             }}>
                 Prepare weekly review for {nowGrace.year()}-{nowGrace.isoWeek()}
+            </Button>{' '}
+            <Button color='primary' outline size='sm' onClick={() => {
+              finishWeeklyReview
+                .mutation({
+                  variables: {
+                    year: now.year(),
+                    week: now.isoWeek(),
+                  }
+                })
+                .then(({ data }) => alert.show(data.finishWeeklyReview.message))
+            }}>
+                Finish weekly review for {now.year()}-{now.isoWeek()}
             </Button>{' '}
 
             <Container>

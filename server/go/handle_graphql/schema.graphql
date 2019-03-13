@@ -44,9 +44,14 @@ type GenerateResult {
   ok: Boolean!
 }
 
+type FinishResult {
+  message: String
+  ok: Boolean!
+}
+
 type Mutation {
   prepareWeeklyReview(year: Int, week: Int): GenerateResult!
-  finishWeeklyReview(year: Int, week: Int): Boolean
+  finishWeeklyReview(year: Int, week: Int): FinishResult!
   setDueDate(taskID: String!, due: Timestamp!): Task!
   setDone(taskID: String!, done: Boolean!, status: String, nextDue: Timestamp): Task!
 

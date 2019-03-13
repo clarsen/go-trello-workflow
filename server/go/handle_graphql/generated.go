@@ -47,6 +47,11 @@ type ComplexityRoot struct {
 		List  func(childComplexity int) int
 	}
 
+	FinishResult struct {
+		Message func(childComplexity int) int
+		Ok      func(childComplexity int) int
+	}
+
 	GenerateResult struct {
 		Message func(childComplexity int) int
 		Ok      func(childComplexity int) int
@@ -91,7 +96,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	PrepareWeeklyReview(ctx context.Context, year *int, week *int) (*GenerateResult, error)
-	FinishWeeklyReview(ctx context.Context, year *int, week *int) (*bool, error)
+	FinishWeeklyReview(ctx context.Context, year *int, week *int) (*FinishResult, error)
 	SetDueDate(ctx context.Context, taskID string, due time.Time) (*Task, error)
 	SetDone(ctx context.Context, taskID string, done bool, status *string, nextDue *time.Time) (*Task, error)
 }
@@ -129,6 +134,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.BoardList.List(childComplexity), true
+
+	case "FinishResult.Message":
+		if e.complexity.FinishResult.Message == nil {
+			break
+		}
+
+		return e.complexity.FinishResult.Message(childComplexity), true
+
+	case "FinishResult.Ok":
+		if e.complexity.FinishResult.Ok == nil {
+			break
+		}
+
+		return e.complexity.FinishResult.Ok(childComplexity), true
 
 	case "GenerateResult.Message":
 		if e.complexity.GenerateResult.Message == nil {
@@ -444,9 +463,14 @@ type GenerateResult {
   ok: Boolean!
 }
 
+type FinishResult {
+  message: String
+  ok: Boolean!
+}
+
 type Mutation {
   prepareWeeklyReview(year: Int, week: Int): GenerateResult!
-  finishWeeklyReview(year: Int, week: Int): Boolean
+  finishWeeklyReview(year: Int, week: Int): FinishResult!
   setDueDate(taskID: String!, due: Timestamp!): Task!
   setDone(taskID: String!, done: Boolean!, status: String, nextDue: Timestamp): Task!
 
@@ -704,6 +728,55 @@ func (ec *executionContext) _BoardList_list(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _FinishResult_message(ctx context.Context, field graphql.CollectedField, obj *FinishResult) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FinishResult",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FinishResult_ok(ctx context.Context, field graphql.CollectedField, obj *FinishResult) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "FinishResult",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ok, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _GenerateResult_message(ctx context.Context, field graphql.CollectedField, obj *GenerateResult) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -857,12 +930,15 @@ func (ec *executionContext) _Mutation_finishWeeklyReview(ctx context.Context, fi
 		return ec.resolvers.Mutation().FinishWeeklyReview(rctx, args["year"].(*int), args["week"].(*int))
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*bool)
+	res := resTmp.(*FinishResult)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+	return ec.marshalNFinishResult2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐFinishResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_setDueDate(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -2215,6 +2291,35 @@ func (ec *executionContext) _BoardList(ctx context.Context, sel ast.SelectionSet
 	return out
 }
 
+var finishResultImplementors = []string{"FinishResult"}
+
+func (ec *executionContext) _FinishResult(ctx context.Context, sel ast.SelectionSet, obj *FinishResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, finishResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FinishResult")
+		case "message":
+			out.Values[i] = ec._FinishResult_message(ctx, field, obj)
+		case "ok":
+			out.Values[i] = ec._FinishResult_ok(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
 var generateResultImplementors = []string{"GenerateResult"}
 
 func (ec *executionContext) _GenerateResult(ctx context.Context, sel ast.SelectionSet, obj *GenerateResult) graphql.Marshaler {
@@ -2295,6 +2400,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "finishWeeklyReview":
 			out.Values[i] = ec._Mutation_finishWeeklyReview(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "setDueDate":
 			out.Values[i] = ec._Mutation_setDueDate(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -2707,6 +2815,20 @@ func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interf
 
 func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
 	return graphql.MarshalBoolean(v)
+}
+
+func (ec *executionContext) marshalNFinishResult2githubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐFinishResult(ctx context.Context, sel ast.SelectionSet, v FinishResult) graphql.Marshaler {
+	return ec._FinishResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNFinishResult2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐFinishResult(ctx context.Context, sel ast.SelectionSet, v *FinishResult) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._FinishResult(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNGenerateResult2githubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐGenerateResult(ctx context.Context, sel ast.SelectionSet, v GenerateResult) graphql.Marshaler {

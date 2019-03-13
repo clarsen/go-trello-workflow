@@ -193,8 +193,77 @@ func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, w
 	return &result, nil
 }
 
-func (r *mutationResolver) FinishWeeklyReview(ctx context.Context, year *int, week *int) (*bool, error) {
-	panic("not implemented")
+// FinishWeeklyReview writes/commit visual to visualized-reviews
+func (r *mutationResolver) FinishWeeklyReview(ctx context.Context, year *int, week *int) (*FinishResult, error) {
+	// setup working directory
+	wd, err := getData()
+	if err != nil {
+		return nil, err
+	}
+
+	_year, _week := time.Now().Add(-time.Hour * 72).ISOWeek()
+	if year != nil {
+		_year = *year
+	}
+	if week != nil {
+		_week = *week
+	}
+
+	summarydir := "task-summary"
+	summaryFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, _year, _week)
+	inSummary, err2 := wd.fs.Open(summaryFname)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	reviewdir := "reviews"
+	reviewFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", reviewdir, _year, _week)
+	inReview, err2 := wd.fs.Open(reviewFname)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	reviewvisdir := "visualized_reviews"
+	visualFname := fmt.Sprintf("%s/weekly-%d-%02d.md", reviewvisdir, _year, _week)
+	out, err2 := wd.fs.Create(visualFname)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	log.Printf("generating %s\n", visualFname)
+	err2 = workflow.VisualizeWeeklyRetrospective(inSummary, inReview, out)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	// add (possibly changed) file
+	wd.worktree.Add(visualFname)
+	status, err := wd.worktree.Status()
+	if err != nil {
+		return nil, err
+	}
+
+	if status.IsClean() {
+		log.Printf("no change, not commiting")
+		msg := fmt.Sprintf("No change in %s, not commiting", visualFname)
+		result := FinishResult{
+			Message: &msg,
+			Ok:      true,
+		}
+		return &result, nil
+	}
+
+	// commit and push
+	err = wd.commitAndPushData(fmt.Sprintf("visualized review for %04d-%02d", _year, _week))
+	if err != nil {
+		return nil, err
+	}
+	msg := fmt.Sprintf("Updated %s", visualFname)
+	result := FinishResult{
+		Message: &msg,
+		Ok:      true,
+	}
+	return &result, nil
 }
 
 func (r *mutationResolver) SetDueDate(ctx context.Context, taskID string, due time.Time) (*Task, error) {

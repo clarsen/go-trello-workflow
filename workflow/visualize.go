@@ -119,6 +119,9 @@ func CreateEmptyWeeklyRetrospective(summaryIn io.Reader, reviewOut io.Writer) er
 				if strings.Contains(weeklygoal.Status, "(done)") {
 					note = ":green_heart:"
 				}
+				if strings.Contains(weeklygoal.Status, "(partial)") {
+					note = ":yellow_heart:"
+				}
 				if strings.Contains(weeklygoal.Status, "(not done)") {
 					note = ":broken_heart:"
 				}
@@ -144,6 +147,9 @@ func CreateEmptyWeeklyRetrospective(summaryIn io.Reader, reviewOut io.Writer) er
 				note := ""
 				if strings.Contains(weeklygoal.Status, "(done)") {
 					note = ":green_heart:"
+				}
+				if strings.Contains(weeklygoal.Status, "(partial)") {
+					note = ":yellow_heart:"
 				}
 				if strings.Contains(weeklygoal.Status, "(not done)") {
 					note = ":broken_heart:"
