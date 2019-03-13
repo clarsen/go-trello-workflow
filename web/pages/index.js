@@ -11,7 +11,7 @@ import { Query, Mutation } from 'react-apollo'
 import { adopt } from 'react-adopt'
 import gql from 'graphql-tag'
 import { withAlert } from 'react-alert'
-
+import moment from 'moment'
 
 import NavHeader from '../components/NavHeader'
 import TaskList from '../components/TaskList'
@@ -35,15 +35,18 @@ export const taskQuery = gql`
   }
 `
 
-const generateWeeklySummaryQuery = gql`
-  mutation generateWeeklySummary {
-    generateWeeklySummary
+const prepareWeeklyReviewQuery = gql`
+  mutation prepareWeeklyReview($year: Int, $week: Int) {
+    prepareWeeklyReview(year: $year, week: $week) {
+      message
+      ok
+    }
   }
 `
 
-const generateWeeklySummary = ({ render }) => (
+const prepareWeeklyReview = ({ render }) => (
   <Mutation
-    mutation={generateWeeklySummaryQuery}
+    mutation={prepareWeeklyReviewQuery}
   >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
@@ -133,8 +136,7 @@ const QueryContainer = adopt({
       {render}
     </Query>
   ),
-  generateWeeklySummary,
-  generateWeeklyReviewTemplate,
+  prepareWeeklyReview,
   setDueDate,
   setDone,
 })
@@ -148,37 +150,45 @@ class IndexPage extends React.Component {
   }
   render () {
     let { alert } = this.props
+    let now = moment()
+    let nowGrace = moment().subtract(3,'days')
+
     return (
       <QueryContainer>
         {({
           queryAll: { loading: loadingAll, data: allTasks, error: queryAllError },
           weeklyVisualizationQuery: { loading : weeklyLoading, data: weeklyVisualizationData, error: weeklyError },
-          generateWeeklySummary,
-          generateWeeklyReviewTemplate,
+          prepareWeeklyReview,
           setDueDate,
           setDone
         }) =>
           <React.Fragment>
             <NavHeader/>
             <Button color='primary' outline size='sm' onClick={() => {
-              generateWeeklySummary.mutation()
+              prepareWeeklyReview
+                .mutation({
+                  variables: {
+                    year: now.year(),
+                    week: now.isoWeek(),
+                  }
+                })
+                .then(({ data }) => alert.show(data.prepareWeeklyReview.message))
             }}>
-                Generate Weekly Summary
+                Prepare weekly review for {now.year()}-{now.isoWeek()}
             </Button>{' '}
             <Button color='primary' outline size='sm' onClick={() => {
-              generateWeeklyReviewTemplate.mutation()
-                .catch((e) => {
-                  console.log('error', e)
-                  alert.show(e.message)
+              prepareWeeklyReview
+                .mutation({
+                  variables: {
+                    year: nowGrace.year(),
+                    week: nowGrace.isoWeek(),
+                  }
                 })
+                .then(({ data }) => alert.show(data.prepareWeeklyReview.message))
             }}>
-                Generate Weekly Review Template
-            </Button>
-            {generateWeeklyReviewTemplate.errors &&
-              <Alert color="warning">
-                {generateWeeklyReviewTemplate.errors.map((e) => e.message)}
-              </Alert>
-            }
+                Prepare weekly review for {nowGrace.year()}-{nowGrace.isoWeek()}
+            </Button>{' '}
+
             <Container>
               <Row>
                 <Col lg={6}>

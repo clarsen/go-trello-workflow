@@ -13,10 +13,10 @@ package handle_graphql
 //
 // type mutationResolver struct{ *Resolver }
 //
-// func (r *mutationResolver) GenerateWeeklySummary(ctx context.Context, year *int, week *int) (*bool, error) {
+// func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, week *int) (*GenerateResult, error) {
 // 	panic("not implemented")
 // }
-// func (r *mutationResolver) GenerateWeeklyReviewTemplate(ctx context.Context, year *int, week *int) (*bool, error) {
+// func (r *mutationResolver) FinishWeeklyReview(ctx context.Context, year *int, week *int) (*bool, error) {
 // 	panic("not implemented")
 // }
 // func (r *mutationResolver) SetDueDate(ctx context.Context, taskID string, due time.Time) (*Task, error) {
@@ -32,5 +32,8 @@ package handle_graphql
 // 	panic("not implemented")
 // }
 // func (r *queryResolver) WeeklyVisualization(ctx context.Context) (*string, error) {
+// 	panic("not implemented")
+// }
+// func (r *queryResolver) MonthlyGoals(ctx context.Context) ([]*MonthlyGoal, error) {
 // 	panic("not implemented")
 // }

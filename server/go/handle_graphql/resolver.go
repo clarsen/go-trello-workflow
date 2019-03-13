@@ -3,7 +3,6 @@ package handle_graphql
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -110,51 +109,7 @@ func (wd *workdir) commitAndPushData(message string) error {
 	return err
 }
 
-func (r *mutationResolver) GenerateWeeklySummary(ctx context.Context, year *int, week *int) (*bool, error) {
-	// setup working directory
-	wd, err := getData()
-	if err != nil {
-		return nil, err
-	}
-
-	_year, _week := time.Now().Add(-time.Hour * 72).ISOWeek()
-	summarydir := "task-summary"
-	fname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, _year, _week)
-
-	out, err := wd.fs.Create(fname)
-	if err != nil {
-		log.Printf("DumpSummaryForWeek %+v", err)
-		return nil, err
-	}
-
-	err = workflow.DumpSummaryForWeek(user, appkey, authtoken, _year, _week, out)
-	if err != nil {
-		log.Printf("DumpSummaryForWeek %+v", err)
-		return nil, err
-	}
-
-	// add file
-	wd.worktree.Add(fname)
-	status, err := wd.worktree.Status()
-	if err != nil {
-		return nil, err
-	}
-	if status.IsClean() {
-		log.Printf("no change, not commiting")
-		res := true
-		return &res, nil
-	}
-
-	// commit and push
-	err = wd.commitAndPushData(fmt.Sprintf("dump summary for %04d-%02d", _year, _week))
-	if err != nil {
-		return nil, err
-	}
-	res := true
-	return &res, nil
-}
-
-func (r *mutationResolver) GenerateWeeklyReviewTemplate(ctx context.Context, year *int, week *int) (*bool, error) {
+func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, week *int) (*GenerateResult, error) {
 	// setup working directory
 	wd, err := getData()
 	if err != nil {
@@ -169,43 +124,77 @@ func (r *mutationResolver) GenerateWeeklyReviewTemplate(ctx context.Context, yea
 		_week = *week
 	}
 	summarydir := "task-summary"
-	reviewdir := "reviews"
-
 	summaryFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, _year, _week)
-	if _, err = wd.fs.Stat(summaryFname); os.IsNotExist(err) {
+
+	out, err := wd.fs.Create(summaryFname)
+	if err != nil {
+		log.Printf("DumpSummaryForWeek %+v", err)
 		return nil, err
 	}
+
+	err = workflow.DumpSummaryForWeek(user, appkey, authtoken, _year, _week, out)
+	if err != nil {
+		log.Printf("DumpSummaryForWeek %+v", err)
+		return nil, err
+	}
+
+	reviewdir := "reviews"
+
 	inSummary, err2 := wd.fs.Open(summaryFname)
 	if err2 != nil {
 		return nil, err2
 	}
 
 	templateFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", reviewdir, _year, _week)
-	if _, err = wd.fs.Stat(templateFname); err == nil {
-		return nil, errors.New(fmt.Sprintf("%s exists already", templateFname))
+	if _, err = wd.fs.Stat(templateFname); err != nil {
+		// doesn't exist
+		outReview, err2 := wd.fs.Create(templateFname)
+		if err2 != nil {
+			return nil, err2
+		}
+
+		err2 = workflow.CreateEmptyWeeklyRetrospective(inSummary, outReview)
+		if err2 != nil {
+			return nil, err2
+		}
+		outReview.Close()
+
+		// add file
+		wd.worktree.Add(templateFname)
 	}
 
-	outReview, err2 := wd.fs.Create(templateFname)
-	if err2 != nil {
-		return nil, err2
+	// add (possibly changed) file
+	wd.worktree.Add(summaryFname)
+	status, err := wd.worktree.Status()
+	if err != nil {
+		return nil, err
 	}
 
-	err2 = workflow.CreateEmptyWeeklyRetrospective(inSummary, outReview)
-	if err2 != nil {
-		return nil, err2
+	if status.IsClean() {
+		log.Printf("no change, not commiting")
+		msg := fmt.Sprintf("No change in %s, not commiting", summaryFname)
+		result := GenerateResult{
+			Message: &msg,
+			Ok:      true,
+		}
+		return &result, nil
 	}
-	outReview.Close()
-
-	// add file
-	wd.worktree.Add(templateFname)
 
 	// commit and push
 	err = wd.commitAndPushData(fmt.Sprintf("dump summary for %04d-%02d", _year, _week))
 	if err != nil {
 		return nil, err
 	}
-	res := true
-	return &res, nil
+	msg := fmt.Sprintf("Updated %s, template at %s", summaryFname, templateFname)
+	result := GenerateResult{
+		Message: &msg,
+		Ok:      true,
+	}
+	return &result, nil
+}
+
+func (r *mutationResolver) FinishWeeklyReview(ctx context.Context, year *int, week *int) (*bool, error) {
+	panic("not implemented")
 }
 
 func (r *mutationResolver) SetDueDate(ctx context.Context, taskID string, due time.Time) (*Task, error) {
@@ -271,4 +260,8 @@ func (r *queryResolver) Tasks(ctx context.Context, dueBefore *int, inBoardList *
 		return nil, err
 	}
 	return tasks, nil
+}
+
+func (r *queryResolver) MonthlyGoals(ctx context.Context) ([]*MonthlyGoal, error) {
+	panic("not implemented")
 }

@@ -26,7 +26,7 @@ class Task extends React.Component {
     let value = 0
     if (task.due) {
       let delta_days = moment().diff(moment.unix(task.due))/(86400*1000)
-      console.log('task', task.title, 'task.due', moment.unix(task.due), 'delta_days from now', delta_days)
+      // console.log('task', task.title, 'task.due', moment.unix(task.due), 'delta_days from now', delta_days)
       if (delta_days < -3) {
         color = 'info'
         value = (100*(14 + delta_days)/14).toFixed(0)

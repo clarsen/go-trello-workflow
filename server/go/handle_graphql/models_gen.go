@@ -16,6 +16,16 @@ type BoardListInput struct {
 	List  string `json:"list"`
 }
 
+type GenerateResult struct {
+	Message *string `json:"message"`
+	Ok      bool    `json:"ok"`
+}
+
+type MonthlyGoal struct {
+	Title       string        `json:"title"`
+	WeeklyGoals []*WeeklyGoal `json:"weeklyGoals"`
+}
+
 type Task struct {
 	ID          string     `json:"id"`
 	Title       string     `json:"title"`
@@ -24,4 +34,12 @@ type Task struct {
 	Due         *time.Time `json:"due"`
 	List        *BoardList `json:"list"`
 	Period      *string    `json:"period"`
+}
+
+type WeeklyGoal struct {
+	Title string  `json:"title"`
+	Tasks []*Task `json:"tasks"`
+	Year  *int    `json:"year"`
+	Month *int    `json:"month"`
+	Week  *int    `json:"week"`
 }

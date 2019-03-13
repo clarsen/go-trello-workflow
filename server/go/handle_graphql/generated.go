@@ -47,16 +47,27 @@ type ComplexityRoot struct {
 		List  func(childComplexity int) int
 	}
 
+	GenerateResult struct {
+		Message func(childComplexity int) int
+		Ok      func(childComplexity int) int
+	}
+
+	MonthlyGoal struct {
+		Title       func(childComplexity int) int
+		WeeklyGoals func(childComplexity int) int
+	}
+
 	Mutation struct {
-		GenerateWeeklySummary        func(childComplexity int, year *int, week *int) int
-		GenerateWeeklyReviewTemplate func(childComplexity int, year *int, week *int) int
-		SetDueDate                   func(childComplexity int, taskID string, due time.Time) int
-		SetDone                      func(childComplexity int, taskID string, done bool, status *string, nextDue *time.Time) int
+		PrepareWeeklyReview func(childComplexity int, year *int, week *int) int
+		FinishWeeklyReview  func(childComplexity int, year *int, week *int) int
+		SetDueDate          func(childComplexity int, taskID string, due time.Time) int
+		SetDone             func(childComplexity int, taskID string, done bool, status *string, nextDue *time.Time) int
 	}
 
 	Query struct {
 		Tasks               func(childComplexity int, dueBefore *int, inBoardList *BoardListInput) int
 		WeeklyVisualization func(childComplexity int) int
+		MonthlyGoals        func(childComplexity int) int
 	}
 
 	Task struct {
@@ -68,17 +79,26 @@ type ComplexityRoot struct {
 		List        func(childComplexity int) int
 		Period      func(childComplexity int) int
 	}
+
+	WeeklyGoal struct {
+		Title func(childComplexity int) int
+		Tasks func(childComplexity int) int
+		Year  func(childComplexity int) int
+		Month func(childComplexity int) int
+		Week  func(childComplexity int) int
+	}
 }
 
 type MutationResolver interface {
-	GenerateWeeklySummary(ctx context.Context, year *int, week *int) (*bool, error)
-	GenerateWeeklyReviewTemplate(ctx context.Context, year *int, week *int) (*bool, error)
+	PrepareWeeklyReview(ctx context.Context, year *int, week *int) (*GenerateResult, error)
+	FinishWeeklyReview(ctx context.Context, year *int, week *int) (*bool, error)
 	SetDueDate(ctx context.Context, taskID string, due time.Time) (*Task, error)
 	SetDone(ctx context.Context, taskID string, done bool, status *string, nextDue *time.Time) (*Task, error)
 }
 type QueryResolver interface {
 	Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardListInput) ([]Task, error)
 	WeeklyVisualization(ctx context.Context) (*string, error)
+	MonthlyGoals(ctx context.Context) ([]*MonthlyGoal, error)
 }
 
 type executableSchema struct {
@@ -110,29 +130,57 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.BoardList.List(childComplexity), true
 
-	case "Mutation.GenerateWeeklySummary":
-		if e.complexity.Mutation.GenerateWeeklySummary == nil {
+	case "GenerateResult.Message":
+		if e.complexity.GenerateResult.Message == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_generateWeeklySummary_args(context.TODO(), rawArgs)
+		return e.complexity.GenerateResult.Message(childComplexity), true
+
+	case "GenerateResult.Ok":
+		if e.complexity.GenerateResult.Ok == nil {
+			break
+		}
+
+		return e.complexity.GenerateResult.Ok(childComplexity), true
+
+	case "MonthlyGoal.Title":
+		if e.complexity.MonthlyGoal.Title == nil {
+			break
+		}
+
+		return e.complexity.MonthlyGoal.Title(childComplexity), true
+
+	case "MonthlyGoal.WeeklyGoals":
+		if e.complexity.MonthlyGoal.WeeklyGoals == nil {
+			break
+		}
+
+		return e.complexity.MonthlyGoal.WeeklyGoals(childComplexity), true
+
+	case "Mutation.PrepareWeeklyReview":
+		if e.complexity.Mutation.PrepareWeeklyReview == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_prepareWeeklyReview_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.GenerateWeeklySummary(childComplexity, args["year"].(*int), args["week"].(*int)), true
+		return e.complexity.Mutation.PrepareWeeklyReview(childComplexity, args["year"].(*int), args["week"].(*int)), true
 
-	case "Mutation.GenerateWeeklyReviewTemplate":
-		if e.complexity.Mutation.GenerateWeeklyReviewTemplate == nil {
+	case "Mutation.FinishWeeklyReview":
+		if e.complexity.Mutation.FinishWeeklyReview == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_generateWeeklyReviewTemplate_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_finishWeeklyReview_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.GenerateWeeklyReviewTemplate(childComplexity, args["year"].(*int), args["week"].(*int)), true
+		return e.complexity.Mutation.FinishWeeklyReview(childComplexity, args["year"].(*int), args["week"].(*int)), true
 
 	case "Mutation.SetDueDate":
 		if e.complexity.Mutation.SetDueDate == nil {
@@ -176,6 +224,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.WeeklyVisualization(childComplexity), true
+
+	case "Query.MonthlyGoals":
+		if e.complexity.Query.MonthlyGoals == nil {
+			break
+		}
+
+		return e.complexity.Query.MonthlyGoals(childComplexity), true
 
 	case "Task.ID":
 		if e.complexity.Task.ID == nil {
@@ -225,6 +280,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Task.Period(childComplexity), true
+
+	case "WeeklyGoal.Title":
+		if e.complexity.WeeklyGoal.Title == nil {
+			break
+		}
+
+		return e.complexity.WeeklyGoal.Title(childComplexity), true
+
+	case "WeeklyGoal.Tasks":
+		if e.complexity.WeeklyGoal.Tasks == nil {
+			break
+		}
+
+		return e.complexity.WeeklyGoal.Tasks(childComplexity), true
+
+	case "WeeklyGoal.Year":
+		if e.complexity.WeeklyGoal.Year == nil {
+			break
+		}
+
+		return e.complexity.WeeklyGoal.Year(childComplexity), true
+
+	case "WeeklyGoal.Month":
+		if e.complexity.WeeklyGoal.Month == nil {
+			break
+		}
+
+		return e.complexity.WeeklyGoal.Month(childComplexity), true
+
+	case "WeeklyGoal.Week":
+		if e.complexity.WeeklyGoal.Week == nil {
+			break
+		}
+
+		return e.complexity.WeeklyGoal.Week(childComplexity), true
 
 	}
 	return 0, false
@@ -325,14 +415,33 @@ input BoardListInput {
   list: String!
 }
 
+type WeeklyGoal {
+  title: String!
+  tasks: [Task]
+  year: Int
+  month: Int
+  week: Int
+}
+
+type MonthlyGoal {
+  title: String!
+  weeklyGoals: [WeeklyGoal]
+}
+
 type Query {
   tasks(dueBefore: Int, inBoardList: BoardListInput): [Task!]
   weeklyVisualization: String
+  monthlyGoals: [MonthlyGoal]
+}
+
+type GenerateResult {
+  message: String
+  ok: Boolean!
 }
 
 type Mutation {
-  generateWeeklySummary(year: Int, week: Int): Boolean
-  generateWeeklyReviewTemplate(year: Int, week: Int): Boolean
+  prepareWeeklyReview(year: Int, week: Int): GenerateResult!
+  finishWeeklyReview(year: Int, week: Int): Boolean
   setDueDate(taskID: String!, due: Timestamp!): Task!
   setDone(taskID: String!, done: Boolean!, status: String, nextDue: Timestamp): Task!
 
@@ -344,7 +453,7 @@ type Mutation {
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_generateWeeklyReviewTemplate_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_finishWeeklyReview_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *int
@@ -366,7 +475,7 @@ func (ec *executionContext) field_Mutation_generateWeeklyReviewTemplate_args(ctx
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_generateWeeklySummary_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_prepareWeeklyReview_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *int
@@ -568,37 +677,105 @@ func (ec *executionContext) _BoardList_list(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_generateWeeklySummary(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _GenerateResult_message(ctx context.Context, field graphql.CollectedField, obj *GenerateResult) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Mutation",
+		Object: "GenerateResult",
 		Field:  field,
 		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_generateWeeklySummary_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().GenerateWeeklySummary(rctx, args["year"].(*int), args["week"].(*int))
+		return obj.Message, nil
 	})
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*bool)
+	res := resTmp.(*string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_generateWeeklyReviewTemplate(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _GenerateResult_ok(ctx context.Context, field graphql.CollectedField, obj *GenerateResult) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "GenerateResult",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ok, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MonthlyGoal_title(ctx context.Context, field graphql.CollectedField, obj *MonthlyGoal) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "MonthlyGoal",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MonthlyGoal_weeklyGoals(ctx context.Context, field graphql.CollectedField, obj *MonthlyGoal) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "MonthlyGoal",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.WeeklyGoals, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*WeeklyGoal)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOWeeklyGoal2ᚕᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐWeeklyGoal(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_prepareWeeklyReview(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -608,7 +785,7 @@ func (ec *executionContext) _Mutation_generateWeeklyReviewTemplate(ctx context.C
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_generateWeeklyReviewTemplate_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_prepareWeeklyReview_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -617,7 +794,40 @@ func (ec *executionContext) _Mutation_generateWeeklyReviewTemplate(ctx context.C
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().GenerateWeeklyReviewTemplate(rctx, args["year"].(*int), args["week"].(*int))
+		return ec.resolvers.Mutation().PrepareWeeklyReview(rctx, args["year"].(*int), args["week"].(*int))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*GenerateResult)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNGenerateResult2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐGenerateResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_finishWeeklyReview(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_finishWeeklyReview_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().FinishWeeklyReview(rctx, args["year"].(*int), args["week"].(*int))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -745,6 +955,29 @@ func (ec *executionContext) _Query_weeklyVisualization(ctx context.Context, fiel
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_monthlyGoals(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().MonthlyGoals(rctx)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*MonthlyGoal)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOMonthlyGoal2ᚕᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐMonthlyGoal(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -965,6 +1198,124 @@ func (ec *executionContext) _Task_period(ctx context.Context, field graphql.Coll
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WeeklyGoal_title(ctx context.Context, field graphql.CollectedField, obj *WeeklyGoal) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "WeeklyGoal",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WeeklyGoal_tasks(ctx context.Context, field graphql.CollectedField, obj *WeeklyGoal) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "WeeklyGoal",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Tasks, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*Task)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOTask2ᚕᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐTask(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WeeklyGoal_year(ctx context.Context, field graphql.CollectedField, obj *WeeklyGoal) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "WeeklyGoal",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Year, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WeeklyGoal_month(ctx context.Context, field graphql.CollectedField, obj *WeeklyGoal) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "WeeklyGoal",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Month, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WeeklyGoal_week(ctx context.Context, field graphql.CollectedField, obj *WeeklyGoal) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "WeeklyGoal",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Week, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
@@ -1830,6 +2181,64 @@ func (ec *executionContext) _BoardList(ctx context.Context, sel ast.SelectionSet
 	return out
 }
 
+var generateResultImplementors = []string{"GenerateResult"}
+
+func (ec *executionContext) _GenerateResult(ctx context.Context, sel ast.SelectionSet, obj *GenerateResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, generateResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GenerateResult")
+		case "message":
+			out.Values[i] = ec._GenerateResult_message(ctx, field, obj)
+		case "ok":
+			out.Values[i] = ec._GenerateResult_ok(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var monthlyGoalImplementors = []string{"MonthlyGoal"}
+
+func (ec *executionContext) _MonthlyGoal(ctx context.Context, sel ast.SelectionSet, obj *MonthlyGoal) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, monthlyGoalImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MonthlyGoal")
+		case "title":
+			out.Values[i] = ec._MonthlyGoal_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "weeklyGoals":
+			out.Values[i] = ec._MonthlyGoal_weeklyGoals(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -1845,10 +2254,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "generateWeeklySummary":
-			out.Values[i] = ec._Mutation_generateWeeklySummary(ctx, field)
-		case "generateWeeklyReviewTemplate":
-			out.Values[i] = ec._Mutation_generateWeeklyReviewTemplate(ctx, field)
+		case "prepareWeeklyReview":
+			out.Values[i] = ec._Mutation_prepareWeeklyReview(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "finishWeeklyReview":
+			out.Values[i] = ec._Mutation_finishWeeklyReview(ctx, field)
 		case "setDueDate":
 			out.Values[i] = ec._Mutation_setDueDate(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -1907,6 +2319,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_weeklyVisualization(ctx, field)
 				return res
 			})
+		case "monthlyGoals":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_monthlyGoals(ctx, field)
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -1953,6 +2376,41 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._Task_list(ctx, field, obj)
 		case "period":
 			out.Values[i] = ec._Task_period(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var weeklyGoalImplementors = []string{"WeeklyGoal"}
+
+func (ec *executionContext) _WeeklyGoal(ctx context.Context, sel ast.SelectionSet, obj *WeeklyGoal) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, weeklyGoalImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("WeeklyGoal")
+		case "title":
+			out.Values[i] = ec._WeeklyGoal_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "tasks":
+			out.Values[i] = ec._WeeklyGoal_tasks(ctx, field, obj)
+		case "year":
+			out.Values[i] = ec._WeeklyGoal_year(ctx, field, obj)
+		case "month":
+			out.Values[i] = ec._WeeklyGoal_month(ctx, field, obj)
+		case "week":
+			out.Values[i] = ec._WeeklyGoal_week(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2215,6 +2673,20 @@ func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interf
 
 func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
 	return graphql.MarshalBoolean(v)
+}
+
+func (ec *executionContext) marshalNGenerateResult2githubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐGenerateResult(ctx context.Context, sel ast.SelectionSet, v GenerateResult) graphql.Marshaler {
+	return ec._GenerateResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNGenerateResult2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐGenerateResult(ctx context.Context, sel ast.SelectionSet, v *GenerateResult) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._GenerateResult(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -2536,6 +3008,54 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return ec.marshalOInt2int(ctx, sel, *v)
 }
 
+func (ec *executionContext) marshalOMonthlyGoal2githubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐMonthlyGoal(ctx context.Context, sel ast.SelectionSet, v MonthlyGoal) graphql.Marshaler {
+	return ec._MonthlyGoal(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOMonthlyGoal2ᚕᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐMonthlyGoal(ctx context.Context, sel ast.SelectionSet, v []*MonthlyGoal) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOMonthlyGoal2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐMonthlyGoal(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOMonthlyGoal2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐMonthlyGoal(ctx context.Context, sel ast.SelectionSet, v *MonthlyGoal) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._MonthlyGoal(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
@@ -2557,6 +3077,10 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return ec.marshalOString2string(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOTask2githubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐTask(ctx context.Context, sel ast.SelectionSet, v Task) graphql.Marshaler {
+	return ec._Task(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalOTask2ᚕgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐTask(ctx context.Context, sel ast.SelectionSet, v []Task) graphql.Marshaler {
@@ -2596,6 +3120,50 @@ func (ec *executionContext) marshalOTask2ᚕgithubᚗcomᚋclarsenᚋgoᚑtrello
 	return ret
 }
 
+func (ec *executionContext) marshalOTask2ᚕᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐTask(ctx context.Context, sel ast.SelectionSet, v []*Task) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOTask2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐTask(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOTask2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐTask(ctx context.Context, sel ast.SelectionSet, v *Task) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Task(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOTimestamp2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
 	return UnmarshalTimestamp(v)
 }
@@ -2620,6 +3188,54 @@ func (ec *executionContext) marshalOTimestamp2ᚖtimeᚐTime(ctx context.Context
 		return graphql.Null
 	}
 	return ec.marshalOTimestamp2timeᚐTime(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOWeeklyGoal2githubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐWeeklyGoal(ctx context.Context, sel ast.SelectionSet, v WeeklyGoal) graphql.Marshaler {
+	return ec._WeeklyGoal(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOWeeklyGoal2ᚕᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐWeeklyGoal(ctx context.Context, sel ast.SelectionSet, v []*WeeklyGoal) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOWeeklyGoal2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐWeeklyGoal(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOWeeklyGoal2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐWeeklyGoal(ctx context.Context, sel ast.SelectionSet, v *WeeklyGoal) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._WeeklyGoal(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

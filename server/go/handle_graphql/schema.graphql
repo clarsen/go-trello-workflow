@@ -20,14 +20,33 @@ input BoardListInput {
   list: String!
 }
 
+type WeeklyGoal {
+  title: String!
+  tasks: [Task]
+  year: Int
+  month: Int
+  week: Int
+}
+
+type MonthlyGoal {
+  title: String!
+  weeklyGoals: [WeeklyGoal]
+}
+
 type Query {
   tasks(dueBefore: Int, inBoardList: BoardListInput): [Task!]
   weeklyVisualization: String
+  monthlyGoals: [MonthlyGoal]
+}
+
+type GenerateResult {
+  message: String
+  ok: Boolean!
 }
 
 type Mutation {
-  generateWeeklySummary(year: Int, week: Int): Boolean
-  generateWeeklyReviewTemplate(year: Int, week: Int): Boolean
+  prepareWeeklyReview(year: Int, week: Int): GenerateResult!
+  finishWeeklyReview(year: Int, week: Int): Boolean
   setDueDate(taskID: String!, due: Timestamp!): Task!
   setDone(taskID: String!, done: Boolean!, status: String, nextDue: Timestamp): Task!
 
