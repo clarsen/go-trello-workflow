@@ -66,47 +66,57 @@ class Task extends React.Component {
               `}</style>
 
               <Collapse isOpen={this.state.showDueDateControls}>
-                <Button outline color='primary' size='sm' onClick={()=>{
-                  setDone.mutation({
-                    variables: {
-                      taskId: task.id,
-                      done: true,
-                    }
-                  })
-                }}>√</Button>{' '}
-                <Button outline color='primary' size='sm' onClick={()=>{
-                  setDone.mutation({
-                    variables: {
-                      taskId: task.id,
-                      done: true,
-                      nextDue: moment.unix(task.due).add(1, 'month').unix(),
-                    }
-                  })
-                }}>√+1m</Button>{' '}
-                <Button outline color='primary' size='sm' onClick={()=>{
-                  setDueDate.mutation({
-                    variables: {
-                      taskId: task.id,
-                      due: task.due + 7*86400
-                    }
-                  })
-                }}>+=1w</Button>{' '}
-                <Button outline color='primary' size='sm' onClick={()=>{
-                  setDueDate.mutation({
-                    variables: {
-                      taskId: task.id,
-                      due: moment().add(7, 'days').unix(),
-                    }
-                  })
-                }}>+1w</Button>{' '}
-                <Button outline color='primary' size='sm' onClick={()=>{
-                  setDueDate.mutation({
-                    variables: {
-                      taskId: task.id,
-                      due: moment().add(1, 'months').unix(),
-                    }
-                  })
-                }}>+1m</Button>{' '}
+                {!task.period &&
+                  <Button outline color='primary' size='sm' onClick={()=>{
+                    setDone.mutation({
+                      variables: {
+                        taskId: task.id,
+                        done: true,
+                      }
+                    })
+                  }}>√</Button>
+                }{' '}
+                {task.period &&
+                  <Button outline color='primary' size='sm' onClick={()=>{
+                    setDone.mutation({
+                      variables: {
+                        taskId: task.id,
+                        done: true,
+                        nextDue: moment.unix(task.due).add(1, 'month').unix(),
+                      }
+                    })
+                  }}>√+1m</Button>
+                }{' '}
+                {task.due &&
+                  <Button outline color='primary' size='sm' onClick={()=>{
+                    setDueDate.mutation({
+                      variables: {
+                        taskId: task.id,
+                        due: task.due + 7*86400
+                      }
+                    })
+                  }}>+=1w</Button>
+                }{' '}
+                {task.due &&
+                  <Button outline color='primary' size='sm' onClick={()=>{
+                    setDueDate.mutation({
+                      variables: {
+                        taskId: task.id,
+                        due: moment().add(7, 'days').unix(),
+                      }
+                    })
+                  }}>+1w</Button>
+                }{' '}
+                {task.due &&
+                  <Button outline color='primary' size='sm' onClick={()=>{
+                    setDueDate.mutation({
+                      variables: {
+                        taskId: task.id,
+                        due: moment().add(1, 'months').unix(),
+                      }
+                    })
+                  }}>+1m</Button>
+                }{' '}
               </Collapse>
             </div>
           </Col>
