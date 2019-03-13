@@ -3,7 +3,8 @@ import {
   Button,
   Container,
   Row,
-  Col
+  Col,
+  Spinner
 } from 'reactstrap'
 
 import { Query, Mutation } from 'react-apollo'
@@ -208,35 +209,51 @@ class IndexPage extends React.Component {
             <Container>
               <Row>
                 <Col lg={6}>
-                  Backlog
-                  {loadingAll && <div>loading...</div>}
+                  Today
+                  {loadingAll && <Spinner color="primary" />}
                   {!loadingAll && console.log('got data', allTasks)}
                   {queryAllError && <div>Tasks: {queryAllError.message}</div>}
-                  {(!loadingAll && !queryAllError) && <TaskList listFilter={['Backlog']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                  {(!loadingAll && !queryAllError) && <TaskList listFilter={['Today']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                </Col>
+                <Col lg={6}>
+                  Waiting on...
+                  {loadingAll && <Spinner color="primary" />}
+                  {(!loadingAll && !queryAllError) && <TaskList listFilter={['Waiting on']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                </Col>
+              </Row>
+              <Row>
+                <Col lg={6}>
+                  Backlog
+                  {loadingAll && <Spinner color="primary" />}
+                  {(!loadingAll && !queryAllError) && <TaskList listFilter={['Backlog (Personal)']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
                 </Col>
                 <Col lg={6}>
                   <Row>
                     Periodic
                     Often
+                    {loadingAll && <Spinner color="primary" />}
                     {(!loadingAll && !queryAllError) && <TaskList isPeriodic listFilter={['Often']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
                   </Row>
                   <Row>
                     Weekly
+                    {loadingAll && <Spinner color="primary" />}
                     {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Weekly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
                   </Row>
                   <Row>
                     Bi-weekly to monthly
+                    {loadingAll && <Spinner color="primary" />}
                     {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Bi-weekly to monthly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
                   </Row>
                   <Row>
                     Quarterly to Yearly
+                    {loadingAll && <Spinner color="primary" />}
                     {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Quarterly to Yearly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
                   </Row>
                 </Col>
               </Row>
               <Row>
                 <Col>
-                  {weeklyLoading && <div>loading...</div>}
+                  {weeklyLoading && <Spinner color="primary" />}
                   {(!weeklyLoading && !weeklyError) &&
                     <div>
                       <FaSync size={25} onClick={() => weeklyVisualizationRefetch()} />
