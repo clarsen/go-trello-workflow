@@ -20,13 +20,22 @@ func TaskFor(card *trello.Card) (*Task, error) {
 	}
 	createdDate := card.CreatedAt().In(local)
 	url := card.ShortUrl
+	// Strip out created date from title
+	title, created, period := workflow.GetTitleAndAttributes(card)
+	if created != nil {
+		maybeCreatedDate, err := time.Parse("2006-01-02", *created)
+		if err == nil {
+			createdDate = maybeCreatedDate
+		}
+	}
 
 	return &Task{
 		ID:          card.ID,
-		Title:       card.Name,
+		Title:       title,
 		CreatedDate: &createdDate,
 		URL:         &url,
 		Due:         card.Due,
+		Period:      period,
 	}, nil
 }
 
@@ -67,7 +76,7 @@ func SetTaskDone(taskId string, done bool) (*Task, error) {
 }
 
 func GetTasks(user, appkey, authtoken string,
-	boardlist *BoardList,
+	boardlist *BoardListInput,
 ) (tasks []Task, err error) {
 	cl, err2 := workflow.New(user, appkey, authtoken)
 	if err2 != nil {
@@ -93,7 +102,10 @@ func GetTasks(user, appkey, authtoken string,
 				err = err2
 				return
 			}
-			t.List = boardlist.List
+			t.List = &BoardList{
+				Board: boardlist.Board,
+				List:  boardlist.List,
+			}
 			tasks = append(tasks, *t)
 		}
 	} else {
@@ -116,7 +128,10 @@ func GetTasks(user, appkey, authtoken string,
 					err = err2
 					return
 				}
-				t.List = bl.List
+				t.List = &BoardList{
+					Board: bl.Board,
+					List:  bl.List,
+				}
 
 				tasks = append(tasks, *t)
 			}

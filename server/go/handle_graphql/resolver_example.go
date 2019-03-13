@@ -28,7 +28,7 @@ package handle_graphql
 //
 // type queryResolver struct{ *Resolver }
 //
-// func (r *queryResolver) Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardList) ([]Task, error) {
+// func (r *queryResolver) Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardListInput) ([]Task, error) {
 // 	panic("not implemented")
 // }
 // func (r *queryResolver) WeeklyVisualization(ctx context.Context) (*string, error) {

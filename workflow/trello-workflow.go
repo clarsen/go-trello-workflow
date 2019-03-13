@@ -62,6 +62,11 @@ type WeeklyReport struct {
 	NowHHMM              string
 }
 
+type BoardAndList struct {
+	Board string
+	List  string
+}
+
 var (
 	AllLists = []BoardAndList{
 		{"Kanban daily/weekly", "Today"},
@@ -582,18 +587,6 @@ func ListFor(cl *Client, b string, l string) (*trello.List, error) {
 	return list, nil
 }
 
-func hasDate(card *trello.Card) bool {
-	re := regexp.MustCompile("\\(\\d{4}-\\d{2}-\\d{2}\\)")
-	date := re.FindString(card.Name)
-	return date != ""
-}
-
-func isPeriodic(card *trello.Card) bool {
-	re := regexp.MustCompile("\\((po|p1w|p2w|p4w|p2m|p3m|p6m|p12m)\\)")
-	period := re.FindString(card.Name)
-	return period != ""
-}
-
 func addDateToName(card *trello.Card) {
 	log.Println("Add date to ", card.Name)
 	local, err := time.LoadLocation("America/Los_Angeles")
@@ -602,11 +595,6 @@ func addDateToName(card *trello.Card) {
 	}
 	s := time.Now().In(local).Format("(2006-01-02)")
 	card.Update(trello.Arguments{"name": card.Name + " " + s})
-}
-
-type BoardAndList struct {
-	Board string
-	List  string
 }
 
 const (
@@ -917,7 +905,7 @@ func DailyMaintenance(user, appkey, authtoken string) error {
 // New create new client
 func New(user string, appKey string, token string) (c *Client, err error) {
 	logger := logrus.New()
-	logger.SetLevel(logrus.DebugLevel)
+	logger.SetLevel(logrus.InfoLevel)
 
 	client := trello.NewClient(appKey, token)
 	client.Logger = logger

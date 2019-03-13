@@ -19,14 +19,18 @@ import MarkdownRenderer from 'react-markdown-renderer'
 
 
 export const taskQuery = gql`
-  query tasks($inBoardList: BoardList) {
+  query tasks($inBoardList: BoardListInput) {
     tasks(inBoardList: $inBoardList) {
       id
       title
       createdDate
       url
       due
-      list
+      list {
+        board
+        list
+      }
+      period
     }
   }
 `
@@ -67,7 +71,11 @@ mutation setDueDate($taskId: String!, $due: Timestamp!) {
     createdDate
     url
     due
-    list
+    list {
+      board
+      list
+    }
+    period
   }
 }
 `
@@ -88,7 +96,11 @@ mutation setDone($taskId: String!, $done: Boolean!, $nextDue: Timestamp) {
     createdDate
     url
     due
-    list
+    list {
+      board
+      list
+    }
+    period
   }
 }
 `
@@ -180,19 +192,19 @@ class IndexPage extends React.Component {
                   <Row>
                     Periodic
                     Often
-                    {(!loadingAll && !queryAllError) && <TaskList listFilter={['Often']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                    {(!loadingAll && !queryAllError) && <TaskList isPeriodic listFilter={['Often']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
                   </Row>
                   <Row>
                     Weekly
-                    {(!loadingAll && !queryAllError) && <TaskList noHeader listFilter={['Weekly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                    {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Weekly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
                   </Row>
                   <Row>
                     Bi-weekly to monthly
-                    {(!loadingAll && !queryAllError) && <TaskList noHeader listFilter={['Bi-weekly to monthly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                    {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Bi-weekly to monthly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
                   </Row>
                   <Row>
                     Quarterly to Yearly
-                    {(!loadingAll && !queryAllError) && <TaskList noHeader listFilter={['Quarterly to Yearly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                    {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Quarterly to Yearly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
                   </Row>
                 </Col>
               </Row>

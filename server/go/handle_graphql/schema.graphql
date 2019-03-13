@@ -1,21 +1,27 @@
 scalar Timestamp
 
+type BoardList {
+  board: String!
+  list: String!
+}
+
 type Task {
   id: String!
   title: String!
   createdDate: Timestamp
   url: String
   due: Timestamp
-  list: String!
+  list: BoardList
+  period: String
 }
 
-input BoardList {
+input BoardListInput {
   board: String!
   list: String!
 }
 
 type Query {
-  tasks(dueBefore: Int, inBoardList: BoardList): [Task!]
+  tasks(dueBefore: Int, inBoardList: BoardListInput): [Task!]
   weeklyVisualization: String
 }
 

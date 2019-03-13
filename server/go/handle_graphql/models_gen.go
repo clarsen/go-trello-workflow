@@ -11,11 +11,17 @@ type BoardList struct {
 	List  string `json:"list"`
 }
 
+type BoardListInput struct {
+	Board string `json:"board"`
+	List  string `json:"list"`
+}
+
 type Task struct {
 	ID          string     `json:"id"`
 	Title       string     `json:"title"`
 	CreatedDate *time.Time `json:"createdDate"`
 	URL         *string    `json:"url"`
 	Due         *time.Time `json:"due"`
-	List        string     `json:"list"`
+	List        *BoardList `json:"list"`
+	Period      *string    `json:"period"`
 }
