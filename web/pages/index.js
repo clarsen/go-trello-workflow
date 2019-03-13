@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-  Alert,
   Button,
   Container,
   Row,
@@ -12,7 +11,7 @@ import { adopt } from 'react-adopt'
 import gql from 'graphql-tag'
 import { withAlert } from 'react-alert'
 import moment from 'moment'
-
+import { FaSync } from 'react-icons/fa'
 import NavHeader from '../components/NavHeader'
 import TaskList from '../components/TaskList'
 import MarkdownRenderer from 'react-markdown-renderer'
@@ -47,20 +46,6 @@ const prepareWeeklyReviewQuery = gql`
 const prepareWeeklyReview = ({ render }) => (
   <Mutation
     mutation={prepareWeeklyReviewQuery}
-  >
-    {(mutation, result) => render({ mutation, result })}
-  </Mutation>
-)
-
-const generateWeeklyReviewTemplateQuery = gql`
-  mutation generateWeeklyTemplate {
-    generateWeeklyReviewTemplate
-  }
-`
-
-const generateWeeklyReviewTemplate = ({ render }) => (
-  <Mutation
-    mutation={generateWeeklyReviewTemplateQuery}
   >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
@@ -117,8 +102,8 @@ const setDone = ({ render }) => (
 )
 
 const weeklyVisualizationQuery = gql`
-  query weeklyVisualization {
-    weeklyVisualization
+  query weeklyVisualization($year: Int, $week: Int) {
+    weeklyVisualization(year: $year, week: $week)
   }
 `
 
@@ -131,8 +116,8 @@ const QueryContainer = adopt({
       {render}
     </Query>
   ),
-  weeklyVisualizationQuery: ({ render }) => (
-    <Query query={weeklyVisualizationQuery} ssr={false} variables={{ }}>
+  weeklyVisualizationQuery: ({ render, year, week }) => (
+    <Query query={weeklyVisualizationQuery} ssr={false} variables={{ year, week }}>
       {render}
     </Query>
   ),
@@ -154,10 +139,10 @@ class IndexPage extends React.Component {
     let nowGrace = moment().subtract(3,'days')
 
     return (
-      <QueryContainer>
+      <QueryContainer year={now.year()} week={now.isoWeek()}>
         {({
           queryAll: { loading: loadingAll, data: allTasks, error: queryAllError },
-          weeklyVisualizationQuery: { loading : weeklyLoading, data: weeklyVisualizationData, error: weeklyError },
+          weeklyVisualizationQuery: { loading : weeklyLoading, data: weeklyVisualizationData, error: weeklyError, refetch: weeklyVisualizationRefetch },
           prepareWeeklyReview,
           setDueDate,
           setDone
@@ -222,7 +207,13 @@ class IndexPage extends React.Component {
                 <Col>
                   {weeklyLoading && <div>loading...</div>}
                   {(!weeklyLoading && !weeklyError) &&
-                    <MarkdownRenderer markdown={weeklyVisualizationData.weeklyVisualization} />}
+                    <div>
+                      <FaSync size={25} onClick={() => weeklyVisualizationRefetch()} />
+                      <MarkdownRenderer className='weeklyReview' markdown={weeklyVisualizationData.weeklyVisualization} />
+                      <style jsx>{`
+                      `}</style>
+                    </div>
+                  }
                   {weeklyError && <div>Weekly review: {weeklyError.message}</div>}
                 </Col>
               </Row>

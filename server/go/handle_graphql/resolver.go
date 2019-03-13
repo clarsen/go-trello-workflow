@@ -213,7 +213,7 @@ func (r *mutationResolver) SetDone(ctx context.Context, taskID string, done bool
 	return t, err
 }
 
-func (r *queryResolver) WeeklyVisualization(ctx context.Context) (*string, error) {
+func (r *queryResolver) WeeklyVisualization(ctx context.Context, year *int, week *int) (*string, error) {
 	// setup working directory
 	wd, err := getData()
 	if err != nil {
@@ -224,6 +224,12 @@ func (r *queryResolver) WeeklyVisualization(ctx context.Context) (*string, error
 	reviewdir := "reviews"
 
 	_year, _week := time.Now().Add(-time.Hour * 72).ISOWeek()
+	if year != nil {
+		_year = *year
+	}
+	if week != nil {
+		_week = *week
+	}
 	summaryFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, _year, _week)
 	if _, err = wd.fs.Stat(summaryFname); os.IsNotExist(err) {
 		return nil, err

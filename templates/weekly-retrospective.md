@@ -42,17 +42,17 @@ The outcomes planned for the week,
 {{- range .DidToCreateOutcome }}
         - {{ . }}
 {{ end }}
-{{ if .KeepDoing }}
+{{- if .KeepDoing }}
     - What do I plan to keep doing?
 {{- range .KeepDoing }}
         - {{ . }}
-{{ end }}
-{{ end }}
-{{ if .DoDifferently }}
+{{ end -}}
+{{ end -}}
+{{- if .DoDifferently }}
     - What do I plan to stop doing/do differently?
 {{- range .DoDifferently }}
         - {{ . }}
-{{ end }}
+{{ end -}}
 {{ end }}
 {{ end }}
 

@@ -35,7 +35,7 @@ type MonthlyGoal {
 
 type Query {
   tasks(dueBefore: Int, inBoardList: BoardListInput): [Task!]
-  weeklyVisualization: String
+  weeklyVisualization(year: Int, week: Int): String
   monthlyGoals: [MonthlyGoal]
 }
 

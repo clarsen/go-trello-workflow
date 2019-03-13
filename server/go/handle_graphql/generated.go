@@ -66,7 +66,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Tasks               func(childComplexity int, dueBefore *int, inBoardList *BoardListInput) int
-		WeeklyVisualization func(childComplexity int) int
+		WeeklyVisualization func(childComplexity int, year *int, week *int) int
 		MonthlyGoals        func(childComplexity int) int
 	}
 
@@ -97,7 +97,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardListInput) ([]Task, error)
-	WeeklyVisualization(ctx context.Context) (*string, error)
+	WeeklyVisualization(ctx context.Context, year *int, week *int) (*string, error)
 	MonthlyGoals(ctx context.Context) ([]*MonthlyGoal, error)
 }
 
@@ -223,7 +223,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.WeeklyVisualization(childComplexity), true
+		args, err := ec.field_Query_weeklyVisualization_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.WeeklyVisualization(childComplexity, args["year"].(*int), args["week"].(*int)), true
 
 	case "Query.MonthlyGoals":
 		if e.complexity.Query.MonthlyGoals == nil {
@@ -430,7 +435,7 @@ type MonthlyGoal {
 
 type Query {
   tasks(dueBefore: Int, inBoardList: BoardListInput): [Task!]
-  weeklyVisualization: String
+  weeklyVisualization(year: Int, week: Int): String
   monthlyGoals: [MonthlyGoal]
 }
 
@@ -590,6 +595,28 @@ func (ec *executionContext) field_Query_tasks_args(ctx context.Context, rawArgs 
 		}
 	}
 	args["inBoardList"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_weeklyVisualization_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["year"]; ok {
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["year"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["week"]; ok {
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["week"] = arg1
 	return args, nil
 }
 
@@ -943,10 +970,17 @@ func (ec *executionContext) _Query_weeklyVisualization(ctx context.Context, fiel
 		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_weeklyVisualization_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().WeeklyVisualization(rctx)
+		return ec.resolvers.Query().WeeklyVisualization(rctx, args["year"].(*int), args["week"].(*int))
 	})
 	if resTmp == nil {
 		return graphql.Null

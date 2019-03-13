@@ -31,7 +31,7 @@ package handle_graphql
 // func (r *queryResolver) Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardListInput) ([]Task, error) {
 // 	panic("not implemented")
 // }
-// func (r *queryResolver) WeeklyVisualization(ctx context.Context) (*string, error) {
+// func (r *queryResolver) WeeklyVisualization(ctx context.Context, year *int, week *int) (*string, error) {
 // 	panic("not implemented")
 // }
 // func (r *queryResolver) MonthlyGoals(ctx context.Context) ([]*MonthlyGoal, error) {
