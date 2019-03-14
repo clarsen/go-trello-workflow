@@ -8,6 +8,8 @@ export default ({ children }) => (
       body {
         margin: 0;
         padding: 25px 50px;
+        background-color: #000;
+        color: #fff;
       }
       a {
         color: #22bad9;

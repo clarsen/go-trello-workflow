@@ -15,8 +15,13 @@ class Goal extends React.Component {
     let thisWeek = now.isoWeek()
     return (
       <React.Fragment key={goal.id}>
-        <Row>
+        <Row className='monthlyGoal'>
           <Col>Monthly: {goal.title}</Col>
+          <style jsx global>{`
+              .monthlyGoal {
+                background: #999;
+              }
+            `}</style>
         </Row>
         {goal.weeklyGoals
           .filter(g => g.week === thisWeek)
