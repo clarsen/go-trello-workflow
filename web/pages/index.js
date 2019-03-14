@@ -219,7 +219,7 @@ class IndexPage extends React.Component {
         }) =>
           <React.Fragment>
             <NavHeader/>
-            <Button color='primary' outline size='sm' onClick={() => {
+            <Button color='primary' size='sm' onClick={() => {
               prepareWeeklyReview
                 .mutation({
                   variables: {
@@ -232,7 +232,7 @@ class IndexPage extends React.Component {
                 Prepare weekly review for {now.year()}-{now.isoWeek()}
             </Button>{' '}
             {nowGrace.isoWeek() !== now.isoWeek() &&
-              <Button color='primary' outline size='sm' onClick={() => {
+              <Button color='primary' size='sm' onClick={() => {
                 prepareWeeklyReview
                   .mutation({
                     variables: {
@@ -245,7 +245,7 @@ class IndexPage extends React.Component {
                   Prepare weekly review for {nowGrace.year()}-{nowGrace.isoWeek()}
               </Button>
             }{' '}
-            <Button color='primary' outline size='sm' onClick={() => {
+            <Button color='primary' size='sm' onClick={() => {
               finishWeeklyReview
                 .mutation({
                   variables: {
@@ -269,7 +269,7 @@ class IndexPage extends React.Component {
                   {loadingAllGoals && <Spinner color="primary" />}
                   {!loadingAllGoals && console.log('got data', allGoals)}
                   {queryAllGoalsError && <div>Goals: {queryAllError.message}</div>}
-                  {!loadingAllGoals && <GoalList goals={allGoals.monthlyGoals}/>}
+                  {!loadingAllGoals && !queryAllGoalsError && <GoalList goals={allGoals.monthlyGoals}/>}
                 </Col>
               </Row>
               <Row>

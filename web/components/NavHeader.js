@@ -34,7 +34,7 @@ class Header extends React.Component {
             }
           `}</style>
         </Head>
-        <Navbar light className="sticky-top" expand="lg">
+        <Navbar className="sticky-top" expand="lg">
           <Nav className="mr-auto" navbar>
             {auth().isAuthenticated()
               ? <NavItem onClick={() => { console.log('Logout'); auth().logout() }}>
