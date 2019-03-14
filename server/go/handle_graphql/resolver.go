@@ -20,6 +20,7 @@ import (
 ) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 var appkey, authtoken, user string
+var cl *workflow.Client
 
 func init() {
 	appkey = os.Getenv("appkey")
@@ -34,16 +35,31 @@ func init() {
 	if user == "" {
 		log.Fatal("$user must be set")
 	}
-
+	_cl, err := workflow.New(user, appkey, authtoken)
+	if err != nil {
+		log.Fatal("Couldn't create new client")
+	}
+	cl = _cl
 }
 
 type Resolver struct{}
+
+func (r *Resolver) MonthlyGoal() MonthlyGoalResolver {
+	return &monthlyGoalResolver{r}
+}
 
 func (r *Resolver) Mutation() MutationResolver {
 	return &mutationResolver{r}
 }
 func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
+}
+
+type monthlyGoalResolver struct{ *Resolver }
+
+func (r *monthlyGoalResolver) WeeklyGoals(ctx context.Context, obj *MonthlyGoal) ([]WeeklyGoal, error) {
+	goals := MonthlyGoalToWeeklyGoals(obj)
+	return goals, nil
 }
 
 type mutationResolver struct{ *Resolver }
@@ -326,10 +342,30 @@ func (r *queryResolver) WeeklyVisualization(ctx context.Context, year *int, week
 	return &res, nil
 }
 
+func (r *mutationResolver) MoveTaskToList(ctx context.Context, taskID string, list BoardListInput) (*Task, error) {
+	trelloList, err := workflow.ListFor(cl, list.Board, list.List)
+	if err != nil {
+		return nil, err
+	}
+
+	card, err := cl.MoveToListOnBoard(taskID, trelloList.ID, trelloList.IDBoard)
+	if err != nil {
+		return nil, err
+	}
+	t, err := TaskFor(card)
+	if err != nil {
+		return nil, err
+	}
+	t.List = &BoardList{
+		Board: list.Board,
+		List:  list.List,
+	}
+	return t, nil
+}
+
 type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardListInput) ([]Task, error) {
-
 	tasks, err := GetTasks(user, appkey, authtoken, inBoardList)
 	if err != nil {
 		return nil, err
@@ -337,6 +373,10 @@ func (r *queryResolver) Tasks(ctx context.Context, dueBefore *int, inBoardList *
 	return tasks, nil
 }
 
-func (r *queryResolver) MonthlyGoals(ctx context.Context) ([]*MonthlyGoal, error) {
-	panic("not implemented")
+func (r *queryResolver) MonthlyGoals(ctx context.Context) ([]MonthlyGoal, error) {
+	goals, err := GetMonthlyGoals(user, appkey, authtoken)
+	if err != nil {
+		return nil, err
+	}
+	return goals, nil
 }

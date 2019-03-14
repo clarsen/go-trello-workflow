@@ -12,6 +12,9 @@ model:
 models:
   Timestamp:
     model: github.com/clarsen/go-trello-workflow/server/go/handle_graphql.Timestamp
+  MonthlyGoal:
+    model: github.com/clarsen/go-trello-workflow/server/go/handle_graphql.MonthlyGoal
+
 resolver:
   filename: resolver_example.go
   type: Resolver

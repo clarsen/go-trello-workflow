@@ -11,17 +11,24 @@ import moment from 'moment'
 class Task extends React.Component {
   constructor (props) {
     super(props)
-    this.state = { showDueDateControls: false }
+    this.state = {
+      showDueDateControls: false,
+      showMoveControls: false,
+    }
     this.toggle = this.toggle.bind(this)
+    this.toggleMove = this.toggleMove.bind(this)
   }
   toggle() {
     this.setState(state => ({ showDueDateControls: !state.showDueDateControls }))
+  }
+  toggleMove() {
+    this.setState(state => ({ showMoveControls: !state.showMoveControls }))
   }
   static header() {
     return null
   }
   render () {
-    let { task, setDueDate, setDone } = this.props
+    let { task, setDueDate, setDone, moveTaskToList } = this.props
     let color = ''
     let value = 0
     if (task.due) {
@@ -66,6 +73,48 @@ class Task extends React.Component {
               `}</style>
 
               <Collapse isOpen={this.state.showDueDateControls}>
+                <Button outline color='primary' size='sm' onClick={this.toggleMove}>Move</Button>
+                <Collapse isOpen={this.state.showMoveControls}>
+                  {task.list.list !== 'Today' &&
+                    <Button outline color='primary' size='sm' onClick={()=>{
+                      moveTaskToList.mutation({
+                        variables: {
+                          taskID: task.id,
+                          list: {
+                            board: 'Kanban daily/weekly',
+                            list: 'Today',
+                          },
+                        }
+                      })
+                    }}>Today</Button>
+                  }{' '}
+                  {task.list.list !== 'Inbox' &&
+                    <Button outline color='primary' size='sm' onClick={()=>{
+                      moveTaskToList.mutation({
+                        variables: {
+                          taskID: task.id,
+                          list: {
+                            board: 'Kanban daily/weekly',
+                            list: 'Inbox',
+                          },
+                        }
+                      })
+                    }}>Inbox</Button>
+                  }{' '}
+                  {task.list.list !== 'Waiting on' &&
+                    <Button outline color='primary' size='sm' onClick={()=>{
+                      moveTaskToList.mutation({
+                        variables: {
+                          taskID: task.id,
+                          list: {
+                            board: 'Kanban daily/weekly',
+                            list: 'Waiting on',
+                          },
+                        }
+                      })
+                    }}>Waiting on</Button>
+                  }
+                </Collapse>
                 {!task.period &&
                   <Button outline color='primary' size='sm' onClick={()=>{
                     setDone.mutation({
@@ -117,6 +166,8 @@ class Task extends React.Component {
                     })
                   }}>+1m</Button>
                 }{' '}
+                <a target="_blank" rel="noopener noreferrer" href={task.url}>link</a>{' '}
+                <a target="_blank" rel="noopener noreferrer" href={`trello://x-callback-url/showCard?x-source=go-trello-workflow&id=${task.id}`}>mobile</a>
               </Collapse>
             </div>
           </Col>

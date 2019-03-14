@@ -30,13 +30,13 @@ type WeeklyGoal {
 
 type MonthlyGoal {
   title: String!
-  weeklyGoals: [WeeklyGoal]
+  weeklyGoals: [WeeklyGoal!]
 }
 
 type Query {
   tasks(dueBefore: Int, inBoardList: BoardListInput): [Task!]
   weeklyVisualization(year: Int, week: Int): String
-  monthlyGoals: [MonthlyGoal]
+  monthlyGoals: [MonthlyGoal!]
 }
 
 type GenerateResult {
@@ -54,5 +54,5 @@ type Mutation {
   finishWeeklyReview(year: Int, week: Int): FinishResult!
   setDueDate(taskID: String!, due: Timestamp!): Task!
   setDone(taskID: String!, done: Boolean!, status: String, nextDue: Timestamp): Task!
-
+  moveTaskToList(taskID: String!, list: BoardListInput!): Task!
 }

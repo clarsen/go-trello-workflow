@@ -26,11 +26,6 @@ type GenerateResult struct {
 	Ok      bool    `json:"ok"`
 }
 
-type MonthlyGoal struct {
-	Title       string        `json:"title"`
-	WeeklyGoals []*WeeklyGoal `json:"weeklyGoals"`
-}
-
 type Task struct {
 	ID          string     `json:"id"`
 	Title       string     `json:"title"`

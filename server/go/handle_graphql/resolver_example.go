@@ -4,11 +4,20 @@ package handle_graphql
 
 // type Resolver struct{}
 //
+// func (r *Resolver) MonthlyGoal() MonthlyGoalResolver {
+// 	return &monthlyGoalResolver{r}
+// }
 // func (r *Resolver) Mutation() MutationResolver {
 // 	return &mutationResolver{r}
 // }
 // func (r *Resolver) Query() QueryResolver {
 // 	return &queryResolver{r}
+// }
+//
+// type monthlyGoalResolver struct{ *Resolver }
+//
+// func (r *monthlyGoalResolver) WeeklyGoals(ctx context.Context, obj *MonthlyGoal) ([]WeeklyGoal, error) {
+// 	panic("not implemented")
 // }
 //
 // type mutationResolver struct{ *Resolver }
@@ -25,6 +34,9 @@ package handle_graphql
 // func (r *mutationResolver) SetDone(ctx context.Context, taskID string, done bool, status *string, nextDue *time.Time) (*Task, error) {
 // 	panic("not implemented")
 // }
+// func (r *mutationResolver) MoveTaskToList(ctx context.Context, taskID string, list BoardListInput) (*Task, error) {
+// 	panic("not implemented")
+// }
 //
 // type queryResolver struct{ *Resolver }
 //
@@ -34,6 +46,6 @@ package handle_graphql
 // func (r *queryResolver) WeeklyVisualization(ctx context.Context, year *int, week *int) (*string, error) {
 // 	panic("not implemented")
 // }
-// func (r *queryResolver) MonthlyGoals(ctx context.Context) ([]*MonthlyGoal, error) {
+// func (r *queryResolver) MonthlyGoals(ctx context.Context) ([]MonthlyGoal, error) {
 // 	panic("not implemented")
 // }

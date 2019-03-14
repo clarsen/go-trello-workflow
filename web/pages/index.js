@@ -35,6 +35,22 @@ export const taskQuery = gql`
   }
 `
 
+export const monthlyGoalsQuery = gql`
+  query monthlyGoals {
+    monthlyGoals {
+      title
+      weeklyGoals {
+        title
+        week
+        tasks {
+          id
+          title
+        }
+      }
+    }
+  }
+`
+
 const prepareWeeklyReviewQuery = gql`
   mutation prepareWeeklyReview($year: Int, $week: Int) {
     prepareWeeklyReview(year: $year, week: $week) {
@@ -119,6 +135,31 @@ const setDone = ({ render }) => (
   </Mutation>
 )
 
+const moveTaskToListQuery = gql`
+mutation moveTaskToList($taskID: String!, $list: BoardListInput!) {
+  moveTaskToList(taskID: $taskID, list: $list) {
+    id
+    title
+    createdDate
+    url
+    due
+    list {
+      board
+      list
+    }
+    period
+  }
+}
+`
+
+const moveTaskToList = ({ render }) => (
+  <Mutation
+    mutation={moveTaskToListQuery}
+  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
 const weeklyVisualizationQuery = gql`
   query weeklyVisualization($year: Int, $week: Int) {
     weeklyVisualization(year: $year, week: $week)
@@ -134,6 +175,11 @@ const QueryContainer = adopt({
       {render}
     </Query>
   ),
+  queryAllGoals: ({ render }) => (
+    <Query query={monthlyGoalsQuery} ssr={false} variables={{ }}>
+      {render}
+    </Query>
+  ),
   weeklyVisualizationQuery: ({ render, year, week }) => (
     <Query query={weeklyVisualizationQuery} ssr={false} variables={{ year, week }}>
       {render}
@@ -143,6 +189,7 @@ const QueryContainer = adopt({
   finishWeeklyReview,
   setDueDate,
   setDone,
+  moveTaskToList,
 })
 
 class IndexPage extends React.Component {
@@ -161,11 +208,13 @@ class IndexPage extends React.Component {
       <QueryContainer year={now.year()} week={now.isoWeek()}>
         {({
           queryAll: { loading: loadingAll, data: allTasks, error: queryAllError },
+          queryAllGoals: { loading: loadingAllGoals, data: allGoals, error: queryAllGoalsError },
           weeklyVisualizationQuery: { loading : weeklyLoading, data: weeklyVisualizationData, error: weeklyError, refetch: weeklyVisualizationRefetch },
           prepareWeeklyReview,
           finishWeeklyReview,
           setDueDate,
-          setDone
+          setDone,
+          moveTaskToList
         }) =>
           <React.Fragment>
             <NavHeader/>
@@ -209,45 +258,53 @@ class IndexPage extends React.Component {
             <Container>
               <Row>
                 <Col lg={6}>
+                  Goals
+                  {loadingAllGoals && <Spinner color="primary" />}
+                  {!loadingAllGoals && console.log('got data', allGoals)}
+                  {queryAllGoalsError && <div>Goals: {queryAllError.message}</div>}
+                </Col>
+              </Row>
+              <Row>
+                <Col lg={6}>
                   Today
                   {loadingAll && <Spinner color="primary" />}
                   {!loadingAll && console.log('got data', allTasks)}
                   {queryAllError && <div>Tasks: {queryAllError.message}</div>}
-                  {(!loadingAll && !queryAllError) && <TaskList listFilter={['Today']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                  {(!loadingAll && !queryAllError) && <TaskList listFilter={['Today']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList}  tasks={allTasks.tasks}/>}
                 </Col>
                 <Col lg={6}>
                   Waiting on...
                   {loadingAll && <Spinner color="primary" />}
-                  {(!loadingAll && !queryAllError) && <TaskList listFilter={['Waiting on']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                  {(!loadingAll && !queryAllError) && <TaskList listFilter={['Waiting on']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList}  tasks={allTasks.tasks}/>}
                 </Col>
               </Row>
               <Row>
                 <Col lg={6}>
                   Backlog
                   {loadingAll && <Spinner color="primary" />}
-                  {(!loadingAll && !queryAllError) && <TaskList listFilter={['Backlog (Personal)']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                  {(!loadingAll && !queryAllError) && <TaskList listFilter={['Backlog (Personal)']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList}  tasks={allTasks.tasks}/>}
                 </Col>
                 <Col lg={6}>
                   <Row>
                     Periodic
                     Often
                     {loadingAll && <Spinner color="primary" />}
-                    {(!loadingAll && !queryAllError) && <TaskList isPeriodic listFilter={['Often']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                    {(!loadingAll && !queryAllError) && <TaskList isPeriodic listFilter={['Often']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList}  tasks={allTasks.tasks}/>}
                   </Row>
                   <Row>
                     Weekly
                     {loadingAll && <Spinner color="primary" />}
-                    {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Weekly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                    {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Weekly']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList}  tasks={allTasks.tasks}/>}
                   </Row>
                   <Row>
                     Bi-weekly to monthly
                     {loadingAll && <Spinner color="primary" />}
-                    {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Bi-weekly to monthly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                    {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Bi-weekly to monthly']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList}  tasks={allTasks.tasks}/>}
                   </Row>
                   <Row>
                     Quarterly to Yearly
                     {loadingAll && <Spinner color="primary" />}
-                    {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Quarterly to Yearly']} setDueDate={setDueDate} setDone={setDone} tasks={allTasks.tasks}/>}
+                    {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Quarterly to Yearly']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList}  tasks={allTasks.tasks}/>}
                   </Row>
                 </Col>
               </Row>

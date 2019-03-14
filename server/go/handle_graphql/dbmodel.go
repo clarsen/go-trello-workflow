@@ -2,11 +2,18 @@
 package handle_graphql
 
 import (
+	"log"
 	"time"
 
 	"github.com/clarsen/go-trello-workflow/workflow"
 	"github.com/clarsen/trello"
 )
+
+type MonthlyGoal struct {
+	Title string // `json:"title"`
+	// WeeklyGoals []WeeklyGoal `json:"weeklyGoals"`
+	card *trello.Card
+}
 
 // type Model_TaskInfo struct {
 // 	ID    string
@@ -36,6 +43,13 @@ func TaskFor(card *trello.Card) (*Task, error) {
 		URL:         &url,
 		Due:         card.Due,
 		Period:      period,
+	}, nil
+}
+
+func MonthlyGoalFor(card *trello.Card) (MonthlyGoal, error) {
+	title, _, _ := workflow.GetTitleAndAttributes(card)
+	return MonthlyGoal{
+		Title: title,
 	}, nil
 }
 
@@ -142,4 +156,57 @@ func GetTasks(user, appkey, authtoken string,
 	}
 
 	return tasks, nil
+}
+
+func GetMonthlyGoals(user, appkey, authtoken string) (goals []MonthlyGoal, err error) {
+	cl, err2 := workflow.New(user, appkey, authtoken)
+	if err2 != nil {
+		err = err2
+		return
+	}
+	list, err2 := workflow.ListFor(cl, "Kanban daily/weekly", "Monthly Goals")
+	if err2 != nil {
+		err = err2
+		// handle error
+		return
+	}
+	cards, err2 := list.GetCards(trello.Defaults())
+	if err2 != nil {
+		err = err2
+		// handle error
+		return
+	}
+	for _, card := range cards {
+		g, err2 := MonthlyGoalFor(card)
+		if err2 != nil {
+			err = err2
+			return
+		}
+		g.card = card
+		goals = append(goals, g)
+	}
+
+	return goals, nil
+}
+
+func MonthlyGoalToWeeklyGoals(mg *MonthlyGoal) []WeeklyGoal {
+	goals := []WeeklyGoal{}
+	for _, cl := range mg.card.Checklists {
+		log.Println("checklist:", cl)
+		for _, item := range cl.CheckItems {
+			title, week, created, _ := workflow.GetAttributesFromChecklistTitle(item.Name)
+			month := int(created.Month())
+			year, _ := created.ISOWeek()
+			wg := WeeklyGoal{
+				Title: title,
+				Year:  &year,
+				Month: &month,
+				Week:  &week,
+				Tasks: []*Task{},
+			}
+			goals = append(goals, wg)
+		}
+	}
+
+	return goals
 }
