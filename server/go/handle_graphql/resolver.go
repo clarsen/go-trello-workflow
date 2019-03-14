@@ -295,6 +295,10 @@ func (r *mutationResolver) SetDone(ctx context.Context, taskID string, done bool
 	if nextDue != nil {
 		t, err = SetTaskDue(taskID, *nextDue)
 	}
+	t.List = &BoardList{
+		Board: "Kanban daily/weekly",
+		List:  "Done this week",
+	}
 	return t, err
 }
 

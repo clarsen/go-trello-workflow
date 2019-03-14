@@ -15,6 +15,7 @@ import moment from 'moment'
 import { FaSync } from 'react-icons/fa'
 import NavHeader from '../components/NavHeader'
 import TaskList from '../components/TaskList'
+import GoalList from '../components/GoalList'
 import MarkdownRenderer from 'react-markdown-renderer'
 
 
@@ -230,18 +231,20 @@ class IndexPage extends React.Component {
             }}>
                 Prepare weekly review for {now.year()}-{now.isoWeek()}
             </Button>{' '}
-            <Button color='primary' outline size='sm' onClick={() => {
-              prepareWeeklyReview
-                .mutation({
-                  variables: {
-                    year: nowGrace.year(),
-                    week: nowGrace.isoWeek(),
-                  }
-                })
-                .then(({ data }) => alert.show(data.prepareWeeklyReview.message))
-            }}>
-                Prepare weekly review for {nowGrace.year()}-{nowGrace.isoWeek()}
-            </Button>{' '}
+            {nowGrace.isoWeek() !== now.isoWeek() &&
+              <Button color='primary' outline size='sm' onClick={() => {
+                prepareWeeklyReview
+                  .mutation({
+                    variables: {
+                      year: nowGrace.year(),
+                      week: nowGrace.isoWeek(),
+                    }
+                  })
+                  .then(({ data }) => alert.show(data.prepareWeeklyReview.message))
+              }}>
+                  Prepare weekly review for {nowGrace.year()}-{nowGrace.isoWeek()}
+              </Button>
+            }{' '}
             <Button color='primary' outline size='sm' onClick={() => {
               finishWeeklyReview
                 .mutation({
@@ -262,6 +265,7 @@ class IndexPage extends React.Component {
                   {loadingAllGoals && <Spinner color="primary" />}
                   {!loadingAllGoals && console.log('got data', allGoals)}
                   {queryAllGoalsError && <div>Goals: {queryAllError.message}</div>}
+                  {!loadingAllGoals && <GoalList goals={allGoals.monthlyGoals}/>}
                 </Col>
               </Row>
               <Row>
