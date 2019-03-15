@@ -77,6 +77,7 @@ functions:
       user: ${file(./secrets.js):getEnvVars.user}
       USER_EMAIL: ${file(./secrets.js):getEnvVars.USER_EMAIL}
       GITHUB_TOKEN: ${file(./secrets.js):getEnvVars.GITHUB_TOKEN}
+      togglAPIKey: ${file(./secrets.js):getEnvVars.togglAPIKey}
 
 package:
  exclude:
