@@ -1,5 +1,7 @@
 import React from 'react'
 import {
+  Button,
+  Collapse,
   Row,
   Col,
 } from 'reactstrap'
@@ -8,9 +10,16 @@ import moment from 'moment'
 class Goal extends React.Component {
   constructor (props) {
     super(props)
+    this.state = {
+      showControls: false,
+    }
+    this.toggle = this.toggle.bind(this)
+  }
+  toggle() {
+    this.setState(state => ({ showControls: !state.showControls }))
   }
   render () {
-    let { goal } = this.props
+    let { goal, startTimer, timerRefetch } = this.props
     let now = moment()
     let thisWeek = now.isoWeek()
     return (
@@ -27,8 +36,21 @@ class Goal extends React.Component {
           .filter(g => g.week === thisWeek)
           .sort((a,b) => b.week - a.week)
           .map((g)=>
-            <Row key={g.title+g.week}>
-              <Col>{g.week}: {g.title}</Col>
+            <Row key={g.idCard+g.idCheckitem}>
+              <Col>
+                <div className='goal' onClick={this.toggle}>{g.week}: {g.title}</div>
+                <Collapse isOpen={this.state.showControls}>
+                  <Button outline color='primary' size='sm' onClick={()=>{
+                    startTimer.mutation({
+                      variables: {
+                        taskID: g.idCard,
+                        checkitemID: g.idCheckitem
+                      }
+                    })
+                      .then(() => timerRefetch())
+                  }}>Start</Button>
+                </Collapse>
+              </Col>
             </Row>
           )
         }

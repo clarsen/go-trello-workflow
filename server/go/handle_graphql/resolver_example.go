@@ -37,6 +37,12 @@ package handle_graphql
 // func (r *mutationResolver) MoveTaskToList(ctx context.Context, taskID string, list BoardListInput) (*Task, error) {
 // 	panic("not implemented")
 // }
+// func (r *mutationResolver) StartTimer(ctx context.Context, taskID string, checkitemID *string) (*Timer, error) {
+// 	panic("not implemented")
+// }
+// func (r *mutationResolver) StopTimer(ctx context.Context, timerID string) (*bool, error) {
+// 	panic("not implemented")
+// }
 //
 // type queryResolver struct{ *Resolver }
 //
@@ -47,5 +53,8 @@ package handle_graphql
 // 	panic("not implemented")
 // }
 // func (r *queryResolver) MonthlyGoals(ctx context.Context) ([]MonthlyGoal, error) {
+// 	panic("not implemented")
+// }
+// func (r *queryResolver) ActiveTimer(ctx context.Context) (*Timer, error) {
 // 	panic("not implemented")
 // }

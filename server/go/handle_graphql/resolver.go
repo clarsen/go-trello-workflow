@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -17,10 +18,15 @@ import (
 	"gopkg.in/src-d/go-git.v4/storage/memory"
 
 	"github.com/clarsen/go-trello-workflow/workflow"
+	"github.com/clarsen/gtoggl-api/gthttp"
+	"github.com/clarsen/gtoggl-api/gttimeentry"
+	"github.com/clarsen/gtoggl-api/gtworkspace"
 ) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 var appkey, authtoken, user string
 var cl *workflow.Client
+var teCL *gttimeentry.TimeEntryClient
+var togglWorkspace *gtworkspace.Workspace
 
 func init() {
 	appkey = os.Getenv("appkey")
@@ -40,6 +46,31 @@ func init() {
 		log.Fatal("Couldn't create new client")
 	}
 	cl = _cl
+	togglAPIKey := os.Getenv("togglAPIKey")
+	if togglAPIKey == "" {
+		log.Fatal("$togglAPIKey must be set")
+	}
+
+	// logger := log.New(os.Stderr, "gthttp.trace: ", log.LstdFlags|log.Llongfile)
+	// _thc, err := gthttp.NewClient(togglAPIKey, gthttp.SetTraceLogger(logger))
+	_thc, err := gthttp.NewClient(togglAPIKey)
+	if err != nil {
+		log.Fatal("Couldn't create new gthttp client")
+	}
+
+	//	_tc := gtclient.NewClient(_thc)
+	_tec := gttimeentry.NewClient(_thc)
+	teCL = _tec
+
+	_tew := gtworkspace.NewClient(_thc)
+	wlist, err := _tew.List()
+	if err != nil {
+		log.Fatal("Couldn't get workspaces")
+	}
+	for _, w := range wlist {
+		log.Printf("%d: %s\n", w.Id, w.Name)
+		togglWorkspace = &w
+	}
 }
 
 type Resolver struct{}
@@ -300,6 +331,73 @@ func (r *mutationResolver) SetDone(ctx context.Context, taskID string, done bool
 		List:  "Done this week",
 	}
 	return t, err
+}
+
+func TimeEntryToTimer(te *gttimeentry.TimeEntry) (*Timer, error) {
+	return &Timer{
+		ID:    strconv.FormatUint(te.Id, 16),
+		Title: te.Description,
+	}, nil
+}
+
+func (r *mutationResolver) StartTimer(ctx context.Context, taskID string, checkitemID *string) (*Timer, error) {
+	log.Printf("StartTimer %s, %s\n", taskID, checkitemID)
+	card, err := cl.GetCard(taskID)
+	if err != nil {
+		return nil, err
+	}
+	title, _, _ := workflow.GetTitleAndAttributes(card)
+	if checkitemID != nil {
+		log.Printf("Find %s in checklist\n", *checkitemID)
+		log.Printf("card: %+v\n", card)
+		log.Printf("card checklists: %+v\n", card.Checklists)
+		for _, cl := range card.Checklists {
+			log.Printf("  checklist: %+v\n", cl)
+			for _, item := range cl.CheckItems {
+				log.Printf("    checkitem: %+v\n", item)
+				if item.ID == *checkitemID {
+					title, _, _, _, _ = workflow.GetAttributesFromChecklistTitle(item.Name)
+					break
+				}
+			}
+		}
+	}
+	tEntry := gttimeentry.TimeEntry{
+		Description: title,
+		Start:       time.Now(),
+		// Workspace:   togglWorkspace,
+		Wid: togglWorkspace.Id,
+	}
+	updatedTEntry, err := teCL.CreateAndStart(&tEntry)
+	if err != nil {
+		return nil, err
+	}
+	return TimeEntryToTimer(updatedTEntry)
+}
+
+func (r *mutationResolver) StopTimer(ctx context.Context, timerID string) (*bool, error) {
+	id, err := strconv.ParseUint(timerID, 16, 64)
+	if err != nil {
+		return nil, err
+	}
+	_, err = teCL.Stop(id)
+	if err != nil {
+		ret := false
+		return &ret, err
+	}
+	ret := true
+	return &ret, nil
+}
+
+func (r *queryResolver) ActiveTimer(ctx context.Context) (*Timer, error) {
+	current, err := teCL.GetCurrent()
+	if err != nil {
+		return nil, err
+	}
+	if current != nil {
+		return TimeEntryToTimer(current)
+	}
+	return nil, nil
 }
 
 func (r *queryResolver) WeeklyVisualization(ctx context.Context, year *int, week *int) (*string, error) {

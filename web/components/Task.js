@@ -28,7 +28,7 @@ class Task extends React.Component {
     return null
   }
   render () {
-    let { task, setDueDate, setDone, moveTaskToList } = this.props
+    let { task, setDueDate, setDone, moveTaskToList, startTimer, timerRefetch } = this.props
     let color = ''
     let value = 0
     if (task.due) {
@@ -115,6 +115,14 @@ class Task extends React.Component {
                     }}>Waiting on</Button>
                   }
                 </Collapse>
+                <Button outline color='primary' size='sm' onClick={()=>{
+                  startTimer.mutation({
+                    variables: {
+                      taskID: task.id,
+                    }
+                  })
+                    .then(() => timerRefetch())
+                }}>Start</Button>
                 {!task.period &&
                   <Button outline color='primary' size='sm' onClick={()=>{
                     setDone.mutation({

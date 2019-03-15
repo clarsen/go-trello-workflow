@@ -86,6 +86,14 @@ func SetTaskDone(taskId string, done bool) (*Task, error) {
 	if err != nil {
 		return nil, err
 	}
+	_, _, period := workflow.GetTitleAndAttributes(card)
+	if period == nil {
+		// mark Due done if present
+		err = card.Update(trello.Arguments{"dueComplete": "true"})
+		if err != nil {
+			return nil, err
+		}
+	}
 	return TaskFor(card)
 }
 
@@ -185,6 +193,27 @@ func GetMonthlyGoals(user, appkey, authtoken string) (goals []MonthlyGoal, err e
 		g.card = card
 		goals = append(goals, g)
 	}
+	list, err2 = workflow.ListFor(cl, "Kanban daily/weekly", "Monthly Sprints")
+	if err2 != nil {
+		err = err2
+		// handle error
+		return
+	}
+	cards, err2 = list.GetCards(trello.Defaults())
+	if err2 != nil {
+		err = err2
+		// handle error
+		return
+	}
+	for _, card := range cards {
+		g, err2 := MonthlyGoalFor(card)
+		if err2 != nil {
+			err = err2
+			return
+		}
+		g.card = card
+		goals = append(goals, g)
+	}
 
 	return goals, nil
 }
@@ -194,15 +223,17 @@ func MonthlyGoalToWeeklyGoals(mg *MonthlyGoal) []WeeklyGoal {
 	for _, cl := range mg.card.Checklists {
 		log.Println("checklist:", cl)
 		for _, item := range cl.CheckItems {
-			title, week, created, _ := workflow.GetAttributesFromChecklistTitle(item.Name)
+			title, week, created, _, _ := workflow.GetAttributesFromChecklistTitle(item.Name)
 			month := int(created.Month())
 			year, _ := created.ISOWeek()
 			wg := WeeklyGoal{
-				Title: title,
-				Year:  &year,
-				Month: &month,
-				Week:  &week,
-				Tasks: []*Task{},
+				IDCard:      item.IDCard,
+				IDCheckitem: item.ID,
+				Title:       title,
+				Year:        &year,
+				Month:       &month,
+				Week:        &week,
+				Tasks:       []*Task{},
 			}
 			goals = append(goals, wg)
 		}

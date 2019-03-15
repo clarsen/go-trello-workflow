@@ -10,21 +10,27 @@ func TestChecklistItemParsing(t *testing.T) {
 		inputTitle string
 		title      string
 		week       int
+		estDur     string
 		created    time.Time
 		status     string
 	}{
 		{"week 11: (2h) implement weekly review repository manipulation (2019-03-10) (partial)",
-			"(2h) implement weekly review repository manipulation",
+			"implement weekly review repository manipulation",
 			11,
+			"(2h)",
 			time.Date(2019, 3, 10, 0, 0, 0, 0, time.UTC),
 			"(partial)",
 		},
 	}
 	for _, tvec := range tests {
-		title, week, created, status := GetAttributesFromChecklistTitle(tvec.inputTitle)
-		if title != tvec.title || week != tvec.week || (status != nil && *status != tvec.status) || (created != nil && tvec.created != *created) {
-			t.Errorf("GetAttributesFromChecklistTitle(%+v): expected (%s,%d,%s,%+v), actual (%s,%d,%s,%+v)",
-				tvec.inputTitle, tvec.title, tvec.week, tvec.status, tvec.created, title, week, *status, *created)
+		title, week, created, estDur, status := GetAttributesFromChecklistTitle(tvec.inputTitle)
+		if title != tvec.title ||
+			week != tvec.week ||
+			(estDur != nil && *estDur != tvec.estDur) ||
+			(created != nil && tvec.created != *created) ||
+			(status != nil && *status != tvec.status) {
+			t.Errorf("GetAttributesFromChecklistTitle(%+v): expected (%s,%d,%s,%s,%+v), actual (%s,%d,%s,%s,%+v)",
+				tvec.inputTitle, tvec.title, tvec.week, tvec.estDur, tvec.status, tvec.created, title, week, *estDur, *status, *created)
 		}
 	}
 }

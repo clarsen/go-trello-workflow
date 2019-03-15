@@ -7,7 +7,7 @@ class TaskList extends React.Component {
     super(props)
   }
   render () {
-    let { listFilter, noHeader, isPeriodic, tasks, setDueDate, setDone, moveTaskToList } = this.props
+    let { listFilter, noHeader, isPeriodic, tasks, setDueDate, setDone, moveTaskToList, startTimer, timerRefetch } = this.props
     return (
       <Container>
         {!noHeader && Task.header()}
@@ -27,7 +27,7 @@ class TaskList extends React.Component {
                 return 0
               }
             })
-            .map((t) => <Task key={t.id} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList} task={t}/>)
+            .map((t) => <Task key={t.id} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList} startTimer={startTimer} timerRefetch={timerRefetch} task={t}/>)
         }
       </Container>
     )

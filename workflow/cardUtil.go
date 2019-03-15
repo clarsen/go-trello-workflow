@@ -36,8 +36,8 @@ func hasDate(card *trello.Card) bool {
 	return date != ""
 }
 
-func GetAttributesFromChecklistTitle(name string) (title string, week int, created *time.Time, status *string) {
-	re := regexp.MustCompile(`^week (\d+): (.*) (?:\((\d{4}-\d{2}-\d{2})\))(?: (\(.*\)))?$`)
+func GetAttributesFromChecklistTitle(name string) (title string, week int, created *time.Time, estDuration *string, status *string) {
+	re := regexp.MustCompile(`^week (\d+): ((\(\d+.*\)) )?(.*) (?:\((\d{4}-\d{2}-\d{2})\))(?: (\(.*\)))?$`)
 	groups := re.FindSubmatch([]byte(name))
 	if groups == nil {
 		log.Printf("match %+v didn't match\n", name)
@@ -47,15 +47,19 @@ func GetAttributesFromChecklistTitle(name string) (title string, week int, creat
 	if err != nil {
 		week = 0
 	}
-	title = string(groups[2])
 	if len(groups[3]) > 0 {
-		c, err := time.Parse("2006-01-02", string(groups[3]))
+		d := string(groups[3])
+		estDuration = &d
+	}
+	title = string(groups[4])
+	if len(groups[5]) > 0 {
+		c, err := time.Parse("2006-01-02", string(groups[5]))
 		if err == nil {
 			created = &c
 		}
 	}
-	if len(groups[4]) > 0 {
-		s := string(groups[4])
+	if len(groups[6]) > 0 {
+		s := string(groups[6])
 		status = &s
 	}
 	return
@@ -88,7 +92,7 @@ func isPeriodic(card *trello.Card) bool {
 }
 
 func (cl *Client) GetCard(cardId string) (*trello.Card, error) {
-	card, err := cl.client.GetCard(cardId, trello.Defaults())
+	card, err := cl.client.GetCard(cardId, trello.Arguments{"fields": "all"})
 	if err != nil {
 		return nil, err
 	}

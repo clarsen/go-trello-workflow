@@ -13,5 +13,6 @@ module.exports.getEnvVars = () => ({
   appkey: process.env.appkey,
   authtoken: process.env.authtoken,
   user: process.env.user,
-  USER_EMAIL: process.env.USER_EMAIL
+  USER_EMAIL: process.env.USER_EMAIL,
+  togglAPIKey: process.env.togglAPIKey,
 })

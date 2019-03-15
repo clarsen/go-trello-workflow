@@ -21,6 +21,8 @@ input BoardListInput {
 }
 
 type WeeklyGoal {
+  idCard: String!
+  idCheckitem: String!
   title: String!
   tasks: [Task]
   year: Int
@@ -33,10 +35,16 @@ type MonthlyGoal {
   weeklyGoals: [WeeklyGoal!]
 }
 
+type Timer {
+  id: String!
+  title: String!
+}
+
 type Query {
   tasks(dueBefore: Int, inBoardList: BoardListInput): [Task!]
   weeklyVisualization(year: Int, week: Int): String
   monthlyGoals: [MonthlyGoal!]
+  activeTimer: Timer
 }
 
 type GenerateResult {
@@ -55,4 +63,6 @@ type Mutation {
   setDueDate(taskID: String!, due: Timestamp!): Task!
   setDone(taskID: String!, done: Boolean!, status: String, nextDue: Timestamp): Task!
   moveTaskToList(taskID: String!, list: BoardListInput!): Task!
+  startTimer(taskID: String!, checkitemID: String): Timer!
+  stopTimer(timerID: String!): Boolean
 }

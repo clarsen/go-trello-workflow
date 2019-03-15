@@ -7,15 +7,16 @@ require (
 	github.com/aws/aws-lambda-go v1.9.0
 	github.com/aws/aws-sdk-go v0.0.0-20181118003551-50e2f0627dec
 	github.com/awslabs/aws-lambda-go-api-proxy v0.0.0-20190219202933-eb5a49d3c0ad
-	github.com/clarsen/trello v0.0.0-20190311213829-4bf40ba5da15
+	github.com/clarsen/gtoggl-api v0.0.0-20190315195523-0ffb4732cac5
+	github.com/clarsen/trello v0.0.0-20190315195451-7d6c25eeba3a
 	github.com/gliderlabs/ssh v0.1.3 // indirect
 	github.com/gobuffalo/buffalo-plugins v1.13.1 // indirect
 	github.com/gobuffalo/genny v0.0.0-20190228211236-f262bb0c783b // indirect
 	github.com/gobuffalo/packr/v2 v2.0.3
 	github.com/gobuffalo/syncx v0.0.0-20190224160051-33c29581e754 // indirect
 	github.com/golang/protobuf v1.3.0 // indirect
+	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.7.0
-	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af // indirect
 	github.com/joho/godotenv v1.3.0

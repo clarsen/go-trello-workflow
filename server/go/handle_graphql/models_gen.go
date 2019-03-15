@@ -36,10 +36,17 @@ type Task struct {
 	Period      *string    `json:"period"`
 }
 
+type Timer struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+}
+
 type WeeklyGoal struct {
-	Title string  `json:"title"`
-	Tasks []*Task `json:"tasks"`
-	Year  *int    `json:"year"`
-	Month *int    `json:"month"`
-	Week  *int    `json:"week"`
+	IDCard      string  `json:"idCard"`
+	IDCheckitem string  `json:"idCheckitem"`
+	Title       string  `json:"title"`
+	Tasks       []*Task `json:"tasks"`
+	Year        *int    `json:"year"`
+	Month       *int    `json:"month"`
+	Week        *int    `json:"week"`
 }
