@@ -315,9 +315,25 @@ class IndexPage extends React.Component {
             <FaSync size={25} onClick={() => {
               allRefetch()
               allGoalsRefetch()
+              timerRefetch()
             }}/>
 
             <Container>
+              <Row>
+                <Col lg={6}>
+                  {loadingTimer && <Spinner color="primary" />}
+                  {!loadingTimer && console.log('got data', timerData)}
+                  {timerError && <div>Timer: {timerError.message}</div>}
+                  {!loadingTimer && !timerError && <Timer stopTimer={stopTimer} timerRefetch={timerRefetch} activeTimer={timerData.activeTimer} />}
+                </Col>
+                <Col lg={6}>
+                  <div className="listTitle">Today</div>
+                  {loadingAll && <Spinner color="primary" />}
+                  {!loadingAll && console.log('got data', allTasks)}
+                  {queryAllError && <div>Tasks: {queryAllError.message}</div>}
+                  {(!loadingAll && !queryAllError) && <TaskList listFilter={['Today']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList} startTimer={startTimer} timerRefetch={timerRefetch} tasks={allTasks.tasks}/>}
+                </Col>
+              </Row>
               <Row>
                 <Col lg={6}>
                   <div className="listTitle">Goals</div>
@@ -325,21 +341,6 @@ class IndexPage extends React.Component {
                   {!loadingAllGoals && console.log('got data', allGoals)}
                   {queryAllGoalsError && <div>Goals: {queryAllError.message}</div>}
                   {!loadingAllGoals && !queryAllGoalsError && <GoalList startTimer={startTimer} timerRefetch={timerRefetch} goals={allGoals.monthlyGoals}/>}
-                </Col>
-                <Col lg={6}>
-                  {loadingTimer && <Spinner color="primary" />}
-                  {!loadingTimer && console.log('got data', timerData)}
-                  {timerError && <div>Timer: {timerError.message}</div>}
-                  {!loadingTimer && !timerError && <Timer stopTimer={stopTimer} timerRefetch={timerRefetch} activeTimer={timerData.activeTimer} />}
-                </Col>
-              </Row>
-              <Row>
-                <Col lg={6}>
-                  <div className="listTitle">Today</div>
-                  {loadingAll && <Spinner color="primary" />}
-                  {!loadingAll && console.log('got data', allTasks)}
-                  {queryAllError && <div>Tasks: {queryAllError.message}</div>}
-                  {(!loadingAll && !queryAllError) && <TaskList listFilter={['Today']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList} startTimer={startTimer} timerRefetch={timerRefetch} tasks={allTasks.tasks}/>}
                 </Col>
                 <Col lg={6}>
                   <div className="listTitle">Waiting on...</div>
