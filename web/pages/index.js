@@ -350,6 +350,13 @@ class IndexPage extends React.Component {
               </Row>
               <Row>
                 <Col lg={6}>
+                  <div className="listTitle">Done this week</div>
+                  {loadingAll && <Spinner color="primary" />}
+                  {(!loadingAll && !queryAllError) && <TaskList listFilter={['Done this week']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList}  startTimer={startTimer} timerRefetch={timerRefetch} tasks={allTasks.tasks}/>}
+                </Col>
+              </Row>
+              <Row>
+                <Col lg={6}>
                   <div className="listTitle">Backlog</div>
                   {loadingAll && <Spinner color="primary" />}
                   {(!loadingAll && !queryAllError) && <TaskList listFilter={['Backlog (Personal)']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList}  startTimer={startTimer} timerRefetch={timerRefetch} tasks={allTasks.tasks}/>}

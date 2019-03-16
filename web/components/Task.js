@@ -144,6 +144,17 @@ class Task extends React.Component {
                     })
                   }}>√+1m</Button>
                 }{' '}
+                {task.period &&
+                  <Button outline color='primary' size='sm' onClick={()=>{
+                    setDone.mutation({
+                      variables: {
+                        taskId: task.id,
+                        done: true,
+                        nextDue: moment.unix(task.due).add(2, 'weeks').unix(),
+                      }
+                    })
+                  }}>√+2w</Button>
+                }{' '}
                 {task.due &&
                   <Button outline color='primary' size='sm' onClick={()=>{
                     setDueDate.mutation({

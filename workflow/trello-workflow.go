@@ -71,6 +71,7 @@ var (
 	AllLists = []BoardAndList{
 		{"Kanban daily/weekly", "Today"},
 		{"Kanban daily/weekly", "Waiting on"},
+		{"Kanban daily/weekly", "Done this week"},
 		{"Backlog (Personal)", "Backlog"},
 		{"Backlog (Personal)", "Projects"},
 		{"Backlog (work)", "Backlog"},
