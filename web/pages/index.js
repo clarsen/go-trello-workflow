@@ -339,7 +339,7 @@ class IndexPage extends React.Component {
                   <div className="listTitle">Goals</div>
                   {loadingAllGoals && <Spinner color="primary" />}
                   {!loadingAllGoals && console.log('got data', allGoals)}
-                  {queryAllGoalsError && <div>Goals: {queryAllError.message}</div>}
+                  {queryAllGoalsError && <div>Goals: {queryAllGoalsError.message}</div>}
                   {!loadingAllGoals && !queryAllGoalsError && <GoalList startTimer={startTimer} timerRefetch={timerRefetch} goals={allGoals.monthlyGoals}/>}
                 </Col>
                 <Col lg={6}>
