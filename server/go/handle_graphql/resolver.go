@@ -289,7 +289,11 @@ func (r *mutationResolver) FinishWeeklyReview(ctx context.Context, year *int, we
 
 	if status.IsClean() {
 		log.Printf("no change, not commiting")
-		msg := fmt.Sprintf("No change in %s, not commiting", visualFname)
+		err = workflow.WeeklyCleanup(user, appkey, authtoken)
+		if err != nil {
+			return nil, err
+		}
+		msg := fmt.Sprintf("No change in %s, not commiting, reset cards", visualFname)
 		result := FinishResult{
 			Message: &msg,
 			Ok:      true,
@@ -302,7 +306,13 @@ func (r *mutationResolver) FinishWeeklyReview(ctx context.Context, year *int, we
 	if err != nil {
 		return nil, err
 	}
-	msg := fmt.Sprintf("Updated %s", visualFname)
+
+	err = workflow.WeeklyCleanup(user, appkey, authtoken)
+	if err != nil {
+		return nil, err
+	}
+
+	msg := fmt.Sprintf("Updated %s and reset cards", visualFname)
 	result := FinishResult{
 		Message: &msg,
 		Ok:      true,
@@ -364,7 +374,11 @@ func TimeEntryToTimer(te *gttimeentry.TimeEntry) (*Timer, error) {
 }
 
 func (r *mutationResolver) StartTimer(ctx context.Context, taskID string, checkitemID *string) (*Timer, error) {
-	log.Printf("StartTimer %s, %s\n", taskID, checkitemID)
+	if checkitemID != nil {
+		log.Printf("StartTimer %s, %s\n", taskID, *checkitemID)
+	} else {
+		log.Printf("StartTimer %s\n", taskID)
+	}
 	card, err := cl.GetCard(taskID)
 	if err != nil {
 		return nil, err

@@ -213,7 +213,11 @@ class IndexPage extends React.Component {
                     week: now.isoWeek(),
                   }
                 })
-                .then(({ data }) => alert.show(data.finishWeeklyReview.message))
+                .then(({ data }) => {
+                  alert.show(data.finishWeeklyReview.message)
+                  allRefetch()
+                  allGoalsRefetch()
+                })
             }}>
                 Finish weekly review for {now.year()}-{now.isoWeek()}
             </Button>{' '}

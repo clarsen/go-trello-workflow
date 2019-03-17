@@ -54,7 +54,7 @@ func ChecklistTitleFromAttributes(title string, week int, created *time.Time, es
 }
 
 func GetAttributesFromChecklistTitle(name string) (title string, week int, created *time.Time, estDuration *string, status *string) {
-	re := regexp.MustCompile(`^week (\d+): ((\(\d+.*\)) )?(.*) (?:\((\d{4}-\d{2}-\d{2})\))(?: (\(.*\)))?\s*$`)
+	re := regexp.MustCompile(`^[Ww]eek (\d+): ((\(\d+.*\)) )?(.*) (?:\((\d{4}-\d{2}-\d{2})\))(?: (\(.*\)))?\s*$`)
 	groups := re.FindSubmatch([]byte(name))
 	if groups == nil {
 		log.Printf("match '%+v' didn't match\n", name)
