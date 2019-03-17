@@ -82,6 +82,16 @@ class Goal extends React.Component {
                         variables: {
                           taskId: g.idCard,
                           checkitemID: g.idCheckitem,
+                          done: true,
+                          status: '(not done)'
+                        }
+                      })
+                    }}>X√</Button>
+                    <Button outline color='primary' size='sm' onClick={()=>{
+                      setGoalDone.mutation({
+                        variables: {
+                          taskId: g.idCard,
+                          checkitemID: g.idCheckitem,
                           done: false,
                           status: '',
                         }
