@@ -49,4 +49,6 @@ type WeeklyGoal struct {
 	Year        *int    `json:"year"`
 	Month       *int    `json:"month"`
 	Week        *int    `json:"week"`
+	Done        *bool   `json:"done"`
+	Status      *string `json:"status"`
 }

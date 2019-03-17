@@ -7,12 +7,12 @@ class GoalList extends React.Component {
     super(props)
   }
   render () {
-    let { goals, startTimer, timerRefetch } = this.props
+    let { goals, startTimer, timerRefetch, setGoalDone } = this.props
     return (
       <Container>
         {
           goals
-            .map((g) => <Goal key={g.title} startTimer={startTimer} timerRefetch={timerRefetch} goal={g}/>)
+            .map((g) => <Goal key={g.title} startTimer={startTimer} setGoalDone={setGoalDone} timerRefetch={timerRefetch} goal={g}/>)
         }
       </Container>
     )

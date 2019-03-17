@@ -43,6 +43,9 @@ package handle_graphql
 // func (r *mutationResolver) StopTimer(ctx context.Context, timerID string) (*bool, error) {
 // 	panic("not implemented")
 // }
+// func (r *mutationResolver) SetGoalDone(ctx context.Context, taskID string, checkitemID string, done bool, status *string) ([]MonthlyGoal, error) {
+// 	panic("not implemented")
+// }
 //
 // type queryResolver struct{ *Resolver }
 //

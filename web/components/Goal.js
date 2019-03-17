@@ -19,7 +19,7 @@ class Goal extends React.Component {
     this.setState(state => ({ showControls: !state.showControls }))
   }
   render () {
-    let { goal, startTimer, timerRefetch } = this.props
+    let { goal, startTimer, timerRefetch, setGoalDone } = this.props
     let now = moment()
     let thisWeek = now.isoWeek()
     return (
@@ -30,29 +30,68 @@ class Goal extends React.Component {
               .monthlyGoal {
                 background: #999;
               }
+              .goal-done {
+                text-decoration: line-through;
+              }
             `}</style>
         </Row>
         {goal.weeklyGoals
           .filter(g => g.week === thisWeek)
           .sort((a,b) => b.week - a.week)
-          .map((g)=>
-            <Row key={g.idCard+g.idCheckitem}>
-              <Col>
-                <div className='goal' onClick={this.toggle}>{g.week}: {g.title}</div>
-                <Collapse isOpen={this.state.showControls}>
-                  <Button outline color='primary' size='sm' onClick={()=>{
-                    startTimer.mutation({
-                      variables: {
-                        taskID: g.idCard,
-                        checkitemID: g.idCheckitem
-                      }
-                    })
-                      .then(() => timerRefetch())
-                  }}>Start</Button>
-                </Collapse>
-              </Col>
-            </Row>
-          )
+          .map((g)=> {
+            let doneClass = ''
+            if (g.done) {
+              doneClass='goal-done'
+            }
+            return (
+              <Row key={g.idCard+g.idCheckitem}>
+                <Col>
+                  <div className={`goal ${doneClass}`} onClick={this.toggle}>{g.week}: {g.title} {g.status}</div>
+                  <Collapse isOpen={this.state.showControls}>
+                    <Button outline color='primary' size='sm' onClick={()=>{
+                      startTimer.mutation({
+                        variables: {
+                          taskID: g.idCard,
+                          checkitemID: g.idCheckitem
+                        }
+                      })
+                        .then(() => timerRefetch())
+                    }}>Start</Button>
+                    <Button outline color='primary' size='sm' onClick={()=>{
+                      setGoalDone.mutation({
+                        variables: {
+                          taskId: g.idCard,
+                          checkitemID: g.idCheckitem,
+                          done: true,
+                          status: '(done)'
+                        }
+                      })
+                    }}>√</Button>
+                    <Button outline color='primary' size='sm' onClick={()=>{
+                      setGoalDone.mutation({
+                        variables: {
+                          taskId: g.idCard,
+                          checkitemID: g.idCheckitem,
+                          done: true,
+                          status: '(partial)',
+                        }
+                      })
+                    }}>½√</Button>
+                    <Button outline color='primary' size='sm' onClick={()=>{
+                      setGoalDone.mutation({
+                        variables: {
+                          taskId: g.idCard,
+                          checkitemID: g.idCheckitem,
+                          done: false,
+                          status: '',
+                        }
+                      })
+                    }}>X</Button>
+                  </Collapse>
+                </Col>
+              </Row>
+            )
+          })
         }
       </React.Fragment>
     )

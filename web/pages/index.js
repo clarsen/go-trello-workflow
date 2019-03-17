@@ -9,7 +9,6 @@ import {
 
 import { Query, Mutation } from 'react-apollo'
 import { adopt } from 'react-adopt'
-import gql from 'graphql-tag'
 import { withAlert } from 'react-alert'
 import moment from 'moment'
 import { FaSync } from 'react-icons/fa'
@@ -19,192 +18,96 @@ import GoalList from '../components/GoalList'
 import Timer from '../components/Timer'
 import MarkdownRenderer from 'react-markdown-renderer'
 
+import {
+  TaskQuery,
+  MonthlyGoalsQuery,
+  PrepareWeeklyReviewQuery,
+  FinishWeeklyReviewQuery,
+  SetDueDateQuery,
+  SetDoneQuery,
+  MoveTaskToListQuery,
+  WeeklyVisualizationQuery,
+  ActiveTimerQuery,
+  StopTimerQuery,
+  StartTimerQuery,
+  SetGoalDoneQuery
+} from '../lib/graphql'
 
-export const taskQuery = gql`
-  query tasks($inBoardList: BoardListInput) {
-    tasks(inBoardList: $inBoardList) {
-      id
-      title
-      createdDate
-      url
-      due
-      list {
-        board
-        list
-      }
-      period
-    }
-  }
-`
-
-export const monthlyGoalsQuery = gql`
-  query monthlyGoals {
-    monthlyGoals {
-      title
-      weeklyGoals {
-        idCard
-        idCheckitem
-        title
-        week
-        tasks {
-          id
-          title
-        }
-      }
-    }
-  }
-`
-
-const prepareWeeklyReviewQuery = gql`
-  mutation prepareWeeklyReview($year: Int, $week: Int) {
-    prepareWeeklyReview(year: $year, week: $week) {
-      message
-      ok
-    }
-  }
-`
 
 const prepareWeeklyReview = ({ render }) => (
   <Mutation
-    mutation={prepareWeeklyReviewQuery}
+    mutation={PrepareWeeklyReviewQuery}
   >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
 
-const finishWeeklyReviewQuery = gql`
-  mutation finishWeeklyReview($year: Int, $week: Int) {
-    finishWeeklyReview(year: $year, week: $week) {
-      message
-      ok
-    }
-  }
-`
 
 const finishWeeklyReview = ({ render }) => (
   <Mutation
-    mutation={finishWeeklyReviewQuery}
+    mutation={FinishWeeklyReviewQuery}
   >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
-
-const setDueDateQuery = gql`
-mutation setDueDate($taskId: String!, $due: Timestamp!) {
-  setDueDate(taskID: $taskId, due: $due) {
-    id
-    title
-    createdDate
-    url
-    due
-    list {
-      board
-      list
-    }
-    period
-  }
-}
-`
 
 const setDueDate = ({ render }) => (
   <Mutation
-    mutation={setDueDateQuery}
+    mutation={SetDueDateQuery}
   >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
 
-const setDoneQuery = gql`
-mutation setDone($taskId: String!, $done: Boolean!, $nextDue: Timestamp) {
-  setDone(taskID: $taskId, done: $done, nextDue: $nextDue) {
-    id
-    title
-    createdDate
-    url
-    due
-    list {
-      board
-      list
-    }
-    period
-  }
-}
-`
 
 const setDone = ({ render }) => (
   <Mutation
-    mutation={setDoneQuery}
+    mutation={SetDoneQuery}
   >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
 
-const moveTaskToListQuery = gql`
-mutation moveTaskToList($taskID: String!, $list: BoardListInput!) {
-  moveTaskToList(taskID: $taskID, list: $list) {
-    id
-    title
-    createdDate
-    url
-    due
-    list {
-      board
-      list
-    }
-    period
-  }
-}
-`
+const setGoalDone = ({ render }) => (
+  <Mutation
+    mutation={SetGoalDoneQuery}
+    update={(cache, { data: { setGoalDone } }) => {
+      console.log('mutation update got setGoalDone', setGoalDone)
+
+      const query = MonthlyGoalsQuery
+      const { monthlyGoals } = cache.readQuery({ query })
+      console.log('currently monthlyGoals', monthlyGoals)
+
+      cache.writeQuery({
+        query,
+        data: { monthlyGoals: setGoalDone }
+      })
+    }}  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
 
 const moveTaskToList = ({ render }) => (
   <Mutation
-    mutation={moveTaskToListQuery}
+    mutation={MoveTaskToListQuery}
   >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
 
-const weeklyVisualizationQuery = gql`
-  query weeklyVisualization($year: Int, $week: Int) {
-    weeklyVisualization(year: $year, week: $week)
-  }
-`
-
-const activeTimerQuery = gql`
-  query activeTimer {
-    activeTimer {
-      id
-      title
-    }
-  }
-`
-
-const stopTimerQuery = gql`
-  mutation stopTimer($timerID: String!) {
-    stopTimer(timerID: $timerID)
-  }
-`
 
 const stopTimer = ({ render }) => (
   <Mutation
-    mutation={stopTimerQuery}
+    mutation={StopTimerQuery}
   >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
 
-const startTimerQuery = gql`
-  mutation startTimer($taskID: String!, $checkitemID: String) {
-    startTimer(taskID: $taskID, checkitemID: $checkitemID) {
-      id
-      title
-    }
-  }
-`
-
 const startTimer = ({ render }) => (
   <Mutation
-    mutation={startTimerQuery}
+    mutation={StartTimerQuery}
   >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
@@ -217,22 +120,22 @@ const startTimer = ({ render }) => (
 
 const QueryContainer = adopt({
   queryAll: ({ render }) => (
-    <Query query={taskQuery} ssr={false} variables={{ }}>
+    <Query query={TaskQuery} ssr={false} variables={{ }}>
       {render}
     </Query>
   ),
   queryAllGoals: ({ render }) => (
-    <Query query={monthlyGoalsQuery} ssr={false} variables={{ }}>
+    <Query query={MonthlyGoalsQuery} ssr={false} variables={{ }}>
       {render}
     </Query>
   ),
   weeklyVisualizationQuery: ({ render, year, week }) => (
-    <Query query={weeklyVisualizationQuery} ssr={false} variables={{ year, week }}>
+    <Query query={WeeklyVisualizationQuery} ssr={false} variables={{ year, week }}>
       {render}
     </Query>
   ),
   queryTimer: ({ render }) => (
-    <Query query={activeTimerQuery} ssr={false} variables={{ }}>
+    <Query query={ActiveTimerQuery} ssr={false} variables={{ }}>
       {render}
     </Query>
   ),
@@ -243,6 +146,7 @@ const QueryContainer = adopt({
   moveTaskToList,
   stopTimer,
   startTimer,
+  setGoalDone,
 })
 
 class IndexPage extends React.Component {
@@ -271,6 +175,7 @@ class IndexPage extends React.Component {
           moveTaskToList,
           stopTimer,
           startTimer,
+          setGoalDone,
         }) =>
           <React.Fragment>
             <NavHeader/>
@@ -340,7 +245,7 @@ class IndexPage extends React.Component {
                   {loadingAllGoals && <Spinner color="primary" />}
                   {!loadingAllGoals && console.log('got data', allGoals)}
                   {queryAllGoalsError && <div>Goals: {queryAllGoalsError.message}</div>}
-                  {!loadingAllGoals && !queryAllGoalsError && <GoalList startTimer={startTimer} timerRefetch={timerRefetch} goals={allGoals.monthlyGoals}/>}
+                  {!loadingAllGoals && !queryAllGoalsError && <GoalList startTimer={startTimer} timerRefetch={timerRefetch} setGoalDone={setGoalDone} goals={allGoals.monthlyGoals}/>}
                 </Col>
                 <Col lg={6}>
                   <div className="listTitle">Waiting on...</div>

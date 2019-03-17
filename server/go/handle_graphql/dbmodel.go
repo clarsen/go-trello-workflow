@@ -223,9 +223,10 @@ func MonthlyGoalToWeeklyGoals(mg *MonthlyGoal) []WeeklyGoal {
 	for _, cl := range mg.card.Checklists {
 		log.Println("checklist:", cl)
 		for _, item := range cl.CheckItems {
-			title, week, created, _, _ := workflow.GetAttributesFromChecklistTitle(item.Name)
+			title, week, created, _, status := workflow.GetAttributesFromChecklistTitle(item.Name)
 			month := int(created.Month())
 			year, _ := created.ISOWeek()
+			done := item.State == "complete"
 			wg := WeeklyGoal{
 				IDCard:      item.IDCard,
 				IDCheckitem: item.ID,
@@ -234,6 +235,8 @@ func MonthlyGoalToWeeklyGoals(mg *MonthlyGoal) []WeeklyGoal {
 				Month:       &month,
 				Week:        &week,
 				Tasks:       []*Task{},
+				Done:        &done,
+				Status:      status,
 			}
 			goals = append(goals, wg)
 		}

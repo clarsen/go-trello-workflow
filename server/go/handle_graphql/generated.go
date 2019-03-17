@@ -71,6 +71,7 @@ type ComplexityRoot struct {
 		MoveTaskToList      func(childComplexity int, taskID string, list BoardListInput) int
 		StartTimer          func(childComplexity int, taskID string, checkitemID *string) int
 		StopTimer           func(childComplexity int, timerID string) int
+		SetGoalDone         func(childComplexity int, taskID string, checkitemID string, done bool, status *string) int
 	}
 
 	Query struct {
@@ -103,6 +104,8 @@ type ComplexityRoot struct {
 		Year        func(childComplexity int) int
 		Month       func(childComplexity int) int
 		Week        func(childComplexity int) int
+		Done        func(childComplexity int) int
+		Status      func(childComplexity int) int
 	}
 }
 
@@ -117,6 +120,7 @@ type MutationResolver interface {
 	MoveTaskToList(ctx context.Context, taskID string, list BoardListInput) (*Task, error)
 	StartTimer(ctx context.Context, taskID string, checkitemID *string) (*Timer, error)
 	StopTimer(ctx context.Context, timerID string) (*bool, error)
+	SetGoalDone(ctx context.Context, taskID string, checkitemID string, done bool, status *string) ([]MonthlyGoal, error)
 }
 type QueryResolver interface {
 	Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardListInput) ([]Task, error)
@@ -280,6 +284,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.StopTimer(childComplexity, args["timerID"].(string)), true
 
+	case "Mutation.SetGoalDone":
+		if e.complexity.Mutation.SetGoalDone == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setGoalDone_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetGoalDone(childComplexity, args["taskID"].(string), args["checkitemID"].(string), args["done"].(bool), args["status"].(*string)), true
+
 	case "Query.Tasks":
 		if e.complexity.Query.Tasks == nil {
 			break
@@ -430,6 +446,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.WeeklyGoal.Week(childComplexity), true
 
+	case "WeeklyGoal.Done":
+		if e.complexity.WeeklyGoal.Done == nil {
+			break
+		}
+
+		return e.complexity.WeeklyGoal.Done(childComplexity), true
+
+	case "WeeklyGoal.Status":
+		if e.complexity.WeeklyGoal.Status == nil {
+			break
+		}
+
+		return e.complexity.WeeklyGoal.Status(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -537,6 +567,8 @@ type WeeklyGoal {
   year: Int
   month: Int
   week: Int
+  done: Boolean
+  status: String
 }
 
 type MonthlyGoal {
@@ -574,6 +606,8 @@ type Mutation {
   moveTaskToList(taskID: String!, list: BoardListInput!): Task!
   startTimer(taskID: String!, checkitemID: String): Timer!
   stopTimer(timerID: String!): Boolean
+
+  setGoalDone(taskID: String!, checkitemID: String!, done: Boolean!, status: String): [MonthlyGoal!]
 }
 `},
 )
@@ -705,6 +739,44 @@ func (ec *executionContext) field_Mutation_setDueDate_args(ctx context.Context, 
 		}
 	}
 	args["due"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_setGoalDone_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["taskID"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["taskID"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["checkitemID"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["checkitemID"] = arg1
+	var arg2 bool
+	if tmp, ok := rawArgs["done"]; ok {
+		arg2, err = ec.unmarshalNBoolean2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["done"] = arg2
+	var arg3 *string
+	if tmp, ok := rawArgs["status"]; ok {
+		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["status"] = arg3
 	return args, nil
 }
 
@@ -1261,6 +1333,36 @@ func (ec *executionContext) _Mutation_stopTimer(ctx context.Context, field graph
 	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_setGoalDone(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_setGoalDone_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SetGoalDone(rctx, args["taskID"].(string), args["checkitemID"].(string), args["done"].(bool), args["status"].(*string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]MonthlyGoal)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOMonthlyGoal2ᚕgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐMonthlyGoal(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_tasks(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -1807,6 +1909,52 @@ func (ec *executionContext) _WeeklyGoal_week(ctx context.Context, field graphql.
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WeeklyGoal_done(ctx context.Context, field graphql.CollectedField, obj *WeeklyGoal) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "WeeklyGoal",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Done, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WeeklyGoal_status(ctx context.Context, field graphql.CollectedField, obj *WeeklyGoal) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "WeeklyGoal",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
@@ -2815,6 +2963,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "stopTimer":
 			out.Values[i] = ec._Mutation_stopTimer(ctx, field)
+		case "setGoalDone":
+			out.Values[i] = ec._Mutation_setGoalDone(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3008,6 +3158,10 @@ func (ec *executionContext) _WeeklyGoal(ctx context.Context, sel ast.SelectionSe
 			out.Values[i] = ec._WeeklyGoal_month(ctx, field, obj)
 		case "week":
 			out.Values[i] = ec._WeeklyGoal_week(ctx, field, obj)
+		case "done":
+			out.Values[i] = ec._WeeklyGoal_done(ctx, field, obj)
+		case "status":
+			out.Values[i] = ec._WeeklyGoal_status(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

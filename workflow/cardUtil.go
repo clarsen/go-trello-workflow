@@ -1,6 +1,7 @@
 package workflow
 
 import (
+	"fmt"
 	"log"
 	"regexp"
 	"strconv"
@@ -36,11 +37,27 @@ func hasDate(card *trello.Card) bool {
 	return date != ""
 }
 
+func ChecklistTitleFromAttributes(title string, week int, created *time.Time, estDuration *string, status *string) string {
+	cstr := ""
+	if created != nil {
+		cstr = created.Format(" (2006-01-02)")
+	}
+	e := ""
+	if estDuration != nil {
+		e = fmt.Sprintf("%s ", *estDuration)
+	}
+	s := ""
+	if status != nil {
+		s = fmt.Sprintf(" %s", *status)
+	}
+	return fmt.Sprintf("week %d: %s%s%s%s", week, e, title, cstr, s)
+}
+
 func GetAttributesFromChecklistTitle(name string) (title string, week int, created *time.Time, estDuration *string, status *string) {
-	re := regexp.MustCompile(`^week (\d+): ((\(\d+.*\)) )?(.*) (?:\((\d{4}-\d{2}-\d{2})\))(?: (\(.*\)))?$`)
+	re := regexp.MustCompile(`^week (\d+): ((\(\d+.*\)) )?(.*) (?:\((\d{4}-\d{2}-\d{2})\))(?: (\(.*\)))?\s*$`)
 	groups := re.FindSubmatch([]byte(name))
 	if groups == nil {
-		log.Printf("match %+v didn't match\n", name)
+		log.Printf("match '%+v' didn't match\n", name)
 		return
 	}
 	week, err := strconv.Atoi(string(groups[1]))

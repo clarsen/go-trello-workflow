@@ -5,6 +5,35 @@ import (
 	"time"
 )
 
+func TestChecklistItemFormatting(t *testing.T) {
+	twoHr := "(2h)"
+	created := time.Date(2019, 3, 10, 0, 0, 0, 0, time.UTC)
+	partial := "(partial)"
+	var tests = []struct {
+		title    string
+		week     int
+		estDur   *string
+		created  *time.Time
+		status   *string
+		newTitle string
+	}{
+		{"implement weekly review repository manipulation",
+			11,
+			&twoHr,
+			&created,
+			&partial,
+			"week 11: (2h) implement weekly review repository manipulation (2019-03-10) (partial)",
+		},
+	}
+	for _, tvec := range tests {
+		title := ChecklistTitleFromAttributes(tvec.title, tvec.week, tvec.created, tvec.estDur, tvec.status)
+		if title != tvec.newTitle {
+			t.Errorf("ChecklistTitleFromAttributes: expected (%s), actual (%s)",
+				tvec.newTitle, title)
+		}
+	}
+}
+
 func TestChecklistItemParsing(t *testing.T) {
 	var tests = []struct {
 		inputTitle string
@@ -20,6 +49,13 @@ func TestChecklistItemParsing(t *testing.T) {
 			"(2h)",
 			time.Date(2019, 3, 10, 0, 0, 0, 0, time.UTC),
 			"(partial)",
+		},
+		{"week 11: (2h) implement weekly review repository manipulation (2019-03-10) ",
+			"implement weekly review repository manipulation",
+			11,
+			"(2h)",
+			time.Date(2019, 3, 10, 0, 0, 0, 0, time.UTC),
+			"",
 		},
 	}
 	for _, tvec := range tests {

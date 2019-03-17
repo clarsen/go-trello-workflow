@@ -47,6 +47,8 @@ github.com/clarsen/trello v0.0.0-20190311213829-4bf40ba5da15 h1:vs1ZL13lPFmjYusT
 github.com/clarsen/trello v0.0.0-20190311213829-4bf40ba5da15/go.mod h1:9xDVD0X4DJ2aURLb3+x/ASLuqe5+5IEDGtuYLDpO/Ak=
 github.com/clarsen/trello v0.0.0-20190315195451-7d6c25eeba3a h1:1qLrGIYrsKVQhybLsSY44lu2CE594BUQX0LESrNhvFs=
 github.com/clarsen/trello v0.0.0-20190315195451-7d6c25eeba3a/go.mod h1:9xDVD0X4DJ2aURLb3+x/ASLuqe5+5IEDGtuYLDpO/Ak=
+github.com/clarsen/trello v0.0.0-20190317011040-ea2c875dccff h1:+F2ZwblNgVpA9HOylRSMuzKio32VmM3Y9d1JsjwiePU=
+github.com/clarsen/trello v0.0.0-20190317011040-ea2c875dccff/go.mod h1:9xDVD0X4DJ2aURLb3+x/ASLuqe5+5IEDGtuYLDpO/Ak=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cockroachdb/apd v1.1.0/go.mod h1:8Sl8LxpKi29FqWXR16WEFZRNSz3SoPzUzeMeY4+DwBQ=
 github.com/cockroachdb/cockroach-go v0.0.0-20181001143604-e0a95dfd547c/go.mod h1:XGLbWH/ujMcbPbhZq52Nv6UrCghb1yGn//133kEsvDk=

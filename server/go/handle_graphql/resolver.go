@@ -193,22 +193,19 @@ func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, w
 	}
 
 	templateFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", reviewdir, _year, _week)
-	if _, err = wd.fs.Stat(templateFname); err != nil {
-		// doesn't exist
-		outReview, err2 := wd.fs.Create(templateFname)
-		if err2 != nil {
-			return nil, err2
-		}
-
-		err2 = workflow.CreateEmptyWeeklyRetrospective(inSummary, outReview)
-		if err2 != nil {
-			return nil, err2
-		}
-		outReview.Close()
-
-		// add file
-		wd.worktree.Add(templateFname)
+	// overwrite if exists
+	outReview, err2 := wd.fs.Create(templateFname)
+	if err2 != nil {
+		return nil, err2
 	}
+	err2 = workflow.CreateEmptyWeeklyRetrospective(inSummary, outReview)
+	if err2 != nil {
+		return nil, err2
+	}
+	outReview.Close()
+
+	// add (possibly changed) file
+	wd.worktree.Add(templateFname)
 
 	// add (possibly changed) file
 	wd.worktree.Add(summaryFname)
@@ -331,6 +328,32 @@ func (r *mutationResolver) SetDone(ctx context.Context, taskID string, done bool
 		List:  "Done this week",
 	}
 	return t, err
+}
+
+func (r *mutationResolver) SetGoalDone(ctx context.Context, taskID string, checkitemID string, done bool, status *string) ([]MonthlyGoal, error) {
+	// update checkitem title and done state
+	card, err := cl.GetCard(taskID)
+	if err != nil {
+		return nil, err
+	}
+	for _, cl := range card.Checklists {
+		for _, item := range cl.CheckItems {
+			if item.ID == checkitemID {
+				title, week, created, estDuration, curStatus := workflow.GetAttributesFromChecklistTitle(item.Name)
+				if status == nil {
+					status = curStatus
+				}
+				s := workflow.ChecklistTitleFromAttributes(title, week, created, estDuration, status)
+				state := "incomplete"
+				if done {
+					state = "complete"
+				}
+				item.SetNameAndState(s, state)
+				break
+			}
+		}
+	}
+	return GetMonthlyGoals(user, appkey, authtoken)
 }
 
 func TimeEntryToTimer(te *gttimeentry.TimeEntry) (*Timer, error) {
