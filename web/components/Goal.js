@@ -21,7 +21,7 @@ class Goal extends React.Component {
   render () {
     let { goal, startTimer, timerRefetch, setGoalDone } = this.props
     let now = moment()
-    let thisWeek = 12 // now.isoWeek()
+    let thisWeek = now.isoWeek()
     return (
       <React.Fragment key={goal.id}>
         <Row className='monthlyGoal'>

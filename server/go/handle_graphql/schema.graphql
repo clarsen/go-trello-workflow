@@ -69,4 +69,5 @@ type Mutation {
   stopTimer(timerID: String!): Boolean
 
   setGoalDone(taskID: String!, checkitemID: String!, done: Boolean!, status: String): [MonthlyGoal!]
+  addTask(title: String!, board: String, list: String): Task!
 }

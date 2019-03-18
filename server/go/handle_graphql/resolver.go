@@ -502,6 +502,37 @@ func (r *mutationResolver) MoveTaskToList(ctx context.Context, taskID string, li
 	return t, nil
 }
 
+func (r *mutationResolver) AddTask(ctx context.Context, title string, board *string, list *string) (*Task, error) {
+	_board := "Kanban daily/weekly"
+	_list := "Today"
+	if board == nil {
+		board = &_board
+	}
+	if list == nil {
+		list = &_list
+	}
+	log.Printf("AddTask %s, %s, %s", title, *board, *list)
+	_, err := workflow.ListFor(cl, *board, *list)
+	if err != nil {
+		return nil, err
+	}
+	card, err := cl.CreateCard(title, *board, *list)
+	if err != nil {
+		return nil, err
+	}
+
+	t, err := TaskFor(card)
+	if err != nil {
+		return nil, err
+	}
+	t.List = &BoardList{
+		Board: *board,
+		List:  *list,
+	}
+	return t, nil
+
+}
+
 type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardListInput) ([]Task, error) {

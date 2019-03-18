@@ -136,3 +136,12 @@ export const StartTimerQuery = gql`
     }
   }
 `
+
+export const AddTaskQuery = gql`
+  mutation addTask($title: String!, $board: String, $list: String) {
+    addTask(title: $title, board: $board, list: $list) {
+      ...TaskWhole
+    }
+  }
+  ${fragments.task}
+`

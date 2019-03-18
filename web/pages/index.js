@@ -37,7 +37,8 @@ import {
   ActiveTimerQuery,
   StopTimerQuery,
   StartTimerQuery,
-  SetGoalDoneQuery
+  SetGoalDoneQuery,
+  AddTaskQuery
 } from '../lib/graphql'
 
 
@@ -120,6 +121,26 @@ const startTimer = ({ render }) => (
   </Mutation>
 )
 
+const addTask = ({ render }) => (
+  <Mutation
+    mutation={AddTaskQuery}
+    update={(cache, { data: { addTask } }) => {
+      console.log('mutation update got addTask', addTask)
+
+      const query = TaskQuery
+      const { tasks } = cache.readQuery({ query })
+      console.log('currently tasks', tasks)
+
+      cache.writeQuery({
+        query,
+        data: { tasks: tasks.concat([addTask]) }
+      })
+    }}
+  >
+
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
 
 
 /* eslint-disable react/display-name */
@@ -154,6 +175,7 @@ const QueryContainer = adopt({
   stopTimer,
   startTimer,
   setGoalDone,
+  addTask,
 })
 
 class IndexPage extends React.Component {
@@ -206,6 +228,7 @@ class IndexPage extends React.Component {
           stopTimer,
           startTimer,
           setGoalDone,
+          addTask,
         }) =>
           <React.Fragment>
             <NavHeader switchTab={this.switchTab} activeTab={this.state.activeTab} />
@@ -269,11 +292,15 @@ class IndexPage extends React.Component {
                       {!loadingTimer && !timerError && <Timer stopTimer={stopTimer} timerRefetch={timerRefetch} activeTimer={timerData.activeTimer} />}
                     </Col>
                     <Col lg={6}>
-                      <div className="listTitle">Today</div>
-                      {loadingAll && <Spinner color="primary" />}
-                      {!loadingAll && console.log('got data', allTasks)}
-                      {queryAllError && <div>Tasks: {queryAllError.message}</div>}
-                      {(!loadingAll && !queryAllError) && <TaskList listFilter={['Today']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList} startTimer={startTimer} timerRefetch={timerRefetch} tasks={allTasks.tasks}/>}
+                      <TaskList
+                        loading={loadingAll} error={queryAllError} data={allTasks}
+                        listTitle={'Today'} listFilter={['Today']}
+                        setDueDate={setDueDate} setDone={setDone}
+                        moveTaskToList={moveTaskToList} startTimer={startTimer}
+                        timerRefetch={timerRefetch}
+                        addTask={addTask} board={'Kanban daily/weekly'} list={'Today'}
+                      />
+
                     </Col>
                   </Row>
                   <Row>
@@ -285,45 +312,75 @@ class IndexPage extends React.Component {
                       {!loadingAllGoals && !queryAllGoalsError && <GoalList startTimer={startTimer} timerRefetch={timerRefetch} setGoalDone={setGoalDone} goals={allGoals.monthlyGoals}/>}
                     </Col>
                     <Col lg={6}>
-                      <div className="listTitle">Waiting on...</div>
-                      {loadingAll && <Spinner color="primary" />}
-                      {(!loadingAll && !queryAllError) && <TaskList listFilter={['Waiting on']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList}  startTimer={startTimer} timerRefetch={timerRefetch} tasks={allTasks.tasks}/>}
+                      <TaskList
+                        loading={loadingAll} error={queryAllError} data={allTasks}
+                        listTitle={'Waiting on...'} listFilter={['Waiting on']}
+                        setDueDate={setDueDate} setDone={setDone}
+                        moveTaskToList={moveTaskToList} startTimer={startTimer}
+                        timerRefetch={timerRefetch}
+                        addTask={addTask} board={'Kanban daily/weekly'} list={'Waiting on'}
+                      />
                     </Col>
                   </Row>
                   <Row>
                     <Col lg={6}>
-                      <div className="listTitle">Done this week</div>
-                      {loadingAll && <Spinner color="primary" />}
-                      {(!loadingAll && !queryAllError) && <TaskList listFilter={['Done this week']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList}  startTimer={startTimer} timerRefetch={timerRefetch} tasks={allTasks.tasks}/>}
+                      <TaskList
+                        loading={loadingAll} error={queryAllError} data={allTasks}
+                        listTitle={'Done this week'} listFilter={['Done this week']}
+                        setDueDate={setDueDate} setDone={setDone}
+                        moveTaskToList={moveTaskToList} startTimer={startTimer}
+                        timerRefetch={timerRefetch}
+                      />
                     </Col>
                   </Row>
                   <Row>
                     <Col lg={6}>
-                      <div className="listTitle">Backlog</div>
-                      {loadingAll && <Spinner color="primary" />}
-                      {(!loadingAll && !queryAllError) && <TaskList listFilter={['Backlog (Personal)']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList}  startTimer={startTimer} timerRefetch={timerRefetch} tasks={allTasks.tasks}/>}
+                      <TaskList
+                        loading={loadingAll} error={queryAllError} data={allTasks}
+                        listTitle={'Backlog'} listFilter={['Backlog (Personal)']}
+                        setDueDate={setDueDate} setDone={setDone}
+                        moveTaskToList={moveTaskToList} startTimer={startTimer}
+                        timerRefetch={timerRefetch}
+                        addTask={addTask} board={'Backlog (Personal)'} list={'Backlog'}
+                      />
                     </Col>
                     <Col lg={6}>
                       <Row>
                         <div className="listTitle">Periodic</div>
-                        <div className="listSubGroupTitle">Often</div>
-                        {loadingAll && <Spinner color="primary" />}
-                        {(!loadingAll && !queryAllError) && <TaskList isPeriodic listFilter={['Often']} setDueDate={setDueDate} setDone={setDone} moveTaskToList={moveTaskToList}  startTimer={startTimer} timerRefetch={timerRefetch} tasks={allTasks.tasks}/>}
+                        <TaskList
+                          loading={loadingAll} error={queryAllError} data={allTasks}
+                          listSubGroupTitle={'Often'} listFilter={['Often']}
+                          setDueDate={setDueDate} setDone={setDone}
+                          moveTaskToList={moveTaskToList} startTimer={startTimer}
+                          timerRefetch={timerRefetch}
+                        />
                       </Row>
                       <Row>
-                        <div className="listSubGroupTitle">Weekly</div>
-                        {loadingAll && <Spinner color="primary" />}
-                        {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Weekly']} setDueDate={setDueDate} setDone={setDone} startTimer={startTimer} timerRefetch={timerRefetch} moveTaskToList={moveTaskToList}  tasks={allTasks.tasks}/>}
+                        <TaskList
+                          loading={loadingAll} error={queryAllError} data={allTasks}
+                          listSubGroupTitle={'Weekly'} listFilter={['Weekly']}
+                          setDueDate={setDueDate} setDone={setDone}
+                          moveTaskToList={moveTaskToList} startTimer={startTimer}
+                          timerRefetch={timerRefetch}
+                        />
                       </Row>
                       <Row>
-                        <div className="listSubGroupTitle">Bi-weekly to monthly</div>
-                        {loadingAll && <Spinner color="primary" />}
-                        {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Bi-weekly to monthly']} setDueDate={setDueDate} setDone={setDone} startTimer={startTimer} timerRefetch={timerRefetch} moveTaskToList={moveTaskToList}  tasks={allTasks.tasks}/>}
+                        <TaskList
+                          loading={loadingAll} error={queryAllError} data={allTasks}
+                          listSubGroupTitle={'Bi-weekly to monthly'} listFilter={['Bi-weekly to monthly']}
+                          setDueDate={setDueDate} setDone={setDone}
+                          moveTaskToList={moveTaskToList} startTimer={startTimer}
+                          timerRefetch={timerRefetch}
+                        />
                       </Row>
                       <Row>
-                        <div className="listSubGroupTitle">Quarterly to Yearly</div>
-                        {loadingAll && <Spinner color="primary" />}
-                        {(!loadingAll && !queryAllError) && <TaskList noHeader isPeriodic listFilter={['Quarterly to Yearly']} setDueDate={setDueDate} setDone={setDone} startTimer={startTimer} timerRefetch={timerRefetch} moveTaskToList={moveTaskToList}  tasks={allTasks.tasks}/>}
+                        <TaskList
+                          loading={loadingAll} error={queryAllError} data={allTasks}
+                          listSubGroupTitle={'Quarterly to Yearly'} listFilter={['Quarterly to Yearly']}
+                          setDueDate={setDueDate} setDone={setDone}
+                          moveTaskToList={moveTaskToList} startTimer={startTimer}
+                          timerRefetch={timerRefetch}
+                        />
                       </Row>
                     </Col>
                   </Row>
@@ -354,14 +411,6 @@ class IndexPage extends React.Component {
               </TabContent>
             </Container>
             <style jsx global>{`
-              .listSubGroupTitle {
-                background: #999;
-              }
-              .listTitle {
-                background: #bbb;
-                width: 100%;
-                color: #fff;
-              }
               .weeklyReview {
                 border: 1px solid #fff;
               }

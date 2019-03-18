@@ -115,3 +115,22 @@ func (cl *Client) GetCard(cardId string) (*trello.Card, error) {
 	}
 	return card, nil
 }
+
+func (cl *Client) CreateCard(title string, board string, list string) (*trello.Card, error) {
+	l, err := ListFor(cl, board, list)
+	if err != nil {
+		return nil, err
+	}
+	created := time.Now()
+	cstr := created.Format(" (2006-01-02)")
+	card := trello.Card{
+		Name:   fmt.Sprintf("%s%s", title, cstr),
+		Pos:    0.0,
+		IDList: l.ID,
+	}
+	err = cl.client.CreateCard(&card, trello.Arguments{"pos": "top"})
+	if err != nil {
+		return nil, err
+	}
+	return &card, err
+}

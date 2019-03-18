@@ -72,6 +72,7 @@ type ComplexityRoot struct {
 		StartTimer          func(childComplexity int, taskID string, checkitemID *string) int
 		StopTimer           func(childComplexity int, timerID string) int
 		SetGoalDone         func(childComplexity int, taskID string, checkitemID string, done bool, status *string) int
+		AddTask             func(childComplexity int, title string, board *string, list *string) int
 	}
 
 	Query struct {
@@ -121,6 +122,7 @@ type MutationResolver interface {
 	StartTimer(ctx context.Context, taskID string, checkitemID *string) (*Timer, error)
 	StopTimer(ctx context.Context, timerID string) (*bool, error)
 	SetGoalDone(ctx context.Context, taskID string, checkitemID string, done bool, status *string) ([]MonthlyGoal, error)
+	AddTask(ctx context.Context, title string, board *string, list *string) (*Task, error)
 }
 type QueryResolver interface {
 	Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardListInput) ([]Task, error)
@@ -295,6 +297,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SetGoalDone(childComplexity, args["taskID"].(string), args["checkitemID"].(string), args["done"].(bool), args["status"].(*string)), true
+
+	case "Mutation.AddTask":
+		if e.complexity.Mutation.AddTask == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addTask_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddTask(childComplexity, args["title"].(string), args["board"].(*string), args["list"].(*string)), true
 
 	case "Query.Tasks":
 		if e.complexity.Query.Tasks == nil {
@@ -608,6 +622,7 @@ type Mutation {
   stopTimer(timerID: String!): Boolean
 
   setGoalDone(taskID: String!, checkitemID: String!, done: Boolean!, status: String): [MonthlyGoal!]
+  addTask(title: String!, board: String, list: String): Task!
 }
 `},
 )
@@ -615,6 +630,36 @@ type Mutation {
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_addTask_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["title"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["title"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["board"]; ok {
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["board"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["list"]; ok {
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["list"] = arg2
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_finishWeeklyReview_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1361,6 +1406,39 @@ func (ec *executionContext) _Mutation_setGoalDone(ctx context.Context, field gra
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOMonthlyGoal2ᚕgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐMonthlyGoal(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_addTask(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_addTask_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddTask(rctx, args["title"].(string), args["board"].(*string), args["list"].(*string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Task)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNTask2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐTask(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_tasks(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -2965,6 +3043,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_stopTimer(ctx, field)
 		case "setGoalDone":
 			out.Values[i] = ec._Mutation_setGoalDone(ctx, field)
+		case "addTask":
+			out.Values[i] = ec._Mutation_addTask(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
