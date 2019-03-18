@@ -49,6 +49,11 @@ class Header extends React.Component {
                 Weekly Review
               </NavLink>
             </NavItem>
+            <NavItem>
+              <NavLink className={classnames({ active: activeTab === 'timeReport'})} onClick={()=> switchTab('timeReport')}>
+                Time report
+              </NavLink>
+            </NavItem>
           </Nav>
           <Nav className="ml-auto" navbar>
             {auth().isAuthenticated()

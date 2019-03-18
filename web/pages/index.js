@@ -19,9 +19,11 @@ import TaskList from '../components/TaskList'
 import GoalList from '../components/GoalList'
 import Timer from '../components/Timer'
 import MarkdownRenderer from 'react-markdown-renderer'
+import fetchTimeReport from '../lib/timevis'
 
 import auth from '../lib/auth0'
 import redirect from '../lib/redirect'
+import renderHTML from 'react-render-html'
 
 import {
   TaskQuery,
@@ -161,15 +163,22 @@ class IndexPage extends React.Component {
       console.log('not authenticated')
       redirect({}, '/login')
     }
+    fetchTimeReport()
+      .then(data => {
+        this.setState({timeReport: data.message})
+      })
   }
+
   constructor (props) {
     super(props)
     this.state = {
       data: null,
       activeTab: 'board',
+      timeReport: null
     }
     this.switchTab = this.switchTab.bind(this)
   }
+
   switchTab (tab) {
     if (this.state.activeTab !== tab) {
       this.setState({
@@ -332,6 +341,15 @@ class IndexPage extends React.Component {
                       {weeklyError && <div>Weekly review: {weeklyError.message}</div>}
                     </Col>
                   </Row>
+                </TabPane>
+                <TabPane tabId="timeReport">
+                  <FaSync size={25} onClick={() => {
+                    fetchTimeReport()
+                      .then(data => {
+                        this.setState({timeReport: data.message})
+                      })
+                  }} />
+                  {this.state.timeReport ? renderHTML(this.state.timeReport) : 'Loading...'}
                 </TabPane>
               </TabContent>
             </Container>
