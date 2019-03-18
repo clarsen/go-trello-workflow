@@ -15,6 +15,7 @@ server.use('/_next', express.static(path.join(__dirname, '.next')))
 server.get('/', (req, res) => app.render(req, res, '/'))
 // catch auth callback
 server.get('/callback', (req, res) => app.render(req, res, '/callback'))
+server.get('/login', (req, res) => app.render(req, res, '/login'))
 
 // default
 server.get('*', (req, res) => handle(req, res))

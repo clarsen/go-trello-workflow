@@ -6,6 +6,8 @@ import {
   NavItem,
   NavLink,
 } from 'reactstrap'
+import classnames from 'classnames'
+
 import { withRouter } from 'next/router'
 import auth from '../lib/auth0'
 
@@ -15,6 +17,7 @@ class Header extends React.Component {
   }
   render () {
     // let { router : { pathname }, queue } = this.props
+    let { switchTab, activeTab } = this.props
     return (
       <React.Fragment>
         <Head>
@@ -34,8 +37,20 @@ class Header extends React.Component {
             }
           `}</style>
         </Head>
-        <Navbar className="sticky-top" expand="lg">
-          <Nav className="mr-auto" navbar>
+        <Navbar expand="lg">
+          <Nav className="mr-auto" tabs>
+            <NavItem>
+              <NavLink className={classnames({ active: activeTab === 'board'})} onClick={()=> switchTab('board')}>
+                Workboard
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink className={classnames({ active: activeTab === 'weeklyReview'})} onClick={()=> switchTab('weeklyReview')}>
+                Weekly Review
+              </NavLink>
+            </NavItem>
+          </Nav>
+          <Nav className="ml-auto" navbar>
             {auth().isAuthenticated()
               ? <NavItem onClick={() => { console.log('Logout'); auth().logout() }}>
                 <NavLink to="#" className="nav-link">
