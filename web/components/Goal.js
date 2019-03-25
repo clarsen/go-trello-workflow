@@ -36,7 +36,7 @@ class Goal extends React.Component {
             `}</style>
         </Row>
         {goal.weeklyGoals
-          .filter(g => g.week === thisWeek)
+          .filter(g => (g.week === thisWeek || g.week === thisWeek+1))
           .sort((a,b) => b.week - a.week)
           .map((g)=> {
             let doneClass = ''
