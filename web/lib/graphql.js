@@ -170,3 +170,19 @@ export const PrepareMonthlyReview = ({ render }) => (
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
+
+const finishMonthlyReviewQuery = gql`
+  mutation finishMonthlyReview($year: Int, $month: Int) {
+    finishMonthlyReview(year: $year, month: $month) {
+      message
+      ok
+    }
+  }
+`
+export const FinishMonthlyReview = ({ render }) => (
+  <Mutation
+    mutation={finishMonthlyReviewQuery}
+  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)

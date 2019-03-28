@@ -52,6 +52,9 @@ package handle_graphql
 // func (r *mutationResolver) PrepareMonthlyReview(ctx context.Context, year *int, month *int) (*GenerateResult, error) {
 // 	panic("not implemented")
 // }
+// func (r *mutationResolver) FinishMonthlyReview(ctx context.Context, year *int, month *int) (*FinishResult, error) {
+// 	panic("not implemented")
+// }
 //
 // type queryResolver struct{ *Resolver }
 //

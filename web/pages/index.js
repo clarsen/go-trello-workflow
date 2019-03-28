@@ -40,7 +40,8 @@ import {
   StartTimerQuery,
   SetGoalDoneQuery,
   AddTaskQuery,
-  PrepareMonthlyReview
+  PrepareMonthlyReview,
+  FinishMonthlyReview
 } from '../lib/graphql'
 
 
@@ -177,6 +178,7 @@ const QueryContainer = adopt({
   prepareWeeklyReview,
   finishWeeklyReview,
   PrepareMonthlyReview,
+  FinishMonthlyReview,
   setDueDate,
   setDone,
   moveTaskToList,
@@ -234,6 +236,7 @@ class IndexPage extends React.Component {
           prepareWeeklyReview,
           finishWeeklyReview,
           PrepareMonthlyReview,
+          FinishMonthlyReview,
           setDueDate,
           setDone,
           moveTaskToList,
@@ -322,6 +325,18 @@ class IndexPage extends React.Component {
                         Prepare monthly review for {now.year()}-{monthNext}
                     </Button>
                   }{' '}
+                  <Button color='primary' size='sm' onClick={() => {
+                    FinishMonthlyReview
+                      .mutation({
+                        variables: {
+                          year: nowGraceMonth.year(),
+                          month: nowGraceMonth.month(),
+                        }
+                      })
+                      .then(({ data }) => alert.show(data.finishMonthlyReview.message))
+                  }}>
+                      Finish monthly review for {nowGraceMonth.year()}-{nowGraceMonth.month()}
+                  </Button>{' '}
                   <Row>
                     <Col lg={6}>
                       {loadingTimer && <Spinner color="primary" />}

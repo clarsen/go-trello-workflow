@@ -30,6 +30,15 @@ var cl *workflow.Client
 var teCL *gttimeentry.TimeEntryClient
 var togglWorkspace *gtworkspace.Workspace
 
+const (
+	// SummaryDir is where dumped data about tasks is written
+	SummaryDir = "task-summary"
+	// ReviewDir is where templates are written and updated by humans.
+	ReviewDir = "reviews"
+	// ReviewVisDir is where templates from ReviewDir are processed into human friendly documents
+	ReviewVisDir = "visualized_reviews"
+)
+
 func init() {
 	appkey = os.Getenv("appkey")
 	if appkey == "" {
@@ -172,8 +181,8 @@ func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, w
 	if week != nil {
 		_week = *week
 	}
-	summarydir := "task-summary"
-	summaryFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, _year, _week)
+
+	summaryFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", SummaryDir, _year, _week)
 
 	out, err := wd.fs.Create(summaryFname)
 	if err != nil {
@@ -187,14 +196,12 @@ func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, w
 		return nil, err
 	}
 
-	reviewdir := "reviews"
-
 	inSummary, err2 := wd.fs.Open(summaryFname)
 	if err2 != nil {
 		return nil, err2
 	}
 
-	templateFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", reviewdir, _year, _week)
+	templateFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", ReviewDir, _year, _week)
 	// overwrite if exists
 	outReview, err2 := wd.fs.Create(templateFname)
 	if err2 != nil {
@@ -255,22 +262,19 @@ func (r *mutationResolver) FinishWeeklyReview(ctx context.Context, year *int, we
 		_week = *week
 	}
 
-	summarydir := "task-summary"
-	summaryFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, _year, _week)
+	summaryFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", SummaryDir, _year, _week)
 	inSummary, err2 := wd.fs.Open(summaryFname)
 	if err2 != nil {
 		return nil, err2
 	}
 
-	reviewdir := "reviews"
-	reviewFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", reviewdir, _year, _week)
+	reviewFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", ReviewDir, _year, _week)
 	inReview, err2 := wd.fs.Open(reviewFname)
 	if err2 != nil {
 		return nil, err2
 	}
 
-	reviewvisdir := "visualized_reviews"
-	visualFname := fmt.Sprintf("%s/weekly-%d-%02d.md", reviewvisdir, _year, _week)
+	visualFname := fmt.Sprintf("%s/weekly-%d-%02d.md", ReviewVisDir, _year, _week)
 	out, err2 := wd.fs.Create(visualFname)
 	if err2 != nil {
 		return nil, err2
@@ -446,9 +450,6 @@ func (r *queryResolver) WeeklyVisualization(ctx context.Context, year *int, week
 		return nil, err
 	}
 
-	summarydir := "task-summary"
-	reviewdir := "reviews"
-
 	_year, _week := time.Now().Add(-time.Hour * 72).ISOWeek()
 	if year != nil {
 		_year = *year
@@ -456,7 +457,7 @@ func (r *queryResolver) WeeklyVisualization(ctx context.Context, year *int, week
 	if week != nil {
 		_week = *week
 	}
-	summaryFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, _year, _week)
+	summaryFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", SummaryDir, _year, _week)
 	if _, err = wd.fs.Stat(summaryFname); os.IsNotExist(err) {
 		return nil, err
 	}
@@ -464,7 +465,7 @@ func (r *queryResolver) WeeklyVisualization(ctx context.Context, year *int, week
 	if err2 != nil {
 		return nil, err2
 	}
-	reviewFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", reviewdir, _year, _week)
+	reviewFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", ReviewDir, _year, _week)
 	if _, err = wd.fs.Stat(reviewFname); os.IsNotExist(err) {
 		return nil, err
 	}
@@ -570,15 +571,11 @@ func (r *mutationResolver) PrepareMonthlyReview(ctx context.Context, year *int, 
 		_month = *month
 	}
 
-	summarydir := "task-summary"
-	reviewdir := "reviews"
-	reviewvisdir := "visualized_reviews"
-
 	var inSummaries [][]byte
 	var inReviews []workflow.WeeklyReviewData
 
 	for week := 1; week <= 53; week++ {
-		weekSummary := fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, _year, week)
+		weekSummary := fmt.Sprintf("%s/weekly-%d-%02d.yaml", SummaryDir, _year, week)
 		if _, err1 := wd.fs.Stat(weekSummary); os.IsNotExist(err1) {
 			// log.Printf("%+v doesn't exist, skipping", weekSummary)
 			continue
@@ -601,7 +598,7 @@ func (r *mutationResolver) PrepareMonthlyReview(ctx context.Context, year *int, 
 		}
 
 		// get weekly review for month
-		reviewFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", reviewdir, _year, week)
+		reviewFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", ReviewDir, _year, week)
 		if _, err = wd.fs.Stat(reviewFname); os.IsNotExist(err) {
 			log.Printf("%+v doesn't exist", reviewFname)
 			continue
@@ -625,7 +622,7 @@ func (r *mutationResolver) PrepareMonthlyReview(ctx context.Context, year *int, 
 		}
 	}
 
-	monthlySummary := fmt.Sprintf("%s/monthly-%d-%02d.yaml", summarydir, _year, _month)
+	monthlySummary := fmt.Sprintf("%s/monthly-%d-%02d.yaml", SummaryDir, _year, _month)
 	out, err := wd.fs.Create(monthlySummary)
 	if err != nil {
 		log.Printf("PrepareMonthlyReview %+v", err)
@@ -646,7 +643,7 @@ func (r *mutationResolver) PrepareMonthlyReview(ctx context.Context, year *int, 
 		return nil, err
 	}
 
-	templateFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", reviewdir, _year, _month)
+	templateFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", ReviewDir, _year, _month)
 	outReview, err2 := wd.fs.Create(templateFname)
 	if err2 != nil {
 		log.Printf("Create %+v, %+v", templateFname, err2)
@@ -665,7 +662,7 @@ func (r *mutationResolver) PrepareMonthlyReview(ctx context.Context, year *int, 
 		log.Printf("Open %+v, %+v", monthlySummary, err)
 		return nil, err
 	}
-	monthlyInputFname := fmt.Sprintf("%s/monthlyinput-%d-%02d.md", reviewvisdir, _year, _month)
+	monthlyInputFname := fmt.Sprintf("%s/monthlyinput-%d-%02d.md", ReviewVisDir, _year, _month)
 	outMonthlyVisInput, err := wd.fs.Create(monthlyInputFname)
 	if err != nil {
 		log.Printf("Create %+v, %+v", monthlyInputFname, err)
@@ -725,17 +722,14 @@ func (r *queryResolver) MonthlyVisualization(ctx context.Context, year *int, mon
 		_month = *month
 	}
 
-	summarydir := "task-summary"
-	reviewdir := "reviews"
-
-	summaryFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", summarydir, _year, _month)
+	summaryFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", SummaryDir, _year, _month)
 	inSummary, err := wd.fs.Open(summaryFname)
 	if err != nil {
 		log.Printf("Open %+v, %+v", summaryFname, err)
 		return nil, err
 	}
 
-	reviewFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", reviewdir, _year, _month)
+	reviewFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", ReviewDir, _year, _month)
 	inReview, err := wd.fs.Open(reviewFname)
 	if err != nil {
 		log.Printf("Open %+v, %+v", reviewFname, err)
@@ -749,4 +743,84 @@ func (r *queryResolver) MonthlyVisualization(ctx context.Context, year *int, mon
 	}
 	res := out.String()
 	return &res, nil
+}
+
+func (r *mutationResolver) FinishMonthlyReview(ctx context.Context, year *int, month *int) (*FinishResult, error) {
+	// setup working directory
+	wd, err := getData()
+	if err != nil {
+		return nil, err
+	}
+
+	_year := time.Now().Year()
+	_month := int(time.Now().Month())
+	if year != nil {
+		_year = *year
+	}
+	if month != nil {
+		_month = *month
+	}
+
+	summaryFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", SummaryDir, _year, _month)
+	inSummary, err2 := wd.fs.Open(summaryFname)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	reviewFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", ReviewDir, _year, _month)
+	inReview, err2 := wd.fs.Open(reviewFname)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	visualFname := fmt.Sprintf("%s/monthly-%d-%02d.md", ReviewVisDir, _year, _month)
+	out, err2 := wd.fs.Create(visualFname)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	log.Printf("generating %s\n", visualFname)
+	err2 = workflow.VisualizeMonthlyRetrospective(inSummary, inReview, out)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	// add (possibly changed) file
+	wd.worktree.Add(visualFname)
+	status, err := wd.worktree.Status()
+	if err != nil {
+		return nil, err
+	}
+
+	if status.IsClean() {
+		log.Printf("no change, not commiting")
+		err = workflow.WeeklyCleanup(user, appkey, authtoken)
+		if err != nil {
+			return nil, err
+		}
+		msg := fmt.Sprintf("No change in %s, not commiting, reset cards", visualFname)
+		result := FinishResult{
+			Message: &msg,
+			Ok:      true,
+		}
+		return &result, nil
+	}
+
+	// commit and push
+	err = wd.commitAndPushData(fmt.Sprintf("visualized review for %04d-%02d", _year, _month))
+	if err != nil {
+		return nil, err
+	}
+
+	err = workflow.MonthlyCleanup(user, appkey, authtoken)
+	if err != nil {
+		return nil, err
+	}
+
+	msg := fmt.Sprintf("Updated %s and reset cards", visualFname)
+	result := FinishResult{
+		Message: &msg,
+		Ok:      true,
+	}
+	return &result, nil
 }

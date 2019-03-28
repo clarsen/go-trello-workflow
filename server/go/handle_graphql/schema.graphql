@@ -73,4 +73,5 @@ type Mutation {
   addTask(title: String!, board: String, list: String): Task!
 
   prepareMonthlyReview(year: Int, month: Int): GenerateResult!
+  finishMonthlyReview(year: Int, month: Int): FinishResult!
 }

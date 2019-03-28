@@ -74,6 +74,7 @@ type ComplexityRoot struct {
 		SetGoalDone          func(childComplexity int, taskID string, checkitemID string, done bool, status *string) int
 		AddTask              func(childComplexity int, title string, board *string, list *string) int
 		PrepareMonthlyReview func(childComplexity int, year *int, month *int) int
+		FinishMonthlyReview  func(childComplexity int, year *int, month *int) int
 	}
 
 	Query struct {
@@ -126,6 +127,7 @@ type MutationResolver interface {
 	SetGoalDone(ctx context.Context, taskID string, checkitemID string, done bool, status *string) ([]MonthlyGoal, error)
 	AddTask(ctx context.Context, title string, board *string, list *string) (*Task, error)
 	PrepareMonthlyReview(ctx context.Context, year *int, month *int) (*GenerateResult, error)
+	FinishMonthlyReview(ctx context.Context, year *int, month *int) (*FinishResult, error)
 }
 type QueryResolver interface {
 	Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardListInput) ([]Task, error)
@@ -325,6 +327,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.PrepareMonthlyReview(childComplexity, args["year"].(*int), args["month"].(*int)), true
+
+	case "Mutation.FinishMonthlyReview":
+		if e.complexity.Mutation.FinishMonthlyReview == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_finishMonthlyReview_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.FinishMonthlyReview(childComplexity, args["year"].(*int), args["month"].(*int)), true
 
 	case "Query.Tasks":
 		if e.complexity.Query.Tasks == nil {
@@ -654,6 +668,7 @@ type Mutation {
   addTask(title: String!, board: String, list: String): Task!
 
   prepareMonthlyReview(year: Int, month: Int): GenerateResult!
+  finishMonthlyReview(year: Int, month: Int): FinishResult!
 }
 `},
 )
@@ -689,6 +704,28 @@ func (ec *executionContext) field_Mutation_addTask_args(ctx context.Context, raw
 		}
 	}
 	args["list"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_finishMonthlyReview_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["year"]; ok {
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["year"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["month"]; ok {
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["month"] = arg1
 	return args, nil
 }
 
@@ -1547,6 +1584,39 @@ func (ec *executionContext) _Mutation_prepareMonthlyReview(ctx context.Context, 
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNGenerateResult2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐGenerateResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_finishMonthlyReview(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_finishMonthlyReview_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().FinishMonthlyReview(rctx, args["year"].(*int), args["month"].(*int))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*FinishResult)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNFinishResult2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐFinishResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_tasks(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -3188,6 +3258,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "prepareMonthlyReview":
 			out.Values[i] = ec._Mutation_prepareMonthlyReview(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "finishMonthlyReview":
+			out.Values[i] = ec._Mutation_finishMonthlyReview(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
