@@ -1,4 +1,6 @@
 import gql from 'graphql-tag'
+import { Mutation } from 'react-apollo'
+
 const fragments = {
   task: gql`
     fragment TaskWhole on Task {
@@ -113,6 +115,12 @@ export const WeeklyVisualizationQuery = gql`
   }
 `
 
+export const MonthlyVisualizationQuery = gql`
+  query monthlyVisualization($year: Int, $month: Int) {
+    monthlyVisualization(year: $year, month: $month)
+  }
+`
+
 export const ActiveTimerQuery = gql`
   query activeTimer {
     activeTimer {
@@ -145,3 +153,20 @@ export const AddTaskQuery = gql`
   }
   ${fragments.task}
 `
+
+const prepareMonthlyReviewQuery = gql`
+  mutation prepareMonthlyReview($year: Int, $month: Int) {
+    prepareMonthlyReview(year: $year, month: $month) {
+      message
+      ok
+    }
+  }
+`
+
+export const PrepareMonthlyReview = ({ render }) => (
+  <Mutation
+    mutation={prepareMonthlyReviewQuery}
+  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)

@@ -64,22 +64,24 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		PrepareWeeklyReview func(childComplexity int, year *int, week *int) int
-		FinishWeeklyReview  func(childComplexity int, year *int, week *int) int
-		SetDueDate          func(childComplexity int, taskID string, due time.Time) int
-		SetDone             func(childComplexity int, taskID string, done bool, status *string, nextDue *time.Time) int
-		MoveTaskToList      func(childComplexity int, taskID string, list BoardListInput) int
-		StartTimer          func(childComplexity int, taskID string, checkitemID *string) int
-		StopTimer           func(childComplexity int, timerID string) int
-		SetGoalDone         func(childComplexity int, taskID string, checkitemID string, done bool, status *string) int
-		AddTask             func(childComplexity int, title string, board *string, list *string) int
+		PrepareWeeklyReview  func(childComplexity int, year *int, week *int) int
+		FinishWeeklyReview   func(childComplexity int, year *int, week *int) int
+		SetDueDate           func(childComplexity int, taskID string, due time.Time) int
+		SetDone              func(childComplexity int, taskID string, done bool, status *string, nextDue *time.Time) int
+		MoveTaskToList       func(childComplexity int, taskID string, list BoardListInput) int
+		StartTimer           func(childComplexity int, taskID string, checkitemID *string) int
+		StopTimer            func(childComplexity int, timerID string) int
+		SetGoalDone          func(childComplexity int, taskID string, checkitemID string, done bool, status *string) int
+		AddTask              func(childComplexity int, title string, board *string, list *string) int
+		PrepareMonthlyReview func(childComplexity int, year *int, month *int) int
 	}
 
 	Query struct {
-		Tasks               func(childComplexity int, dueBefore *int, inBoardList *BoardListInput) int
-		WeeklyVisualization func(childComplexity int, year *int, week *int) int
-		MonthlyGoals        func(childComplexity int) int
-		ActiveTimer         func(childComplexity int) int
+		Tasks                func(childComplexity int, dueBefore *int, inBoardList *BoardListInput) int
+		WeeklyVisualization  func(childComplexity int, year *int, week *int) int
+		MonthlyVisualization func(childComplexity int, year *int, month *int) int
+		MonthlyGoals         func(childComplexity int) int
+		ActiveTimer          func(childComplexity int) int
 	}
 
 	Task struct {
@@ -123,10 +125,12 @@ type MutationResolver interface {
 	StopTimer(ctx context.Context, timerID string) (*bool, error)
 	SetGoalDone(ctx context.Context, taskID string, checkitemID string, done bool, status *string) ([]MonthlyGoal, error)
 	AddTask(ctx context.Context, title string, board *string, list *string) (*Task, error)
+	PrepareMonthlyReview(ctx context.Context, year *int, month *int) (*GenerateResult, error)
 }
 type QueryResolver interface {
 	Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardListInput) ([]Task, error)
 	WeeklyVisualization(ctx context.Context, year *int, week *int) (*string, error)
+	MonthlyVisualization(ctx context.Context, year *int, month *int) (*string, error)
 	MonthlyGoals(ctx context.Context) ([]MonthlyGoal, error)
 	ActiveTimer(ctx context.Context) (*Timer, error)
 }
@@ -310,6 +314,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.AddTask(childComplexity, args["title"].(string), args["board"].(*string), args["list"].(*string)), true
 
+	case "Mutation.PrepareMonthlyReview":
+		if e.complexity.Mutation.PrepareMonthlyReview == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_prepareMonthlyReview_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.PrepareMonthlyReview(childComplexity, args["year"].(*int), args["month"].(*int)), true
+
 	case "Query.Tasks":
 		if e.complexity.Query.Tasks == nil {
 			break
@@ -333,6 +349,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.WeeklyVisualization(childComplexity, args["year"].(*int), args["week"].(*int)), true
+
+	case "Query.MonthlyVisualization":
+		if e.complexity.Query.MonthlyVisualization == nil {
+			break
+		}
+
+		args, err := ec.field_Query_monthlyVisualization_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MonthlyVisualization(childComplexity, args["year"].(*int), args["month"].(*int)), true
 
 	case "Query.MonthlyGoals":
 		if e.complexity.Query.MonthlyGoals == nil {
@@ -598,6 +626,7 @@ type Timer {
 type Query {
   tasks(dueBefore: Int, inBoardList: BoardListInput): [Task!]
   weeklyVisualization(year: Int, week: Int): String
+  monthlyVisualization(year: Int, month: Int): String
   monthlyGoals: [MonthlyGoal!]
   activeTimer: Timer
 }
@@ -623,6 +652,8 @@ type Mutation {
 
   setGoalDone(taskID: String!, checkitemID: String!, done: Boolean!, status: String): [MonthlyGoal!]
   addTask(title: String!, board: String, list: String): Task!
+
+  prepareMonthlyReview(year: Int, month: Int): GenerateResult!
 }
 `},
 )
@@ -702,6 +733,28 @@ func (ec *executionContext) field_Mutation_moveTaskToList_args(ctx context.Conte
 		}
 	}
 	args["list"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_prepareMonthlyReview_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["year"]; ok {
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["year"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["month"]; ok {
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["month"] = arg1
 	return args, nil
 }
 
@@ -872,6 +925,28 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_monthlyVisualization_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["year"]; ok {
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["year"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["month"]; ok {
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["month"] = arg1
 	return args, nil
 }
 
@@ -1441,6 +1516,39 @@ func (ec *executionContext) _Mutation_addTask(ctx context.Context, field graphql
 	return ec.marshalNTask2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐTask(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_prepareMonthlyReview(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_prepareMonthlyReview_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().PrepareMonthlyReview(rctx, args["year"].(*int), args["month"].(*int))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*GenerateResult)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNGenerateResult2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐGenerateResult(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_tasks(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -1491,6 +1599,36 @@ func (ec *executionContext) _Query_weeklyVisualization(ctx context.Context, fiel
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().WeeklyVisualization(rctx, args["year"].(*int), args["week"].(*int))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_monthlyVisualization(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_monthlyVisualization_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().MonthlyVisualization(rctx, args["year"].(*int), args["month"].(*int))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -3048,6 +3186,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "prepareMonthlyReview":
+			out.Values[i] = ec._Mutation_prepareMonthlyReview(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3094,6 +3237,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_weeklyVisualization(ctx, field)
+				return res
+			})
+		case "monthlyVisualization":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_monthlyVisualization(ctx, field)
 				return res
 			})
 		case "monthlyGoals":

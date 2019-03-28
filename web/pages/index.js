@@ -34,11 +34,13 @@ import {
   SetDoneQuery,
   MoveTaskToListQuery,
   WeeklyVisualizationQuery,
+  MonthlyVisualizationQuery,
   ActiveTimerQuery,
   StopTimerQuery,
   StartTimerQuery,
   SetGoalDoneQuery,
-  AddTaskQuery
+  AddTaskQuery,
+  PrepareMonthlyReview
 } from '../lib/graphql'
 
 
@@ -162,6 +164,11 @@ const QueryContainer = adopt({
       {render}
     </Query>
   ),
+  monthlyVisualizationQuery: ({ render, year, month }) => (
+    <Query query={MonthlyVisualizationQuery} ssr={false} variables={{ year, month }}>
+      {render}
+    </Query>
+  ),
   queryTimer: ({ render }) => (
     <Query query={ActiveTimerQuery} ssr={false} variables={{ }}>
       {render}
@@ -169,6 +176,7 @@ const QueryContainer = adopt({
   ),
   prepareWeeklyReview,
   finishWeeklyReview,
+  PrepareMonthlyReview,
   setDueDate,
   setDone,
   moveTaskToList,
@@ -212,16 +220,20 @@ class IndexPage extends React.Component {
     let { alert } = this.props
     let now = moment()
     let nowGrace = moment().subtract(3,'days')
+    let nowGraceMonth = moment().subtract(5,'days')
+    let monthNext = nowGraceMonth.month()+1
 
     return (
-      <QueryContainer year={now.year()} week={now.isoWeek()}>
+      <QueryContainer year={now.year()} week={now.isoWeek()} month={3}>
         {({
           queryAll: { loading: loadingAll, data: allTasks, error: queryAllError, refetch: allRefetch },
           queryAllGoals: { loading: loadingAllGoals, data: allGoals, error: queryAllGoalsError, refetch: allGoalsRefetch },
           weeklyVisualizationQuery: { loading : weeklyLoading, data: weeklyVisualizationData, error: weeklyError, refetch: weeklyVisualizationRefetch },
+          monthlyVisualizationQuery: { loading : monthlyLoading, data: monthlyVisualizationData, error: monthlyError, refetch: monthlyVisualizationRefetch },
           queryTimer: { loading: loadingTimer, data: timerData, error: timerError, refetch: timerRefetch },
           prepareWeeklyReview,
           finishWeeklyReview,
+          PrepareMonthlyReview,
           setDueDate,
           setDone,
           moveTaskToList,
@@ -284,6 +296,32 @@ class IndexPage extends React.Component {
                   }}>
                       Finish weekly review for {now.year()}-{now.isoWeek()}
                   </Button>{' '}
+                  <Button color='primary' size='sm' onClick={() => {
+                    PrepareMonthlyReview
+                      .mutation({
+                        variables: {
+                          year: nowGraceMonth.year(),
+                          month: nowGraceMonth.month(),
+                        }
+                      })
+                      .then(({ data }) => alert.show(data.prepareMonthlyReview.message))
+                  }}>
+                      Prepare monthly review for {nowGraceMonth.year()}-{nowGraceMonth.month()}
+                  </Button>{' '}
+                  {nowGraceMonth.month() !== monthNext &&
+                    <Button color='primary' size='sm' onClick={() => {
+                      PrepareMonthlyReview
+                        .mutation({
+                          variables: {
+                            year: nowGraceMonth.year(),
+                            month: monthNext,
+                          }
+                        })
+                        .then(({ data }) => alert.show(data.prepareMonthlyReview.message))
+                    }}>
+                        Prepare monthly review for {now.year()}-{monthNext}
+                    </Button>
+                  }{' '}
                   <Row>
                     <Col lg={6}>
                       {loadingTimer && <Spinner color="primary" />}
@@ -396,6 +434,20 @@ class IndexPage extends React.Component {
                         </div>
                       }
                       {weeklyError && <div>Weekly review: {weeklyError.message}</div>}
+                    </Col>
+                  </Row>
+                </TabPane>
+                <TabPane tabId="monthlyReview">
+                  <Row>
+                    <Col>
+                      {monthlyLoading && <Spinner color="primary" />}
+                      {(!monthlyLoading && !monthlyError) &&
+                        <div>
+                          <FaSync size={25} onClick={() => monthlyVisualizationRefetch()} />
+                          <MarkdownRenderer className='monthlyReview' markdown={monthlyVisualizationData.monthlyVisualization} />
+                        </div>
+                      }
+                      {monthlyError && <div>Monthly review: {monthlyError.message}</div>}
                     </Col>
                   </Row>
                 </TabPane>

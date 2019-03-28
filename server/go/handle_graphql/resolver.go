@@ -4,6 +4,7 @@ package handle_graphql
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
@@ -16,6 +17,7 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	"gopkg.in/src-d/go-git.v4/storage/memory"
+	yaml "gopkg.in/yaml.v2"
 
 	"github.com/clarsen/go-trello-workflow/workflow"
 	"github.com/clarsen/gtoggl-api/gthttp"
@@ -549,4 +551,202 @@ func (r *queryResolver) MonthlyGoals(ctx context.Context) ([]MonthlyGoal, error)
 		return nil, err
 	}
 	return goals, nil
+}
+
+func (r *mutationResolver) PrepareMonthlyReview(ctx context.Context, year *int, month *int) (*GenerateResult, error) {
+	// Summarize month in progress for given year/month
+	// setup working directory
+	wd, err := getData()
+	if err != nil {
+		return nil, err
+	}
+
+	_year := time.Now().Year()
+	_month := int(time.Now().Month())
+	if year != nil {
+		_year = *year
+	}
+	if month != nil {
+		_month = *month
+	}
+
+	summarydir := "task-summary"
+	reviewdir := "reviews"
+	reviewvisdir := "visualized_reviews"
+
+	var inSummaries [][]byte
+	var inReviews []workflow.WeeklyReviewData
+
+	for week := 1; week <= 53; week++ {
+		weekSummary := fmt.Sprintf("%s/weekly-%d-%02d.yaml", summarydir, _year, week)
+		if _, err1 := wd.fs.Stat(weekSummary); os.IsNotExist(err1) {
+			// log.Printf("%+v doesn't exist, skipping", weekSummary)
+			continue
+		}
+		inSummary, err2 := wd.fs.Open(weekSummary)
+		if err2 != nil {
+			log.Fatal(err2)
+		}
+		buf, err2 := ioutil.ReadAll(inSummary)
+		if err2 != nil {
+			log.Fatal(err2)
+		}
+		inSummaries = append(inSummaries, buf)
+
+		// get month
+		var weekly workflow.WeeklySummary
+		err3 := yaml.Unmarshal(buf, &weekly)
+		if err3 != nil {
+			log.Fatal(err3)
+		}
+
+		// get weekly review for month
+		reviewFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", reviewdir, _year, week)
+		if _, err = wd.fs.Stat(reviewFname); os.IsNotExist(err) {
+			log.Printf("%+v doesn't exist", reviewFname)
+			continue
+		}
+
+		inReview, err2 := wd.fs.Open(reviewFname)
+		if err2 != nil {
+			return nil, err2
+		}
+		buf2, err2 := ioutil.ReadAll(inReview)
+		if err2 != nil {
+			return nil, err2
+		}
+		if _month == weekly.Month {
+			inReviews = append(inReviews, workflow.WeeklyReviewData{
+				Week:    week,
+				Month:   weekly.Month,
+				Year:    weekly.Year,
+				Content: buf2,
+			})
+		}
+	}
+
+	monthlySummary := fmt.Sprintf("%s/monthly-%d-%02d.yaml", summarydir, _year, _month)
+	out, err := wd.fs.Create(monthlySummary)
+	if err != nil {
+		log.Printf("PrepareMonthlyReview %+v", err)
+		return nil, err
+	}
+
+	err = workflow.GenerateSummaryForMonth(user, appkey, authtoken, _year, _month, inSummaries, inReviews, out)
+	if err != nil {
+		log.Printf("GenerateSummaryForMonth %+v, %+v", monthlySummary, err)
+		return nil, err
+	}
+	out.Close()
+
+	// Generate monthly review template
+	inMonthlySummary, err := wd.fs.Open(monthlySummary)
+	if err != nil {
+		log.Printf("Open %+v, %+v", monthlySummary, err)
+		return nil, err
+	}
+
+	templateFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", reviewdir, _year, _month)
+	outReview, err2 := wd.fs.Create(templateFname)
+	if err2 != nil {
+		log.Printf("Create %+v, %+v", templateFname, err2)
+		return nil, err2
+	}
+
+	err2 = workflow.CreateEmptyMonthlyRetrospective(inMonthlySummary, outReview)
+	if err2 != nil {
+		log.Printf("CreateEmptyMonthlyRetrospective %+v, %+v", templateFname, err)
+		return nil, err2
+	}
+
+	// Generate monthly summary of weeks for visualization input
+	inMonthlySummary, err = wd.fs.Open(monthlySummary)
+	if err != nil {
+		log.Printf("Open %+v, %+v", monthlySummary, err)
+		return nil, err
+	}
+	monthlyInputFname := fmt.Sprintf("%s/monthlyinput-%d-%02d.md", reviewvisdir, _year, _month)
+	outMonthlyVisInput, err := wd.fs.Create(monthlyInputFname)
+	if err != nil {
+		log.Printf("Create %+v, %+v", monthlyInputFname, err)
+		return nil, err
+	}
+
+	err = workflow.VisualizeWeeklySummariesForMonthly(inMonthlySummary, outMonthlyVisInput)
+	if err != nil {
+		log.Printf("VisualizeWeeklySummariesForMonthly %+v, %+v", monthlyInputFname, err)
+		return nil, err
+	}
+
+	// add (possibly changed) files
+	wd.worktree.Add(monthlySummary)
+	wd.worktree.Add(templateFname)
+	wd.worktree.Add(monthlyInputFname)
+
+	status, err := wd.worktree.Status()
+	if err != nil {
+		return nil, err
+	}
+	if status.IsClean() {
+		log.Printf("no change, not commiting")
+		msg := fmt.Sprintf("No change in %s, not commiting", monthlySummary)
+		result := GenerateResult{
+			Message: &msg,
+			Ok:      true,
+		}
+		return &result, nil
+	}
+
+	// commit and push
+	err = wd.commitAndPushData(fmt.Sprintf("dump summary for %04d-%02d", _year, _month))
+	if err != nil {
+		return nil, err
+	}
+	msg := fmt.Sprintf("Updated %s", monthlySummary)
+	result := GenerateResult{
+		Message: &msg,
+		Ok:      true,
+	}
+	return &result, nil
+}
+
+func (r *queryResolver) MonthlyVisualization(ctx context.Context, year *int, month *int) (*string, error) {
+	// setup working directory
+	wd, err := getData()
+	if err != nil {
+		return nil, err
+	}
+	_year := time.Now().Year()
+	_month := int(time.Now().Month())
+	if year != nil {
+		_year = *year
+	}
+	if month != nil {
+		_month = *month
+	}
+
+	summarydir := "task-summary"
+	reviewdir := "reviews"
+
+	summaryFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", summarydir, _year, _month)
+	inSummary, err := wd.fs.Open(summaryFname)
+	if err != nil {
+		log.Printf("Open %+v, %+v", summaryFname, err)
+		return nil, err
+	}
+
+	reviewFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", reviewdir, _year, _month)
+	inReview, err := wd.fs.Open(reviewFname)
+	if err != nil {
+		log.Printf("Open %+v, %+v", reviewFname, err)
+		return nil, err
+	}
+	var out strings.Builder
+
+	err = workflow.VisualizeMonthlyRetrospective(inSummary, inReview, &out)
+	if err != nil {
+		return nil, err
+	}
+	res := out.String()
+	return &res, nil
 }

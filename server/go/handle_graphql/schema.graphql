@@ -45,6 +45,7 @@ type Timer {
 type Query {
   tasks(dueBefore: Int, inBoardList: BoardListInput): [Task!]
   weeklyVisualization(year: Int, week: Int): String
+  monthlyVisualization(year: Int, month: Int): String
   monthlyGoals: [MonthlyGoal!]
   activeTimer: Timer
 }
@@ -70,4 +71,6 @@ type Mutation {
 
   setGoalDone(taskID: String!, checkitemID: String!, done: Boolean!, status: String): [MonthlyGoal!]
   addTask(title: String!, board: String, list: String): Task!
+
+  prepareMonthlyReview(year: Int, month: Int): GenerateResult!
 }
