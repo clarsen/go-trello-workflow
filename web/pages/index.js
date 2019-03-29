@@ -189,16 +189,21 @@ const QueryContainer = adopt({
 })
 
 class IndexPage extends React.Component {
-  componentDidMount () {
+  async componentDidMount () {
     console.log('componentDidMount')
-    if (!auth().isAuthenticated()) {
-      console.log('not authenticated')
-      redirect({}, '/login')
+    try {
+      await auth.silentAuth();
+      console.log('silentAuth done')
+      fetchTimeReport()
+        .then(data => {
+          this.setState({timeReport: data.message})
+        })
+    } catch (err) {
+      console.log(err.error);
+      if (err.error === 'login_required') {
+        redirect({}, '/login')
+      }
     }
-    fetchTimeReport()
-      .then(data => {
-        this.setState({timeReport: data.message})
-      })
   }
 
   constructor (props) {
