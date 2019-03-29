@@ -22,7 +22,8 @@ class Auth {
     this.state = {
       expiresAt: 0,
     }
-    // this.authFlag = 'phc_admin.isLoggedIn'
+    this.authFlag = 'workflow.isLoggedIn'
+    this.authResult = 'workflow.authResult'
 
     this.login = this.login.bind(this)
     this.logout = this.logout.bind(this)
@@ -30,8 +31,17 @@ class Auth {
     this.setSession = this.setSession.bind(this)
     this.silentAuth = this.silentAuth.bind(this)
     this.isAuthenticated = this.isAuthenticated.bind(this)
+    this.rehydrate()
   }
-
+  rehydrate() {
+    let res = localStorage.getItem(this.authResult)
+    console.log('rehydrate authResult', res)
+    if (res) {
+      let ar = JSON.parse(res)
+      this.idToken = ar.idToken
+      this.idTokenPayload = ar.idTokenPayload
+    }
+  }
   login() {
     this.auth0.authorize()
   }
@@ -65,6 +75,7 @@ class Auth {
     console.log('setSession authResult=', authResult)
     this.idToken = authResult.idToken
     this.idTokenPayload = authResult.idTokenPayload
+    localStorage.setItem(this.authResult, JSON.stringify(authResult))
     localStorage.setItem(this.authFlag, JSON.stringify(true))
     console.log(this.idToken)
   }
@@ -72,6 +83,7 @@ class Auth {
   logout() {
     let redirectUri = `${window.location.protocol}//${window.location.host}/`
     localStorage.setItem(this.authFlag, JSON.stringify(false))
+    localStorage.removeItem(this.authResult)
     this.auth0.logout({
       returnTo: redirectUri,
       clientID: AUTH0_CLIENT_ID,

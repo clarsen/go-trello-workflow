@@ -192,18 +192,24 @@ class IndexPage extends React.Component {
   async componentDidMount () {
     console.log('componentDidMount')
     try {
-      await auth.silentAuth();
+      await auth().silentAuth()
       console.log('silentAuth done')
-      fetchTimeReport()
-        .then(data => {
-          this.setState({timeReport: data.message})
-        })
     } catch (err) {
-      console.log(err.error);
+      console.log('error', err)
       if (err.error === 'login_required') {
         redirect({}, '/login')
+        return
       }
     }
+    if (!auth().isAuthenticated()) {
+      console.log('not authenticated')
+      redirect({}, '/login')
+      return
+    }
+    fetchTimeReport()
+      .then(data => {
+        this.setState({timeReport: data.message})
+      })
   }
 
   constructor (props) {
