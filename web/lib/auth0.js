@@ -2,6 +2,7 @@ import auth0 from 'auth0-js'
 
 const AUTH0_CLIENT_ID = 'PML4dRWOkZuPvU1THvcEN56a9k8JZbXh'
 const AUTH0_DOMAIN = 'clarsen.auth0.com'
+import moment from 'moment'
 
 class Auth {
   constructor() {
@@ -24,6 +25,7 @@ class Auth {
     }
     this.authFlag = 'workflow.isLoggedIn'
     this.authResult = 'workflow.authResult'
+    this.authExpiresAfter = 'workflow.authExpiresAfter'
 
     this.login = this.login.bind(this)
     this.logout = this.logout.bind(this)
@@ -77,6 +79,9 @@ class Auth {
     this.idTokenPayload = authResult.idTokenPayload
     localStorage.setItem(this.authResult, JSON.stringify(authResult))
     localStorage.setItem(this.authFlag, JSON.stringify(true))
+    let expAfter = authResult.expiresIn + moment().unix()
+    console.log(`expires after ${expAfter} (${authResult.expiresIn})`)
+    localStorage.setItem(this.authExpiresAfter, JSON.stringify(expAfter))
     console.log(this.idToken)
   }
 
@@ -94,12 +99,19 @@ class Auth {
     console.log('silentAuth')
     if(this.isAuthenticated()) {
       console.log('  isAuthenticated')
+      let expTime = JSON.parse(localStorage.getItem(this.authExpiresAfter))
+      if (expTime > moment().unix()) {
+        console.log(` still valid until ${expTime}`)
+        return
+      }
       return new Promise((resolve, reject) => {
         console.log('  silentAuth promise calling')
         this.auth0.checkSession({}, (err, authResult) => {
           console.log('  checked session got', err, authResult)
           if (err) {
+            localStorage.removeItem(this.authExpiresAfter)
             localStorage.removeItem(this.authFlag)
+            localStorage.removeItem(this.authResult)
             return reject(err)
           }
           this.setSession(authResult)
@@ -114,8 +126,10 @@ class Auth {
       return false
     }
     console.log('isAuthenticated Auth=', this)
-    let res = JSON.parse(localStorage.getItem(this.authFlag))
-    console.log('isAuthenticated Auth=', this, 'localstorage =', res, 'idToken =', this.getIdToken())
+    let authFlag = localStorage.getItem(this.authFlag)
+    console.log(`isAuthenticated ${this.authFlag} authFlag=`, authFlag)
+    let res = JSON.parse(authFlag)
+    console.log('isAuthenticated Auth=', this, 'authFlag parsed =', res, 'idToken =', this.getIdToken())
     return res && this.getIdToken() !== undefined // only if auth *and* idtoken available
   }
 }
