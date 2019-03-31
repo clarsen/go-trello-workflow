@@ -8,6 +8,7 @@ import {
   TabContent,
   TabPane
 } from 'reactstrap'
+import ApolloClient, { InMemoryCache }  from 'apollo-boost'
 
 import { Query, Mutation } from 'react-apollo'
 import { adopt } from 'react-adopt'
@@ -20,6 +21,7 @@ import GoalList from '../components/GoalList'
 import Timer from '../components/Timer'
 import MarkdownRenderer from 'react-markdown-renderer'
 import fetchTimeReport from '../lib/timevis'
+import { ENDPOINTS } from '../lib/api'
 
 import auth from '../lib/auth0'
 import redirect from '../lib/redirect'
@@ -44,6 +46,9 @@ import {
   FinishMonthlyReview
 } from '../lib/graphql'
 
+import {
+  TimeReportQuery
+} from '../lib/timereport_graphql'
 
 const prepareWeeklyReview = ({ render }) => (
   <Mutation
@@ -145,6 +150,19 @@ const addTask = ({ render }) => (
   </Mutation>
 )
 
+const pythonGraphqlClient = new ApolloClient({
+  uri: ENDPOINTS['python']['private_gql'],
+  cache: new InMemoryCache().restore({}),
+  request: operation => {
+    operation.setContext(context => ({
+      headers: {
+        ...context.headers,
+        Authorization: `Bearer ${auth().getIdToken()}`,
+      },
+    }))
+  },
+})
+
 
 /* eslint-disable react/display-name */
 /* eslint-disable react/prop-types */
@@ -172,6 +190,11 @@ const QueryContainer = adopt({
   ),
   queryTimer: ({ render }) => (
     <Query query={ActiveTimerQuery} ssr={false} variables={{ }}>
+      {render}
+    </Query>
+  ),
+  timeReportQuery: ({ render }) => (
+    <Query client={pythonGraphqlClient} query={TimeReportQuery} ssr={false} variables={{ }}>
       {render}
     </Query>
   ),
@@ -206,10 +229,10 @@ class IndexPage extends React.Component {
       redirect({}, '/login')
       return
     }
-    fetchTimeReport()
-      .then(data => {
-        this.setState({timeReport: data.message})
-      })
+    // fetchTimeReport()
+    //   .then(data => {
+    //     this.setState({timeReport: data.message})
+    //   })
   }
 
   constructor (props) {
@@ -244,6 +267,7 @@ class IndexPage extends React.Component {
           weeklyVisualizationQuery: { loading : weeklyLoading, data: weeklyVisualizationData, error: weeklyError, refetch: weeklyVisualizationRefetch },
           monthlyVisualizationQuery: { loading : monthlyLoading, data: monthlyVisualizationData, error: monthlyError, refetch: monthlyVisualizationRefetch },
           queryTimer: { loading: loadingTimer, data: timerData, error: timerError, refetch: timerRefetch },
+          timeReportQuery: { loading: loadingTimeReport, data: timeReportData, error: timeReportError, refetch: timeReportRefetch },
           prepareWeeklyReview,
           finishWeeklyReview,
           PrepareMonthlyReview,
@@ -347,6 +371,18 @@ class IndexPage extends React.Component {
                       .then(({ data }) => alert.show(data.finishMonthlyReview.message))
                   }}>
                       Finish monthly review for {nowGraceMonth.year()}-{nowGraceMonth.month()}
+                  </Button>{' '}
+                  <Button color='primary' size='sm' onClick={() => {
+                    FinishMonthlyReview
+                      .mutation({
+                        variables: {
+                          year: nowGraceMonth.year(),
+                          month: monthNext,
+                        }
+                      })
+                      .then(({ data }) => alert.show(data.finishMonthlyReview.message))
+                  }}>
+                      Finish monthly review for {nowGraceMonth.year()}-{monthNext}
                   </Button>{' '}
                   <Row>
                     <Col lg={6}>
@@ -478,13 +514,12 @@ class IndexPage extends React.Component {
                   </Row>
                 </TabPane>
                 <TabPane tabId="timeReport">
+                  {loadingTimeReport && <Spinner color="primary" />}
                   <FaSync size={25} onClick={() => {
-                    fetchTimeReport()
-                      .then(data => {
-                        this.setState({timeReport: data.message})
-                      })
+                    timeReportRefetch()
                   }} />
-                  {this.state.timeReport ? renderHTML(this.state.timeReport) : 'Loading...'}
+                  {(!loadingTimeReport && !timeReportError) &&
+                    renderHTML('data here')}
                 </TabPane>
               </TabContent>
             </Container>
