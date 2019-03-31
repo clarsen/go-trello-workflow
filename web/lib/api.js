@@ -4,6 +4,7 @@ export const ENDPOINTS = {
     'private_gql': 'https://workflow.api.caselarsen.com/api/gql',
   },
   'python': {
+    'private_gql': 'https://s0veshh554.execute-api.us-east-1.amazonaws.com/dev/api/graphql',
     'timevis_api': 'https://s0veshh554.execute-api.us-east-1.amazonaws.com/dev/api/private',
   }
 }
