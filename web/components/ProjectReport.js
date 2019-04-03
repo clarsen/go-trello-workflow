@@ -1,10 +1,11 @@
 import React from 'react'
 import {
-  Container,
-  Row,
   Col,
-  Spinner,
+  Collapse,
+  Container,
   Input,
+  Row,
+  Spinner,
 } from 'reactstrap'
 import { FaSync } from 'react-icons/fa'
 
@@ -47,17 +48,42 @@ class ProjectDetailEntry extends React.Component {
     super(props)
   }
   render() {
-    let { entry } = this.props
-    let tot_ms = entry.entries.reduce((acc, entr) => acc + entr.duration_ms, 0)
+    let { entry, showDetails } = this.props
+    let tot_ms = entry.entries
+      .reduce((acc, entr) => acc + entr.duration_ms, 0)
+    let dur_for_day = new Map()
+    let cols = []
+    for (let day = 0; day < 7; day++) {
+      dur_for_day[day] = entry.entries
+        .filter(e => moment.unix(e.start).day() === day )
+        .reduce((acc, e) => acc + e.duration_ms, 0)
+      cols.push(
+        <Col lg={1}>{dur_for_day[day]>0 && `${numeral(dur_for_day[day]/1000.0).format('00:00:00')}`}</Col>
+      )
+    }
 
     return (
       <React.Fragment>
-        <Row>
+        <Row className="projectDetailEntry">
           <Col>{entry.detail}</Col>
           <Col>{
             `${numeral(tot_ms/1000.0).format('00:00:00')}`
           }</Col>
         </Row>
+        <Collapse isOpen={this.props.showDetails}>
+          <Row className="dayHoursDetail">
+            <Col lg={1}>Su</Col>
+            <Col lg={1}>M</Col>
+            <Col lg={1}>Tu</Col>
+            <Col lg={1}>W</Col>
+            <Col lg={1}>Th</Col>
+            <Col lg={1}>F</Col>
+            <Col lg={1}>Sa</Col>
+          </Row>
+          <Row className="dayHoursDetail">
+            {cols}
+          </Row>
+        </Collapse>
       </React.Fragment>
     )
   }
@@ -66,22 +92,31 @@ class ProjectDetailEntry extends React.Component {
 class ProjectItem extends React.Component {
   constructor (props) {
     super(props)
+    this.state = {
+      showDetails: false
+    }
+    this.toggle = this.toggle.bind(this)
+  }
+  toggle() {
+    this.setState(state => ({ showDetails: !state.showDetails }))
   }
   render() {
     let { project } = this.props
     let tot_ms = project.entries.reduce((acc, e) =>
-        acc + e.entries.reduce((acc, de) =>
-          acc + de.duration_ms, 0), 0)
+      acc + e.entries.reduce((acc, de) =>
+      acc + de.duration_ms, 0), 0)
 
     return (
       <React.Fragment>
-        <Row>
-          <Col lg={2}>{project.title}</Col>
+        <Row className="projectItem">
+          <Col lg={2} onClick={this.toggle}>{project.title}</Col>
           <Col lg={1}>{
             `${numeral(tot_ms/1000.0).format('00:00:00')}`
           }</Col>
           <Col>
-            {project.entries.map((e) => <ProjectDetailEntry entry={e} />)}
+            {project.entries.map((e) =>
+              <ProjectDetailEntry entry={e} showDetails={this.state.showDetails}/>
+            )}
           </Col>
         </Row>
       </React.Fragment>
@@ -103,9 +138,7 @@ class ProjectReport extends React.Component {
   }
   render() {
     let now = moment()
-    let nowGrace = moment().subtract(3,'days')
     let nowGraceMonth = moment().subtract(5,'days')
-    let monthNext = nowGraceMonth.month()+1
     return (
       <QueryContainer year={now.year()} week={this.state.week} month={3}>
         {({
@@ -143,6 +176,15 @@ class ProjectReport extends React.Component {
               .weekSelect {
                 display: inline;
                 width: 3em;
+              }
+              .projectDetailEntry {
+                background-color: #222;
+              }
+              .projectItem {
+                background-color: #222;
+              }
+              .dayHoursDetail {
+                background-color: #000;
               }
               .rowHeader {
                 text-decoration: underline
