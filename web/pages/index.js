@@ -48,7 +48,6 @@ import {
 } from '../lib/graphql'
 
 import {
-  TimeReportQuery,
   ProjectReportQuery,
 } from '../lib/timereport_graphql'
 
@@ -195,11 +194,6 @@ const QueryContainer = adopt({
       {render}
     </Query>
   ),
-  timeReportQuery: ({ render }) => (
-    <Query client={pythonGraphqlClient} query={TimeReportQuery} ssr={false} variables={{ }}>
-      {render}
-    </Query>
-  ),
   projectReportQuery: ({ render, year, week }) => (
     <Query client={pythonGraphqlClient} query={ProjectReportQuery} ssr={false} variables={{ year, week }}>
       {render}
@@ -236,10 +230,6 @@ class IndexPage extends React.Component {
       redirect({}, '/login')
       return
     }
-    // fetchTimeReport()
-    //   .then(data => {
-    //     this.setState({timeReport: data.message})
-    //   })
   }
 
   constructor (props) {
@@ -247,7 +237,6 @@ class IndexPage extends React.Component {
     this.state = {
       data: null,
       activeTab: 'board',
-      timeReport: null
     }
     this.switchTab = this.switchTab.bind(this)
   }
@@ -274,7 +263,6 @@ class IndexPage extends React.Component {
           weeklyVisualizationQuery: { loading : weeklyLoading, data: weeklyVisualizationData, error: weeklyError, refetch: weeklyVisualizationRefetch },
           monthlyVisualizationQuery: { loading : monthlyLoading, data: monthlyVisualizationData, error: monthlyError, refetch: monthlyVisualizationRefetch },
           queryTimer: { loading: loadingTimer, data: timerData, error: timerError, refetch: timerRefetch },
-          timeReportQuery: { loading: loadingTimeReport, data: timeReportData, error: timeReportError, refetch: timeReportRefetch },
           projectReportQuery: { loading: projectReportLoading, data: projectReportData, error: projectReportError, refetch: projectReportRefetch },
           prepareWeeklyReview,
           finishWeeklyReview,
@@ -523,15 +511,11 @@ class IndexPage extends React.Component {
                 </TabPane>
                 <TabPane tabId="timeReport">
                   <FaSync size={25} onClick={() => {
-                    timeReportRefetch()
                     projectReportRefetch()
                   }} />
                   <ProjectReport
                     loading={projectReportLoading} error={projectReportError} data={projectReportData}
                   />
-                  {loadingTimeReport && <Spinner color="primary" />}
-                  {(!loadingTimeReport && !timeReportError) &&
-                    renderHTML(timeReportData.default_report)}
                 </TabPane>
               </TabContent>
             </Container>
