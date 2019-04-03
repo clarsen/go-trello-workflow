@@ -8,7 +8,6 @@ import {
   TabContent,
   TabPane
 } from 'reactstrap'
-import ApolloClient, { InMemoryCache }  from 'apollo-boost'
 
 import { Query, Mutation } from 'react-apollo'
 import { adopt } from 'react-adopt'
@@ -22,11 +21,9 @@ import Timer from '../components/Timer'
 import ProjectReport from '../components/ProjectReport'
 
 import MarkdownRenderer from 'react-markdown-renderer'
-import { ENDPOINTS } from '../lib/api'
 
 import auth from '../lib/auth0'
 import redirect from '../lib/redirect'
-import renderHTML from 'react-render-html'
 
 import {
   TaskQuery,
@@ -46,10 +43,6 @@ import {
   PrepareMonthlyReview,
   FinishMonthlyReview
 } from '../lib/graphql'
-
-import {
-  ProjectReportQuery,
-} from '../lib/timereport_graphql'
 
 const prepareWeeklyReview = ({ render }) => (
   <Mutation
@@ -151,20 +144,6 @@ const addTask = ({ render }) => (
   </Mutation>
 )
 
-const pythonGraphqlClient = new ApolloClient({
-  uri: ENDPOINTS['python']['private_gql'],
-  cache: new InMemoryCache().restore({}),
-  request: operation => {
-    operation.setContext(context => ({
-      headers: {
-        ...context.headers,
-        Authorization: `Bearer ${auth().getIdToken()}`,
-      },
-    }))
-  },
-})
-
-
 /* eslint-disable react/display-name */
 /* eslint-disable react/prop-types */
 
@@ -191,11 +170,6 @@ const QueryContainer = adopt({
   ),
   queryTimer: ({ render }) => (
     <Query query={ActiveTimerQuery} ssr={false} variables={{ }}>
-      {render}
-    </Query>
-  ),
-  projectReportQuery: ({ render, year, week }) => (
-    <Query client={pythonGraphqlClient} query={ProjectReportQuery} ssr={false} variables={{ year, week }}>
       {render}
     </Query>
   ),
@@ -263,7 +237,6 @@ class IndexPage extends React.Component {
           weeklyVisualizationQuery: { loading : weeklyLoading, data: weeklyVisualizationData, error: weeklyError, refetch: weeklyVisualizationRefetch },
           monthlyVisualizationQuery: { loading : monthlyLoading, data: monthlyVisualizationData, error: monthlyError, refetch: monthlyVisualizationRefetch },
           queryTimer: { loading: loadingTimer, data: timerData, error: timerError, refetch: timerRefetch },
-          projectReportQuery: { loading: projectReportLoading, data: projectReportData, error: projectReportError, refetch: projectReportRefetch },
           prepareWeeklyReview,
           finishWeeklyReview,
           PrepareMonthlyReview,
@@ -510,12 +483,7 @@ class IndexPage extends React.Component {
                   </Row>
                 </TabPane>
                 <TabPane tabId="timeReport">
-                  <FaSync size={25} onClick={() => {
-                    projectReportRefetch()
-                  }} />
-                  <ProjectReport
-                    loading={projectReportLoading} error={projectReportError} data={projectReportData}
-                  />
+                  <ProjectReport />
                 </TabPane>
               </TabContent>
             </Container>
