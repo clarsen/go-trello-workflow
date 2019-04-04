@@ -4,10 +4,12 @@ import {
   Container,
   Row,
   Col,
+  Progress,
   Spinner,
   TabContent,
   TabPane
 } from 'reactstrap'
+import numeral from 'numeral'
 
 import { Query, Mutation } from 'react-apollo'
 import { adopt } from 'react-adopt'
@@ -228,7 +230,9 @@ class IndexPage extends React.Component {
     let nowGrace = moment().subtract(3,'days')
     let nowGraceMonth = moment().subtract(5,'days')
     let monthNext = nowGraceMonth.month()+1
-
+    let elapsedWeek = moment().diff(moment().startOf('week').hours(12), 'hours', true)
+    let remainingWeek = 168 - elapsedWeek
+    let elapsedWeekPct = elapsedWeek/168.0*100.0
     return (
       <QueryContainer year={now.year()} week={now.isoWeek()} month={3}>
         {({
@@ -256,6 +260,9 @@ class IndexPage extends React.Component {
             <Container>
               <TabContent activeTab={this.state.activeTab}>
                 <TabPane tabId="board">
+                  <Progress className="weeklyProgress" color={'info'} value={elapsedWeekPct}>
+                    {`${numeral(remainingWeek).format('0')} hours remaining until weekly review (Sun 12pm)`}
+                  </Progress>
                   <FaSync size={25} onClick={() => {
                     allRefetch()
                     allGoalsRefetch()
@@ -488,6 +495,9 @@ class IndexPage extends React.Component {
               </TabContent>
             </Container>
             <style jsx global>{`
+              .weeklyProgress {
+                margin-bottom: 1em;
+              }
               .weeklyReview {
                 border: 1px solid #fff;
               }

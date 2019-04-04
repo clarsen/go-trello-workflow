@@ -59,14 +59,14 @@ class Task extends React.Component {
               <div className='task' onClick={this.toggle}>
                 {task.title}{' '}
                 { (task.due && value>0) &&
-                      <Progress color={color} value={value} onClick={this.toggle}>
+                      <Progress className="periodicProgress" color={color} value={value} onClick={this.toggle}>
                         {moment.unix(task.due).fromNow()}
                       </Progress>
                 }
                 { (task.due && value==0) && moment.unix(task.due).fromNow() }
               </div>
               <style jsx global>{`
-                .progress {
+                .periodicProgress {
                   float: right;
                   background-color: #888;
                 }
@@ -155,6 +155,17 @@ class Task extends React.Component {
                     })
                   }}>√+2w</Button>
                 }{' '}
+                {task.period &&
+                  <Button outline color='primary' size='sm' onClick={()=>{
+                    setDone.mutation({
+                      variables: {
+                        taskId: task.id,
+                        done: true,
+                        nextDue: moment.unix(task.due).add(1, 'weeks').unix(),
+                      }
+                    })
+                  }}>√+1w</Button>
+                }{' '}
                 {task.due &&
                   <Button outline color='primary' size='sm' onClick={()=>{
                     setDueDate.mutation({
@@ -170,20 +181,20 @@ class Task extends React.Component {
                     setDueDate.mutation({
                       variables: {
                         taskId: task.id,
-                        due: moment().add(7, 'days').unix(),
+                        due: task.due + 14*86400,
                       }
                     })
-                  }}>+1w</Button>
+                  }}>+=2w</Button>
                 }{' '}
                 {task.due &&
                   <Button outline color='primary' size='sm' onClick={()=>{
                     setDueDate.mutation({
                       variables: {
                         taskId: task.id,
-                        due: moment().add(1, 'months').unix(),
+                        due: task.due + 28*86400,
                       }
                     })
-                  }}>+1m</Button>
+                  }}>+=1m</Button>
                 }{' '}
                 <a target="_blank" rel="noopener noreferrer" href={task.url}>link</a>{' '}
                 <a target="_blank" rel="noopener noreferrer" href={`trello://x-callback-url/showCard?x-source=go-trello-workflow&id=${task.id}`}>mobile</a>
