@@ -11,7 +11,7 @@ import {
 } from 'reactstrap'
 import numeral from 'numeral'
 
-import { Query, Mutation } from 'react-apollo'
+import { Query } from 'react-apollo'
 import { adopt } from 'react-adopt'
 import { withAlert } from 'react-alert'
 import moment from 'moment'
@@ -30,121 +30,23 @@ import redirect from '../lib/redirect'
 import {
   TaskQuery,
   MonthlyGoalsQuery,
-  PrepareWeeklyReviewQuery,
-  FinishWeeklyReviewQuery,
-  SetDueDateQuery,
-  SetDoneQuery,
-  MoveTaskToListQuery,
+  PrepareWeeklyReview,
+  FinishWeeklyReview,
+  SetDueDate,
+  SetDone,
+  SetGoalDone,
+
+  MoveTaskToList,
   WeeklyVisualizationQuery,
   MonthlyVisualizationQuery,
   ActiveTimerQuery,
-  StopTimerQuery,
-  StartTimerQuery,
-  SetGoalDoneQuery,
-  AddTaskQuery,
+  StopTimer,
+  StartTimer,
+  AddTask,
   PrepareMonthlyReview,
   FinishMonthlyReview
 } from '../lib/graphql'
 
-const prepareWeeklyReview = ({ render }) => (
-  <Mutation
-    mutation={PrepareWeeklyReviewQuery}
-  >
-    {(mutation, result) => render({ mutation, result })}
-  </Mutation>
-)
-
-
-const finishWeeklyReview = ({ render }) => (
-  <Mutation
-    mutation={FinishWeeklyReviewQuery}
-  >
-    {(mutation, result) => render({ mutation, result })}
-  </Mutation>
-)
-
-const setDueDate = ({ render }) => (
-  <Mutation
-    mutation={SetDueDateQuery}
-  >
-    {(mutation, result) => render({ mutation, result })}
-  </Mutation>
-)
-
-
-const setDone = ({ render }) => (
-  <Mutation
-    mutation={SetDoneQuery}
-  >
-    {(mutation, result) => render({ mutation, result })}
-  </Mutation>
-)
-
-const setGoalDone = ({ render }) => (
-  <Mutation
-    mutation={SetGoalDoneQuery}
-    update={(cache, { data: { setGoalDone } }) => {
-      console.log('mutation update got setGoalDone', setGoalDone)
-
-      const query = MonthlyGoalsQuery
-      const { monthlyGoals } = cache.readQuery({ query })
-      console.log('currently monthlyGoals', monthlyGoals)
-
-      cache.writeQuery({
-        query,
-        data: { monthlyGoals: setGoalDone }
-      })
-    }}  >
-    {(mutation, result) => render({ mutation, result })}
-  </Mutation>
-)
-
-
-const moveTaskToList = ({ render }) => (
-  <Mutation
-    mutation={MoveTaskToListQuery}
-  >
-    {(mutation, result) => render({ mutation, result })}
-  </Mutation>
-)
-
-
-const stopTimer = ({ render }) => (
-  <Mutation
-    mutation={StopTimerQuery}
-  >
-    {(mutation, result) => render({ mutation, result })}
-  </Mutation>
-)
-
-const startTimer = ({ render }) => (
-  <Mutation
-    mutation={StartTimerQuery}
-  >
-    {(mutation, result) => render({ mutation, result })}
-  </Mutation>
-)
-
-const addTask = ({ render }) => (
-  <Mutation
-    mutation={AddTaskQuery}
-    update={(cache, { data: { addTask } }) => {
-      console.log('mutation update got addTask', addTask)
-
-      const query = TaskQuery
-      const { tasks } = cache.readQuery({ query })
-      console.log('currently tasks', tasks)
-
-      cache.writeQuery({
-        query,
-        data: { tasks: tasks.concat([addTask]) }
-      })
-    }}
-  >
-
-    {(mutation, result) => render({ mutation, result })}
-  </Mutation>
-)
 
 /* eslint-disable react/display-name */
 /* eslint-disable react/prop-types */
@@ -175,17 +77,17 @@ const QueryContainer = adopt({
       {render}
     </Query>
   ),
-  prepareWeeklyReview,
-  finishWeeklyReview,
+  PrepareWeeklyReview,
+  FinishWeeklyReview,
   PrepareMonthlyReview,
   FinishMonthlyReview,
-  setDueDate,
-  setDone,
-  moveTaskToList,
-  stopTimer,
-  startTimer,
-  setGoalDone,
-  addTask,
+  SetDueDate,
+  SetDone,
+  MoveTaskToList,
+  StopTimer,
+  StartTimer,
+  SetGoalDone,
+  AddTask,
 })
 
 class IndexPage extends React.Component {
@@ -241,17 +143,17 @@ class IndexPage extends React.Component {
           weeklyVisualizationQuery: { loading : weeklyLoading, data: weeklyVisualizationData, error: weeklyError, refetch: weeklyVisualizationRefetch },
           monthlyVisualizationQuery: { loading : monthlyLoading, data: monthlyVisualizationData, error: monthlyError, refetch: monthlyVisualizationRefetch },
           queryTimer: { loading: loadingTimer, data: timerData, error: timerError, refetch: timerRefetch },
-          prepareWeeklyReview,
-          finishWeeklyReview,
+          PrepareWeeklyReview,
+          FinishWeeklyReview,
           PrepareMonthlyReview,
           FinishMonthlyReview,
-          setDueDate,
-          setDone,
-          moveTaskToList,
-          stopTimer,
-          startTimer,
-          setGoalDone,
-          addTask,
+          SetDueDate,
+          SetDone,
+          MoveTaskToList,
+          StopTimer,
+          StartTimer,
+          SetGoalDone,
+          AddTask,
         }) =>
           <React.Fragment>
             <NavHeader switchTab={this.switchTab} activeTab={this.state.activeTab} />
@@ -269,7 +171,7 @@ class IndexPage extends React.Component {
                     timerRefetch()
                   }} />
                   <Button color='primary' size='sm' onClick={() => {
-                    prepareWeeklyReview
+                    PrepareWeeklyReview
                       .mutation({
                         variables: {
                           year: now.year(),
@@ -282,7 +184,7 @@ class IndexPage extends React.Component {
                   </Button>{' '}
                   {nowGrace.isoWeek() !== now.isoWeek() &&
                     <Button color='primary' size='sm' onClick={() => {
-                      prepareWeeklyReview
+                      PrepareWeeklyReview
                         .mutation({
                           variables: {
                             year: nowGrace.year(),
@@ -295,7 +197,7 @@ class IndexPage extends React.Component {
                     </Button>
                   }{' '}
                   <Button color='primary' size='sm' onClick={() => {
-                    finishWeeklyReview
+                    FinishWeeklyReview
                       .mutation({
                         variables: {
                           year: now.year(),
@@ -365,16 +267,16 @@ class IndexPage extends React.Component {
                       {loadingTimer && <Spinner color="primary" />}
                       {!loadingTimer && console.log('got data', timerData)}
                       {timerError && <div>Timer: {timerError.message}</div>}
-                      {!loadingTimer && !timerError && <Timer stopTimer={stopTimer} timerRefetch={timerRefetch} activeTimer={timerData.activeTimer} />}
+                      {!loadingTimer && !timerError && <Timer stopTimer={StopTimer} timerRefetch={timerRefetch} activeTimer={timerData.activeTimer} />}
                     </Col>
                     <Col lg={6}>
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
                         listTitle={'Today'} listFilter={['Today']}
-                        setDueDate={setDueDate} setDone={setDone}
-                        moveTaskToList={moveTaskToList} startTimer={startTimer}
+                        setDueDate={SetDueDate} setDone={SetDone}
+                        moveTaskToList={MoveTaskToList} startTimer={StartTimer}
                         timerRefetch={timerRefetch}
-                        addTask={addTask} board={'Kanban daily/weekly'} list={'Today'}
+                        addTask={AddTask} board={'Kanban daily/weekly'} list={'Today'}
                       />
 
                     </Col>
@@ -385,16 +287,16 @@ class IndexPage extends React.Component {
                       {loadingAllGoals && <Spinner color="primary" />}
                       {!loadingAllGoals && console.log('got data', allGoals)}
                       {queryAllGoalsError && <div>Goals: {queryAllGoalsError.message}</div>}
-                      {!loadingAllGoals && !queryAllGoalsError && <GoalList startTimer={startTimer} timerRefetch={timerRefetch} setGoalDone={setGoalDone} goals={allGoals.monthlyGoals}/>}
+                      {!loadingAllGoals && !queryAllGoalsError && <GoalList startTimer={StartTimer} timerRefetch={timerRefetch} setGoalDone={SetGoalDone} goals={allGoals.monthlyGoals}/>}
                     </Col>
                     <Col lg={6}>
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
                         listTitle={'Waiting on...'} listFilter={['Waiting on']}
-                        setDueDate={setDueDate} setDone={setDone}
-                        moveTaskToList={moveTaskToList} startTimer={startTimer}
+                        setDueDate={SetDueDate} setDone={SetDone}
+                        moveTaskToList={MoveTaskToList} startTimer={StartTimer}
                         timerRefetch={timerRefetch}
-                        addTask={addTask} board={'Kanban daily/weekly'} list={'Waiting on'}
+                        addTask={AddTask} board={'Kanban daily/weekly'} list={'Waiting on'}
                       />
                     </Col>
                   </Row>
@@ -403,8 +305,8 @@ class IndexPage extends React.Component {
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
                         listTitle={'Done this week'} listFilter={['Done this week']}
-                        setDueDate={setDueDate} setDone={setDone}
-                        moveTaskToList={moveTaskToList} startTimer={startTimer}
+                        setDueDate={SetDueDate} setDone={SetDone}
+                        moveTaskToList={MoveTaskToList} startTimer={StartTimer}
                         timerRefetch={timerRefetch}
                       />
                     </Col>
@@ -414,10 +316,10 @@ class IndexPage extends React.Component {
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
                         listTitle={'Backlog'} listFilter={['Backlog (Personal)']}
-                        setDueDate={setDueDate} setDone={setDone}
-                        moveTaskToList={moveTaskToList} startTimer={startTimer}
+                        setDueDate={SetDueDate} setDone={SetDone}
+                        moveTaskToList={MoveTaskToList} startTimer={StartTimer}
                         timerRefetch={timerRefetch}
-                        addTask={addTask} board={'Backlog (Personal)'} list={'Backlog'}
+                        addTask={AddTask} board={'Backlog (Personal)'} list={'Backlog'}
                       />
                     </Col>
                     <Col lg={6}>
@@ -426,8 +328,8 @@ class IndexPage extends React.Component {
                         <TaskList
                           loading={loadingAll} error={queryAllError} data={allTasks}
                           listSubGroupTitle={'Often'} listFilter={['Often']}
-                          setDueDate={setDueDate} setDone={setDone}
-                          moveTaskToList={moveTaskToList} startTimer={startTimer}
+                          setDueDate={SetDueDate} setDone={SetDone}
+                          moveTaskToList={MoveTaskToList} startTimer={StartTimer}
                           timerRefetch={timerRefetch}
                         />
                       </Row>
@@ -435,8 +337,8 @@ class IndexPage extends React.Component {
                         <TaskList
                           loading={loadingAll} error={queryAllError} data={allTasks}
                           listSubGroupTitle={'Weekly'} listFilter={['Weekly']}
-                          setDueDate={setDueDate} setDone={setDone}
-                          moveTaskToList={moveTaskToList} startTimer={startTimer}
+                          setDueDate={SetDueDate} setDone={SetDone}
+                          moveTaskToList={MoveTaskToList} startTimer={StartTimer}
                           timerRefetch={timerRefetch}
                         />
                       </Row>
@@ -444,8 +346,8 @@ class IndexPage extends React.Component {
                         <TaskList
                           loading={loadingAll} error={queryAllError} data={allTasks}
                           listSubGroupTitle={'Bi-weekly to monthly'} listFilter={['Bi-weekly to monthly']}
-                          setDueDate={setDueDate} setDone={setDone}
-                          moveTaskToList={moveTaskToList} startTimer={startTimer}
+                          setDueDate={SetDueDate} setDone={SetDone}
+                          moveTaskToList={MoveTaskToList} startTimer={StartTimer}
                           timerRefetch={timerRefetch}
                         />
                       </Row>
@@ -453,8 +355,8 @@ class IndexPage extends React.Component {
                         <TaskList
                           loading={loadingAll} error={queryAllError} data={allTasks}
                           listSubGroupTitle={'Quarterly to Yearly'} listFilter={['Quarterly to Yearly']}
-                          setDueDate={setDueDate} setDone={setDone}
-                          moveTaskToList={moveTaskToList} startTimer={startTimer}
+                          setDueDate={SetDueDate} setDone={SetDone}
+                          moveTaskToList={MoveTaskToList} startTimer={StartTimer}
                           timerRefetch={timerRefetch}
                         />
                       </Row>

@@ -55,7 +55,7 @@ export const MonthlyGoalsQuery = gql`
   ${fragments.monthlyGoal}
 `
 
-export const PrepareWeeklyReviewQuery = gql`
+const PrepareWeeklyReviewQuery = gql`
   mutation prepareWeeklyReview($year: Int, $week: Int) {
     prepareWeeklyReview(year: $year, week: $week) {
       message
@@ -64,7 +64,15 @@ export const PrepareWeeklyReviewQuery = gql`
   }
 `
 
-export const FinishWeeklyReviewQuery = gql`
+export const PrepareWeeklyReview = ({ render }) => (
+  <Mutation
+    mutation={PrepareWeeklyReviewQuery}
+  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
+const finishWeeklyReviewQuery = gql`
   mutation finishWeeklyReview($year: Int, $week: Int) {
     finishWeeklyReview(year: $year, week: $week) {
       message
@@ -73,7 +81,15 @@ export const FinishWeeklyReviewQuery = gql`
   }
 `
 
-export const SetDueDateQuery = gql`
+export const FinishWeeklyReview = ({ render }) => (
+  <Mutation
+    mutation={finishWeeklyReviewQuery}
+  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
+const setDueDateQuery = gql`
   mutation setDueDate($taskId: String!, $due: Timestamp!) {
     setDueDate(taskID: $taskId, due: $due) {
       ...TaskWhole
@@ -82,7 +98,15 @@ export const SetDueDateQuery = gql`
   ${fragments.task}
 `
 
-export const SetDoneQuery = gql`
+export const SetDueDate = ({ render }) => (
+  <Mutation
+    mutation={setDueDateQuery}
+  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
+const setDoneQuery = gql`
   mutation setDone($taskId: String!, $done: Boolean!, $nextDue: Timestamp) {
     setDone(taskID: $taskId, done: $done, nextDue: $nextDue) {
       ...TaskWhole
@@ -91,7 +115,15 @@ export const SetDoneQuery = gql`
   ${fragments.task}
 `
 
-export const SetGoalDoneQuery = gql`
+export const SetDone = ({ render }) => (
+  <Mutation
+    mutation={setDoneQuery}
+  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
+const setGoalDoneQuery = gql`
   mutation setGoalDone($taskId: String!, $checkitemID: String!, $done: Boolean!, $status: String) {
     setGoalDone(taskID: $taskId, checkitemID: $checkitemID, done: $done, status: $status) {
       ...MonthlyGoalWhole
@@ -100,7 +132,26 @@ export const SetGoalDoneQuery = gql`
   ${fragments.monthlyGoal}
 `
 
-export const MoveTaskToListQuery = gql`
+export const SetGoalDone = ({ render }) => (
+  <Mutation
+    mutation={setGoalDoneQuery}
+    update={(cache, { data: { setGoalDone } }) => {
+      console.log('mutation update got setGoalDone', setGoalDone)
+
+      const query = MonthlyGoalsQuery
+      const { monthlyGoals } = cache.readQuery({ query })
+      console.log('currently monthlyGoals', monthlyGoals)
+
+      cache.writeQuery({
+        query,
+        data: { monthlyGoals: setGoalDone }
+      })
+    }}  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
+const moveTaskToListQuery = gql`
   mutation moveTaskToList($taskID: String!, $list: BoardListInput!) {
     moveTaskToList(taskID: $taskID, list: $list) {
       ...TaskWhole
@@ -108,6 +159,15 @@ export const MoveTaskToListQuery = gql`
   }
   ${fragments.task}
 `
+
+export const MoveTaskToList = ({ render }) => (
+  <Mutation
+    mutation={moveTaskToListQuery}
+  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
 
 export const WeeklyVisualizationQuery = gql`
   query weeklyVisualization($year: Int, $week: Int) {
@@ -130,13 +190,21 @@ export const ActiveTimerQuery = gql`
   }
 `
 
-export const StopTimerQuery = gql`
+const stopTimerQuery = gql`
   mutation stopTimer($timerID: String!) {
     stopTimer(timerID: $timerID)
   }
 `
 
-export const StartTimerQuery = gql`
+export const StopTimer = ({ render }) => (
+  <Mutation
+    mutation={stopTimerQuery}
+  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
+const startTimerQuery = gql`
   mutation startTimer($taskID: String!, $checkitemID: String) {
     startTimer(taskID: $taskID, checkitemID: $checkitemID) {
       id
@@ -145,7 +213,15 @@ export const StartTimerQuery = gql`
   }
 `
 
-export const AddTaskQuery = gql`
+export const StartTimer = ({ render }) => (
+  <Mutation
+    mutation={startTimerQuery}
+  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
+const addTaskQuery = gql`
   mutation addTask($title: String!, $board: String, $list: String) {
     addTask(title: $title, board: $board, list: $list) {
       ...TaskWhole
@@ -153,6 +229,27 @@ export const AddTaskQuery = gql`
   }
   ${fragments.task}
 `
+
+export const AddTask = ({ render }) => (
+  <Mutation
+    mutation={addTaskQuery}
+    update={(cache, { data: { addTask } }) => {
+      console.log('mutation update got addTask', addTask)
+
+      const query = TaskQuery
+      const { tasks } = cache.readQuery({ query })
+      console.log('currently tasks', tasks)
+
+      cache.writeQuery({
+        query,
+        data: { tasks: tasks.concat([addTask]) }
+      })
+    }}
+  >
+
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
 
 const prepareMonthlyReviewQuery = gql`
   mutation prepareMonthlyReview($year: Int, $month: Int) {
