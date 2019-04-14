@@ -109,7 +109,7 @@ func isPeriodic(card *trello.Card) bool {
 }
 
 func (cl *Client) GetCard(cardId string) (*trello.Card, error) {
-	card, err := cl.client.GetCard(cardId, trello.Arguments{"fields": "all"})
+	card, err := cl.Client.GetCard(cardId, trello.Arguments{"fields": "all"})
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,7 @@ func (cl *Client) CreateCard(title string, board string, list string) (*trello.C
 		Pos:    0.0,
 		IDList: l.ID,
 	}
-	err = cl.client.CreateCard(&card, trello.Arguments{"pos": "top"})
+	err = cl.Client.CreateCard(&card, trello.Arguments{"pos": "top"})
 	if err != nil {
 		return nil, err
 	}

@@ -369,7 +369,7 @@ func (r *mutationResolver) SetGoalDone(ctx context.Context, taskID string, check
 			}
 		}
 	}
-	return GetMonthlyGoals(user, appkey, authtoken)
+	return GetMonthlyGoals(cl)
 }
 
 func TimeEntryToTimer(te *gttimeentry.TimeEntry) (*Timer, error) {
@@ -539,7 +539,7 @@ func (r *mutationResolver) AddTask(ctx context.Context, title string, board *str
 type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardListInput) ([]Task, error) {
-	tasks, err := GetTasks(user, appkey, authtoken, inBoardList)
+	tasks, err := GetTasks(cl, inBoardList)
 	if err != nil {
 		return nil, err
 	}
@@ -547,7 +547,7 @@ func (r *queryResolver) Tasks(ctx context.Context, dueBefore *int, inBoardList *
 }
 
 func (r *queryResolver) MonthlyGoals(ctx context.Context) ([]MonthlyGoal, error) {
-	goals, err := GetMonthlyGoals(user, appkey, authtoken)
+	goals, err := GetMonthlyGoals(cl)
 	if err != nil {
 		return nil, err
 	}

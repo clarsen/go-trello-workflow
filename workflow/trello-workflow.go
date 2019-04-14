@@ -11,21 +11,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/clarsen/trello"
 )
-
-// Client wraps logged in member
-type Client struct {
-	client *trello.Client
-	member *trello.Member
-}
-
-// Test does nothing
-func (cl *Client) Test() {
-
-}
 
 type CardAttrs struct {
 	DoneDate string
@@ -539,7 +526,7 @@ func listForCreate(cl *Client, b string, l string) (*trello.List, error) {
 	if list != nil {
 		return list, err
 	}
-	board, err := boardFor(cl.member, b)
+	board, err := boardFor(cl.Member, b)
 	if err != nil {
 		return nil, err
 	}
@@ -553,7 +540,7 @@ func listForCreate(cl *Client, b string, l string) (*trello.List, error) {
 
 // ListFor finds trello list for board and list with caching -- candidate for pushing into library
 func ListFor(cl *Client, b string, l string) (*trello.List, error) {
-	m := cl.member
+	m := cl.Member
 	if list, ok := listmap[b][l]; ok {
 		return list, nil
 	}
@@ -787,7 +774,7 @@ func (cl *Client) doMinutely() error {
 
 			}
 		}
-		err = sortList(cl.member, list)
+		err = sortList(cl.Member, list)
 		if err != nil {
 			return err
 		}
@@ -805,7 +792,7 @@ func (cl *Client) doMinutely() error {
 			return err
 		}
 		for _, card := range cards {
-			err = sortChecklist(cl.member, card)
+			err = sortChecklist(cl.Member, card)
 			if err != nil {
 				return err
 			}
@@ -815,42 +802,9 @@ func (cl *Client) doMinutely() error {
 	return nil
 }
 
-func (cl *Client) MoveToListOnBoard(cardId string, listID, boardID string) (*trello.Card, error) {
-	card, err := cl.client.GetCard(cardId, trello.Defaults())
-	if err != nil {
-		return nil, err
-	}
-	log.Printf("Move card=%+v to list=%+v/board=%+v\n", cardId, listID, boardID)
-	card.MoveToListOnBoard(listID, boardID, trello.Defaults())
-	card, err = cl.client.GetCard(cardId, trello.Defaults())
-	if err != nil {
-		return nil, err
-	}
-	return card, nil
-}
-
-func (cl *Client) SetDue(cardId string, due time.Time) (*trello.Card, error) {
-	card, err := cl.client.GetCard(cardId, trello.Defaults())
-	if err != nil {
-		return nil, err
-	}
-	args := trello.Defaults()
-	args["due"] = due.Format(time.RFC3339)
-	// card.Due = &due
-	err = card.Update(args)
-	if err != nil {
-		return nil, err
-	}
-	card, err = cl.client.GetCard(cardId, trello.Defaults())
-	if err != nil {
-		return nil, err
-	}
-	return card, nil
-}
-
 // PrepareToday moves cards back to their respective boards at end of day
 func (cl *Client) prepareToday() error {
-	board, err := boardFor(cl.member, "Kanban daily/weekly")
+	board, err := boardFor(cl.Member, "Kanban daily/weekly")
 	if err != nil {
 		// handle error
 		return err
@@ -901,25 +855,4 @@ func DailyMaintenance(user, appkey, authtoken string) error {
 	wf.prepareToday()
 	log.Println("Finished running DailyMaintenance")
 	return nil
-}
-
-// New create new client
-func New(user string, appKey string, token string) (c *Client, err error) {
-	logger := logrus.New()
-	logger.SetLevel(logrus.InfoLevel)
-
-	client := trello.NewClient(appKey, token)
-	client.Logger = logger
-
-	member, err := client.GetMember(user, trello.Defaults())
-	if err != nil {
-		// Handle error
-		return nil, err
-	}
-	client.Logger.Debugf("member %+v", member)
-	c = &Client{
-		client,
-		member,
-	}
-	return
 }
