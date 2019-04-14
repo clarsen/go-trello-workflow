@@ -39,7 +39,7 @@ func (cl *Client) MoveToListOnBoard(cardID string, listID, boardID string) (*tre
 }
 
 // SetDue sets due date/time of card
-func (cl *Client) SetDue(cardID string, due time.Time) (*trello.Card, error) {
+func (cl *Client) SetDue(cardID string, due time.Time) (*WFTask, error) {
 	card, err := cl.Client.GetCard(cardID, trello.Defaults())
 	if err != nil {
 		return nil, err
@@ -51,14 +51,14 @@ func (cl *Client) SetDue(cardID string, due time.Time) (*trello.Card, error) {
 	if err != nil {
 		return nil, err
 	}
-	card, err = cl.Client.GetCard(cardID, trello.Defaults())
+	card, err = cl.Client.GetCard(cardID, trello.Arguments{"fields": "all"})
 	if err != nil {
 		return nil, err
 	}
-	return card, nil
+	return cl.wfTaskFor(card)
 }
 
-func wfTaskFor(card *trello.Card) (*WFTask, error) {
+func (cl *Client) wfTaskFor(card *trello.Card) (*WFTask, error) {
 	local, err := time.LoadLocation("America/Los_Angeles")
 	if err != nil {
 		return nil, err
@@ -73,15 +73,23 @@ func wfTaskFor(card *trello.Card) (*WFTask, error) {
 			createdDate = maybeCreatedDate
 		}
 	}
-
-	return &WFTask{
+	wfTask := &WFTask{
 		ID:          card.ID,
 		Title:       title,
 		CreatedDate: &createdDate,
 		URL:         &url,
 		Due:         card.Due,
 		Period:      period,
-	}, nil
+	}
+	bl, err := BoardListFor(cl, card.IDBoard, card.IDList)
+	if err != nil {
+		return nil, err
+	}
+	wfTask.List = &WFBoardList{
+		bl.Board,
+		bl.List,
+	}
+	return wfTask, nil
 }
 
 // Tasks returns all open tasks, possibly limited to a particular board/list
@@ -100,7 +108,7 @@ func (cl *Client) Tasks(board, boardList *string) (tasks []WFTask, err error) {
 			return
 		}
 		for _, card := range cards {
-			t, err2 := wfTaskFor(card)
+			t, err2 := cl.wfTaskFor(card)
 			if err2 != nil {
 				err = err2
 				return
@@ -127,7 +135,7 @@ func (cl *Client) Tasks(board, boardList *string) (tasks []WFTask, err error) {
 				return
 			}
 			for _, card := range cards {
-				t, err2 := wfTaskFor(card)
+				t, err2 := cl.wfTaskFor(card)
 				if err2 != nil {
 					err = err2
 					return

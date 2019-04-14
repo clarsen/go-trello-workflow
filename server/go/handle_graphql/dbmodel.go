@@ -50,11 +50,23 @@ func SetTaskDue(taskId string, due time.Time) (*Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	card, err := cl.SetDue(taskId, due)
+	wfTask, err := cl.SetDue(taskId, due)
 	if err != nil {
 		return nil, err
 	}
-	return TaskFor(card)
+	task := Task{
+		ID:          wfTask.ID,
+		Title:       wfTask.Title,
+		CreatedDate: wfTask.CreatedDate,
+		URL:         wfTask.URL,
+		Due:         wfTask.Due,
+		Period:      wfTask.Period,
+		List: &BoardList{
+			wfTask.List.Board,
+			wfTask.List.List,
+		},
+	}
+	return &task, nil
 }
 
 func SetTaskDone(taskId string, done bool) (*Task, error) {

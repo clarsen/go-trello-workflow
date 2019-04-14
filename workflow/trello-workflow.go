@@ -72,6 +72,7 @@ var (
 var boards []*trello.Board
 var boardmap = make(map[string]*trello.Board)
 var listmap = make(map[string]map[string]*trello.List)
+var boardlistmap = make(map[string]map[string]*BoardAndList)
 
 func reportMonthlyGoal(card *trello.Card) (MonthlyGoal, error) {
 	var g MonthlyGoal
@@ -535,7 +536,54 @@ func listForCreate(cl *Client, b string, l string) (*trello.List, error) {
 		return nil, err
 	}
 	listmap[b][l] = list
+	// XXX: don't know list ID at this point
+	// boardlistmap[board.ID][list.ID] = ...
 	return list, nil
+}
+
+// BoardListFor returns board list for trello IDBoard and IDList
+func BoardListFor(cl *Client, idBoard, idList string) (*BoardAndList, error) {
+	m := cl.Member
+	if boardlistEntry, ok := boardlistmap[idBoard][idList]; ok {
+		return boardlistEntry, nil
+	}
+	if boards == nil {
+		boardsRet, err := m.GetBoards(trello.Defaults())
+		if err != nil {
+			fmt.Println("error")
+			return nil, err
+			// Handle error
+		}
+		boards = boardsRet
+		// fmt.Println("got", boards)
+	}
+	for _, b := range boards {
+		if idBoard == b.ID {
+			lists, err := b.GetLists(trello.Defaults())
+			if err != nil {
+				// handle error
+				return nil, err
+			}
+			if boardlistmap[idBoard] == nil {
+				boardlistmap[idBoard] = map[string]*BoardAndList{}
+			}
+			for idx := range lists {
+				li := lists[idx]
+				// fmt.Println("examining board ", b)
+				// fmt.Println(b.Name, "->", b)
+				// if listmap[board.Name] == nil {
+				//   listmap[board.Name] = map[string]*trello.List{}
+				// }
+				// fmt.Println("list ", li.Name)
+				boardlistmap[idBoard][li.ID] = &BoardAndList{
+					Board: b.Name,
+					List:  li.Name,
+				}
+			}
+		}
+	}
+
+	return boardlistmap[idBoard][idList], nil
 }
 
 // ListFor finds trello list for board and list with caching -- candidate for pushing into library
