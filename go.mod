@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/99designs/gqlgen v0.0.0-20190306232736-d872af63addc
+	github.com/adlio/trello v0.0.0-20190408222002-5b31feeddcaa
 	github.com/aws/aws-lambda-go v1.9.0
 	github.com/aws/aws-sdk-go v0.0.0-20181118003551-50e2f0627dec
 	github.com/awslabs/aws-lambda-go-api-proxy v0.0.0-20190219202933-eb5a49d3c0ad
