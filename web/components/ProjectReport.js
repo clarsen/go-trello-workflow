@@ -1,11 +1,9 @@
 import React from 'react'
 import {
-  Col,
   Collapse,
-  Container,
   Input,
-  Row,
   Spinner,
+  Table,
 } from 'reactstrap'
 import { FaSync } from 'react-icons/fa'
 
@@ -58,31 +56,31 @@ class ProjectDetailEntry extends React.Component {
         .filter(e => moment.unix(e.start).day() === day )
         .reduce((acc, e) => acc + e.duration_ms, 0)
       cols.push(
-        <Col lg={1}>{dur_for_day[day]>0 && `${numeral(dur_for_day[day]/1000.0).format('00:00:00')}`}</Col>
+        <td>{dur_for_day[day]>0 && `${numeral(dur_for_day[day]/1000.0).format('00:00:00')}`}</td>
       )
     }
 
     return (
       <React.Fragment>
-        <Row className="projectDetailEntry">
-          <Col>{entry.detail}</Col>
-          <Col>{
+        <tr>
+          <td>{entry.detail}</td>
+          <td>{
             `${numeral(tot_ms/1000.0).format('00:00:00')}`
-          }</Col>
-        </Row>
+          }</td>
+        </tr>
         <Collapse isOpen={this.props.showDetails}>
-          <Row className="dayHoursDetail">
-            <Col lg={1}>Su</Col>
-            <Col lg={1}>M</Col>
-            <Col lg={1}>Tu</Col>
-            <Col lg={1}>W</Col>
-            <Col lg={1}>Th</Col>
-            <Col lg={1}>F</Col>
-            <Col lg={1}>Sa</Col>
-          </Row>
-          <Row className="dayHoursDetail">
+          <tr>
+            <td>Su</td>
+            <td>M</td>
+            <td>Tu</td>
+            <td>W</td>
+            <td>Th</td>
+            <td>F</td>
+            <td>Sa</td>
+          </tr>
+          <tr>
             {cols}
-          </Row>
+          </tr>
         </Collapse>
       </React.Fragment>
     )
@@ -108,17 +106,19 @@ class ProjectItem extends React.Component {
 
     return (
       <React.Fragment>
-        <Row className="projectItem">
-          <Col lg={2} onClick={this.toggle}>{project.title}</Col>
-          <Col lg={1}>{
+        <tr className="projectItem">
+          <th scope="row" onClick={this.toggle}>{project.title}</th>
+          <td>{
             `${numeral(tot_ms/1000.0).format('00:00:00')}`
-          }</Col>
-          <Col>
-            {project.entries.map((e) =>
-              <ProjectDetailEntry entry={e} showDetails={this.state.showDetails}/>
-            )}
-          </Col>
-        </Row>
+          }</td>
+          <td>
+            <Table dark>
+              {project.entries.map((e) =>
+                <ProjectDetailEntry entry={e} showDetails={this.state.showDetails}/>
+              )}
+            </Table>
+          </td>
+        </tr>
       </React.Fragment>
     )
   }
@@ -162,32 +162,21 @@ class ProjectReport extends React.Component {
             {loading && <Spinner color="primary" />}
             {!loading && console.log('got data', data)}
             {(!loading && !error) &&
-            <Container>
-              <Row className="rowHeader">
-                <Col lg={2}>Project</Col>
-                <Col lg={1}>Total</Col>
-                <Col>Detail</Col>
-                <Col>Duration (HH:MM:SS)</Col>
-              </Row>
-              {data.projects.map((p) => <ProjectItem project={p} />)}
-            </Container>
+            <Table dark striped>
+              <thead>
+                <th>Project</th>
+                <th>Total</th>
+                <th>Detail/Duration (HH:MM:SS)</th>
+              </thead>
+              <tbody>
+                {data.projects.map((p) => <ProjectItem project={p} />)}
+              </tbody>
+            </Table>
             }
             <style global jsx>{`
               .weekSelect {
                 display: inline;
-                width: 3em;
-              }
-              .projectDetailEntry {
-                background-color: #222;
-              }
-              .projectItem {
-                background-color: #222;
-              }
-              .dayHoursDetail {
-                background-color: #000;
-              }
-              .rowHeader {
-                text-decoration: underline
+                width: 4em;
               }
             `}</style>
           </React.Fragment>
