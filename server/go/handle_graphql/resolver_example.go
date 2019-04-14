@@ -49,6 +49,9 @@ package handle_graphql
 // func (r *mutationResolver) AddTask(ctx context.Context, title string, board *string, list *string) (*Task, error) {
 // 	panic("not implemented")
 // }
+// func (r *mutationResolver) AddWeeklyGoal(ctx context.Context, taskID string, title string) ([]MonthlyGoal, error) {
+// 	panic("not implemented")
+// }
 // func (r *mutationResolver) PrepareMonthlyReview(ctx context.Context, year *int, month *int) (*GenerateResult, error) {
 // 	panic("not implemented")
 // }

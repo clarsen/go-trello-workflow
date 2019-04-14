@@ -33,6 +33,7 @@ type WeeklyGoal {
 }
 
 type MonthlyGoal {
+  idCard: ID
   title: String!
   weeklyGoals: [WeeklyGoal!]
 }
@@ -71,6 +72,7 @@ type Mutation {
 
   setGoalDone(taskID: String!, checkitemID: String!, done: Boolean!, status: String): [MonthlyGoal!]
   addTask(title: String!, board: String, list: String): Task!
+  addWeeklyGoal(taskID: ID!, title: String!, week: Int!): [MonthlyGoal!]
 
   prepareMonthlyReview(year: Int, month: Int): GenerateResult!
   finishMonthlyReview(year: Int, month: Int): FinishResult!

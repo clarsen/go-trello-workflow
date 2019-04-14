@@ -379,6 +379,24 @@ func TimeEntryToTimer(te *gttimeentry.TimeEntry) (*Timer, error) {
 	}, nil
 }
 
+func (r *mutationResolver) AddWeeklyGoal(ctx context.Context, taskID string, title string, week int) ([]MonthlyGoal, error) {
+	mg, err := cl.GetMonthlyGoal(taskID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = cl.AddWeeklyGoal(mg, title, week)
+	if err != nil {
+		return nil, err
+	}
+
+	goals, err := GetMonthlyGoals(cl)
+	if err != nil {
+		return nil, err
+	}
+	return goals, nil
+}
+
 func (r *mutationResolver) StartTimer(ctx context.Context, taskID string, checkitemID *string) (*Timer, error) {
 	if checkitemID != nil {
 		log.Printf("StartTimer %s, %s\n", taskID, *checkitemID)

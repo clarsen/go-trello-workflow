@@ -9,7 +9,8 @@ import (
 )
 
 type MonthlyGoal struct {
-	Title string // `json:"title"`
+	IDCard string
+	Title  string // `json:"title"`
 	// WeeklyGoals []WeeklyGoal `json:"weeklyGoals"`
 	wfGoal *workflow.WFMonthlyGoal
 }
@@ -141,6 +142,7 @@ func GetMonthlyGoals(cl *workflow.Client) (goals []MonthlyGoal, err error) {
 	for idx, _ := range wfGoals {
 		g := wfGoals[idx]
 		goals = append(goals, MonthlyGoal{
+			IDCard: g.IDCard,
 			Title:  g.Title,
 			wfGoal: &g,
 		})

@@ -18,6 +18,7 @@ const fragments = {
   `,
   monthlyGoal: gql`
     fragment MonthlyGoalWhole on MonthlyGoal {
+      idCard
       title
       weeklyGoals {
         idCard
@@ -247,6 +248,34 @@ export const AddTask = ({ render }) => (
     }}
   >
 
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
+const addWeeklyGoalQuery = gql`
+  mutation addWeeklyGoal($taskID: ID!, $title: String!, $week: Int!) {
+    addWeeklyGoal(taskID: $taskID, title: $title, week: $week) {
+      ...MonthlyGoalWhole
+    }
+  }
+  ${fragments.monthlyGoal}
+`
+
+export const AddWeeklyGoal = ({ render }) => (
+  <Mutation
+    mutation={addWeeklyGoalQuery}
+    update={(cache, { data: { addWeeklyGoal } }) => {
+      console.log('mutation update got addWeeklyGoal', addWeeklyGoal)
+
+      const query = MonthlyGoalsQuery
+      const { monthlyGoals } = cache.readQuery({ query })
+      console.log('currently monthlyGoals', monthlyGoals)
+
+      cache.writeQuery({
+        query,
+        data: { monthlyGoals: addWeeklyGoal }
+      })
+    }}  >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )

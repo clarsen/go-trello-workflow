@@ -4,28 +4,47 @@ import {
   Collapse,
   Row,
   Col,
+  Form,
+  Input
 } from 'reactstrap'
 import moment from 'moment'
 
 class Goal extends React.Component {
   constructor (props) {
     super(props)
+    let now = moment()
+    let thisWeek = now.isoWeek()
     this.state = {
       showControls: false,
+      showAddControls: false,
+      title: '',
+      week: thisWeek,
     }
     this.toggle = this.toggle.bind(this)
+    this.toggleAdd = this.toggleAdd.bind(this)
+    this.handleWeekChange = this.handleWeekChange.bind(this)
+    this.handleTitleChange = this.handleTitleChange.bind(this)
   }
   toggle() {
     this.setState(state => ({ showControls: !state.showControls }))
   }
+  toggleAdd() {
+    this.setState(state => ({ showAddControls: !state.showAddControls }))
+  }
+  handleTitleChange(e) {
+    this.setState({ title: e.target.value })
+  }
+  handleWeekChange(e) {
+    this.setState({ week: e.target.value })
+  }
   render () {
-    let { goal, startTimer, timerRefetch, setGoalDone } = this.props
+    let { goal, startTimer, timerRefetch, setGoalDone, addWeeklyGoal } = this.props
     let now = moment()
     let thisWeek = now.isoWeek()
     return (
       <React.Fragment key={goal.id}>
         <Row className='monthlyGoal'>
-          <Col>Monthly: {goal.title}</Col>
+          <Col onClick={this.toggleAdd}>Monthly: {goal.title}</Col>
           <style jsx global>{`
               .monthlyGoal {
                 background: #999;
@@ -33,8 +52,45 @@ class Goal extends React.Component {
               .goal-done {
                 text-decoration: line-through;
               }
+              #newGoalWeek {
+                width: 3em;
+                display: inline-block;
+              }
+              #newGoalTitle {
+                width: 20em;
+                display: inline-block;
+              }
             `}</style>
         </Row>
+        <Collapse isOpen={this.state.showAddControls}>
+          <Form>
+            {`Week:`}<Input type="text"
+              value={this.state.week}
+              size={'5'}
+              id="newGoalWeek"
+              placeholder="week"
+              onChange={this.handleWeekChange}/>
+            <Input type="text"
+              value={this.state.title}
+              size={'50'}
+              id="newGoalTitle"
+              placeholder="goal description"
+              onChange={this.handleTitleChange}/>
+            <Button key={'add'+goal.title} onClick={() => {
+              addWeeklyGoal.mutation({
+                variables: {
+                  taskID: goal.idCard,
+                  title: this.state.title,
+                  week: this.state.week,
+                }
+              })
+                .then(() => {
+                  this.setState({ showAddControls: false })
+                })
+            }} size="sm" color="primary">
+              Add goal</Button>
+          </Form>
+        </Collapse>
         {goal.weeklyGoals
           .filter(g => (g.week === thisWeek || g.week === thisWeek+1))
           .sort((a,b) => b.week - a.week)

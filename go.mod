@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go v0.0.0-20181118003551-50e2f0627dec
 	github.com/awslabs/aws-lambda-go-api-proxy v0.0.0-20190219202933-eb5a49d3c0ad
 	github.com/clarsen/gtoggl-api v0.0.0-20190315195523-0ffb4732cac5
-	github.com/clarsen/trello v0.0.0-20190317011040-ea2c875dccff
+	github.com/clarsen/trello v0.0.0-20190414044537-3db1d5e70a53
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/gliderlabs/ssh v0.1.3 // indirect
 	github.com/gobuffalo/buffalo-plugins v1.13.1 // indirect

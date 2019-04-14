@@ -1,14 +1,17 @@
 package workflow
 
 import (
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/clarsen/trello"
 )
 
 // WFMonthlyGoal is a wrapper for underlying trello card representation
 type WFMonthlyGoal struct {
-	Title string // `json:"title"`
+	IDCard string
+	Title  string // `json:"title"`
 	// WeeklyGoals []WeeklyGoal `json:"weeklyGoals"`
 	card *trello.Card
 }
@@ -28,8 +31,35 @@ type WFWeeklyGoal struct {
 func wfMonthlyGoalFor(card *trello.Card) (WFMonthlyGoal, error) {
 	title, _, _ := GetTitleAndAttributes(card)
 	return WFMonthlyGoal{
-		Title: title,
+		Title:  title,
+		IDCard: card.ID,
 	}, nil
+}
+
+func (cl *Client) AddWeeklyGoal(mg *WFMonthlyGoal, title string, week int) error {
+	card, err := cl.Client.GetCard(mg.IDCard, trello.Defaults())
+	if err != nil {
+		return err
+	}
+
+	created := time.Now()
+	cstr := created.Format(" (2006-01-02)")
+	wgTitle := fmt.Sprintf("week %d: %s%s", week, title, cstr)
+
+	err = card.Checklists[0].AddCheckItem(wgTitle)
+	return err
+}
+
+func (cl *Client) GetMonthlyGoal(id string) (*WFMonthlyGoal, error) {
+	card, err := cl.Client.GetCard(id, trello.Defaults())
+	if err != nil {
+		return nil, err
+	}
+	g, err := wfMonthlyGoalFor(card)
+	if err != nil {
+		return nil, err
+	}
+	return &g, nil
 }
 
 // MonthlyGoals returns all goals for this month
