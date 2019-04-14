@@ -367,12 +367,12 @@ class IndexPage extends React.Component {
                   <Row>
                     <Col>
                       {weeklyLoading && <Spinner color="primary" />}
-                      {(!weeklyLoading && !weeklyError) &&
-                        <div>
-                          <FaSync size={25} onClick={() => weeklyVisualizationRefetch()} />
-                          <MarkdownRenderer className='weeklyReview' markdown={weeklyVisualizationData.weeklyVisualization} />
-                        </div>
-                      }
+                      <div>
+                        {!weeklyLoading && <FaSync size={25} onClick={() => weeklyVisualizationRefetch()} />}
+                        {(!weeklyLoading && !weeklyError) &&
+                            <MarkdownRenderer className='weeklyReview' markdown={weeklyVisualizationData.weeklyVisualization} />
+                        }
+                      </div>
                       {weeklyError && <div>Weekly review: {weeklyError.message}</div>}
                     </Col>
                   </Row>
