@@ -2,10 +2,17 @@ import React from 'react'
 import {
   Collapse,
   Input,
+  Navbar,
+  Nav,
+  NavItem,
+  NavLink,
   Spinner,
   Table,
+  TabContent,
+  TabPane
 } from 'reactstrap'
 import { FaSync } from 'react-icons/fa'
+import classnames from 'classnames'
 
 import numeral from 'numeral'
 import moment from 'moment'
@@ -34,8 +41,18 @@ const pythonGraphqlClient = new ApolloClient({
 })
 
 const QueryContainer = adopt({
-  projectReportQuery: ({ render, year, week }) => (
+  projectWeeklyReportQuery: ({ render, year, week }) => (
     <Query client={pythonGraphqlClient} query={ProjectReportQuery} ssr={false} variables={{ year, week }}>
+      {render}
+    </Query>
+  ),
+  projectMonthlyReportQuery: ({ render, year, month }) => (
+    <Query client={pythonGraphqlClient} query={ProjectReportQuery} ssr={false} variables={{ year, month }}>
+      {render}
+    </Query>
+  ),
+  projectYearlyReportQuery: ({ render, year }) => (
+    <Query client={pythonGraphqlClient} query={ProjectReportQuery} ssr={false} variables={{ year }}>
       {render}
     </Query>
   ),
@@ -129,56 +146,166 @@ class ProjectReport extends React.Component {
     super(props)
     let now = moment()
     this.state = {
-      week: now.isoWeek()
+      week: now.isoWeek(),
+      month: now.month(),
+      year: now.year(),
+      activeTab: 'weekReport',
     }
     this.changeWeek = this.changeWeek.bind(this)
+    this.changeMonth = this.changeMonth.bind(this)
+    this.changeYear = this.changeYear.bind(this)
+    this.switchTab = this.switchTab.bind(this)
   }
+
+  switchTab (tab) {
+    if (this.state.activeTab !== tab) {
+      this.setState({
+        activeTab: tab
+      })
+    }
+  }
+
   changeWeek(e) {
     this.setState({ week: parseInt(e.target.value) })
   }
+
+  changeMonth(e) {
+    this.setState({ month: parseInt(e.target.value) })
+  }
+
+  changeYear(e) {
+    this.setState({ year: parseInt(e.target.value) })
+  }
+
   render() {
     let now = moment()
     let nowGraceMonth = moment().subtract(5,'days')
     return (
-      <QueryContainer year={now.year()} week={this.state.week} month={3}>
+      <QueryContainer year={now.year()} week={this.state.week} month={this.state.month}>
         {({
-          projectReportQuery: { loading, data, error, refetch: projectReportRefetch },
+          projectWeeklyReportQuery: { loading, data, error, refetch: projectWeeklyReportRefetch },
+          projectMonthlyReportQuery: { loading: loadingMonthly, data: dataMonthly, error: errorMonthly, refetch: projectMonthlyReportRefetch },
+          projectYearlyReportQuery: { loading: loadingYearly, data: dataYearly, error: errorYearly, refetch: projectYearlyReportRefetch },
         }) =>
           <React.Fragment>
-            {'Week '}<Input className="weekSelect" type="select" id="week" value={this.state.week} onChange={this.changeWeek}>
-              <option>10</option>
-              <option>11</option>
-              <option>12</option>
-              <option>13</option>
-              <option>14</option>
-              <option>15</option>
-              <option>16</option>
-              <option>17</option>
-              <option>18</option>
-            </Input>{' '}
-            <FaSync size={25} onClick={() => {
-              projectReportRefetch()
-            }} />
-            {loading && <Spinner color="primary" />}
-            {!loading && console.log('got data', data)}
-            {(!loading && !error) &&
-            <Table dark striped>
-              <thead>
-                <th>Project</th>
-                <th>Total</th>
-                <th>Detail/Duration (HH:MM:SS)</th>
-              </thead>
-              <tbody>
-                {data.projects.map((p) => <ProjectItem project={p} />)}
-              </tbody>
-            </Table>
-            }
-            <style global jsx>{`
-              .weekSelect {
-                display: inline;
-                width: 4em;
-              }
-            `}</style>
+            <Navbar expand="lg">
+              <Nav className="mr-auto" tabs>
+                <NavItem>
+                  <NavLink className={classnames({ active: this.state.activeTab === 'weekReport'})} onClick={()=> this.switchTab('weekReport')}>
+                    Weekly
+                  </NavLink>
+                </NavItem>
+                <NavItem>
+                  <NavLink className={classnames({ active: this.state.activeTab === 'monthReport'})} onClick={()=> this.switchTab('monthReport')}>
+                    Monthly
+                  </NavLink>
+                </NavItem>
+                <NavItem>
+                  <NavLink className={classnames({ active: this.state.activeTab === 'yearReport'})} onClick={()=> this.switchTab('yearReport')}>
+                    Yearly
+                  </NavLink>
+                </NavItem>
+              </Nav>
+            </Navbar>
+            <TabContent activeTab={this.state.activeTab}>
+              <TabPane tabId="weekReport">
+                {'Week '}<Input className="weekSelect" type="select" id="week" value={this.state.week} onChange={this.changeWeek}>
+                  <option>10</option>
+                  <option>11</option>
+                  <option>12</option>
+                  <option>13</option>
+                  <option>14</option>
+                  <option>15</option>
+                  <option>16</option>
+                  <option>17</option>
+                  <option>18</option>
+                </Input>{' '}
+                <FaSync size={25} onClick={() => {
+                  projectWeeklyReportRefetch()
+                }} />
+                {loading && <Spinner color="primary" />}
+                {!loading && console.log('got data', data)}
+                {(!loading && !error) &&
+                <Table dark striped>
+                  <thead>
+                    <th>Project</th>
+                    <th>Total</th>
+                    <th>Detail/Duration (HH:MM:SS)</th>
+                  </thead>
+                  <tbody>
+                    {data.projects.map((p) => <ProjectItem project={p} />)}
+                  </tbody>
+                </Table>
+                }
+                <style global jsx>{`
+                  .weekSelect {
+                    display: inline;
+                    width: 4em;
+                  }
+                `}</style>
+              </TabPane>
+              <TabPane tabId="monthReport">
+                {'Month '}<Input className="monthSelect" type="select" id="month" value={this.state.month} onChange={this.changeMonth}>
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                </Input>{' '}
+                <FaSync size={25} onClick={() => {
+                  projectMonthlyReportRefetch()
+                }} />
+                {loadingMonthly && <Spinner color="primary" />}
+                {!loadingMonthly && console.log('got data', dataMonthly)}
+                {(!loadingMonthly && !errorMonthly) &&
+                <Table dark striped>
+                  <thead>
+                    <th>Project</th>
+                    <th>Total</th>
+                    <th>Detail/Duration (HH:MM:SS)</th>
+                  </thead>
+                  <tbody>
+                    {dataMonthly.projects.map((p) => <ProjectItem project={p} />)}
+                  </tbody>
+                </Table>
+                }
+                <style global jsx>{`
+                  .monthSelect {
+                    display: inline;
+                    width: 4em;
+                  }
+                `}</style>
+              </TabPane>
+              <TabPane tabId="yearReport">
+                {'Year '}<Input className="yearSelect" type="select" id="year" value={this.state.year} onChange={this.changeYear}>
+                    <option>2018</option>
+                    <option>2019</option>
+                </Input>{' '}
+                <FaSync size={25} onClick={() => {
+                  projectYearlyReportRefetch()
+                }} />
+                {loadingYearly && <Spinner color="primary" />}
+                {!loadingYearly && console.log('got data', dataYearly)}
+                {(!loadingYearly && !errorYearly) &&
+                <Table dark striped>
+                  <thead>
+                    <th>Project</th>
+                    <th>Total</th>
+                    <th>Detail/Duration (HH:MM:SS)</th>
+                  </thead>
+                  <tbody>
+                    {dataYearly.projects.map((p) => <ProjectItem project={p} />)}
+                  </tbody>
+                </Table>
+                }
+                <style global jsx>{`
+                  .yearSelect {
+                    display: inline;
+                    width: 4em;
+                  }
+                `}</style>
+              </TabPane>
+            </TabContent>
           </React.Fragment>
         }
       </QueryContainer>

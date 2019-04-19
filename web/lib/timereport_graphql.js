@@ -8,8 +8,8 @@ export const TimeReportQuery = gql`
 `
 
 export const ProjectReportQuery = gql`
-  query projects($year: Int, $week: Int) {
-    projects(year: $year, week: $week) {
+  query projects($year: Int, $month: Int, $week: Int) {
+    projects(year: $year, month: $month, week: $week) {
       title
       entries {
         detail
