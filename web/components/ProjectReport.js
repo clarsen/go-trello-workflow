@@ -120,6 +120,23 @@ class ProjectItem extends React.Component {
     let tot_ms = project.entries.reduce((acc, e) =>
       acc + e.entries.reduce((acc, de) =>
       acc + de.duration_ms, 0), 0)
+    let rollup = project.entries.reduce((dur_for_day, entry) => {
+        for (let day = 0; day < 7; day++) {
+          dur_for_day[day] += entry.entries
+            .filter(e => moment.unix(e.start).day() === day )
+            .reduce((acc, e) => acc + e.duration_ms, 0)
+        }
+        return dur_for_day
+      }, 
+      {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
+    )
+
+    let rollupCols =[]
+    for (let day = 0; day < 7; day++) {
+      rollupCols.push(
+        <td>{rollup[day]>0 && `${numeral(rollup[day]/1000.0).format('00:00:00')}`}</td>
+      )
+    }
 
     return (
       <React.Fragment>
@@ -129,6 +146,22 @@ class ProjectItem extends React.Component {
             `${numeral(tot_ms/1000.0).format('00:00:00')}`
           }</td>
           <td>
+            <Collapse isOpen={this.state.showDetails}>
+              <Table dark>
+                <tr>
+                  <td>Su</td>
+                  <td>M</td>
+                  <td>Tu</td>
+                  <td>W</td>
+                  <td>Th</td>
+                  <td>F</td>
+                  <td>Sa</td>
+                </tr>
+                <tr>
+                  {rollupCols}
+                </tr>
+                </Table>
+            </Collapse>
             <Table dark>
               {project.entries.map((e) =>
                 <ProjectDetailEntry entry={e} showDetails={this.state.showDetails}/>
@@ -147,7 +180,7 @@ class ProjectReport extends React.Component {
     let now = moment()
     this.state = {
       week: now.isoWeek(),
-      month: now.month(),
+      month: now.month() + 1,
       year: now.year(),
       activeTab: 'weekReport',
     }
