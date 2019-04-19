@@ -174,6 +174,29 @@ class ProjectItem extends React.Component {
   }
 }
 
+function jsonCopy(src) {
+  return JSON.parse(JSON.stringify(src));
+}
+
+const rebucket = (projects, levels) => {
+  let rebucketed = projects.reduce((newProjects, p) => {
+    let comps = p.title.split(/\s*-\s*/)
+    let newTitle = comps.slice(0,levels).join(' - ')
+    if (newTitle in newProjects)   {
+      newProjects[newTitle].entries = newProjects[newTitle].entries.concat(jsonCopy(p.entries))
+    } else {
+      newProjects[newTitle] = jsonCopy(p)
+      newProjects[newTitle].title = newTitle
+    }
+    return newProjects
+  }, {})
+  let newProjects = []
+  for (var key in rebucketed) {
+    newProjects.push(rebucketed[key])
+  }
+  return newProjects
+}
+
 class ProjectReport extends React.Component {
   constructor (props) {
     super(props)
@@ -256,6 +279,7 @@ class ProjectReport extends React.Component {
                 <FaSync size={25} onClick={() => {
                   projectWeeklyReportRefetch()
                 }} />
+                <div className="sectionName">Project summary:</div>
                 {loading && <Spinner color="primary" />}
                 {!loading && console.log('got data', data)}
                 {(!loading && !error) &&
@@ -270,10 +294,28 @@ class ProjectReport extends React.Component {
                   </tbody>
                 </Table>
                 }
+                <div className="sectionName">Project group summary:</div>
+                {(!loading && !error) &&
+                <Table dark striped>
+                  <thead>
+                    <th>Project</th>
+                    <th>Total</th>
+                    <th>Detail/Duration (HH:MM:SS)</th>
+                  </thead>
+                  <tbody>
+                    {rebucket(data.projects, 2).map((p) => <ProjectItem project={p} />)}
+                  </tbody>
+                </Table>
+                }
                 <style global jsx>{`
                   .weekSelect {
                     display: inline;
                     width: 4em;
+                  }
+                  .sectionName {
+                    font-size: 1.3em;
+                    font-weight: bold;
+                    text-decoration: underline;
                   }
                 `}</style>
               </TabPane>
@@ -288,6 +330,7 @@ class ProjectReport extends React.Component {
                 <FaSync size={25} onClick={() => {
                   projectMonthlyReportRefetch()
                 }} />
+                <div className="sectionName">Project summary:</div>
                 {loadingMonthly && <Spinner color="primary" />}
                 {!loadingMonthly && console.log('got data', dataMonthly)}
                 {(!loadingMonthly && !errorMonthly) &&
@@ -302,10 +345,28 @@ class ProjectReport extends React.Component {
                   </tbody>
                 </Table>
                 }
+                <div className="sectionName">Project group summary:</div>
+                {(!loadingMonthly && !errorMonthly) &&
+                <Table dark striped>
+                  <thead>
+                    <th>Project</th>
+                    <th>Total</th>
+                    <th>Detail/Duration (HH:MM:SS)</th>
+                  </thead>
+                  <tbody>
+                    {rebucket(dataMonthly.projects, 2).map((p) => <ProjectItem project={p} />)}
+                  </tbody>
+                </Table>
+                }
                 <style global jsx>{`
                   .monthSelect {
                     display: inline;
                     width: 4em;
+                  }
+                  .sectionName {
+                    font-size: 1.3em;
+                    font-weight: bold;
+                    text-decoration: underline;
                   }
                 `}</style>
               </TabPane>
@@ -317,6 +378,7 @@ class ProjectReport extends React.Component {
                 <FaSync size={25} onClick={() => {
                   projectYearlyReportRefetch()
                 }} />
+                <div className="sectionName">Project summary:</div>
                 {loadingYearly && <Spinner color="primary" />}
                 {!loadingYearly && console.log('got data', dataYearly)}
                 {(!loadingYearly && !errorYearly) &&
@@ -331,10 +393,28 @@ class ProjectReport extends React.Component {
                   </tbody>
                 </Table>
                 }
+                <div className="sectionName">Project group summary:</div>
+                {(!loadingYearly && !errorYearly) &&
+                <Table dark striped>
+                  <thead>
+                    <th>Project</th>
+                    <th>Total</th>
+                    <th>Detail/Duration (HH:MM:SS)</th>
+                  </thead>
+                  <tbody>
+                    {rebucket(dataYearly.projects, 2).map((p) => <ProjectItem project={p} />)}
+                  </tbody>
+                </Table>
+                }
                 <style global jsx>{`
                   .yearSelect {
                     display: inline;
-                    width: 4em;
+                    width: 5em;
+                  }
+                  .sectionName {
+                    font-size: 1.3em;
+                    font-weight: bold;
+                    text-decoration: underline;
                   }
                 `}</style>
               </TabPane>
