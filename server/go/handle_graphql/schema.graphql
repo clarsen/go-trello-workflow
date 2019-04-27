@@ -73,6 +73,7 @@ type Mutation {
   setGoalDone(taskID: String!, checkitemID: String!, done: Boolean!, status: String): [MonthlyGoal!]
   addTask(title: String!, board: String, list: String): Task!
   addWeeklyGoal(taskID: ID!, title: String!, week: Int!): [MonthlyGoal!]
+  addMonthlyGoal(title: String!): [MonthlyGoal!]
 
   prepareMonthlyReview(year: Int, month: Int): GenerateResult!
   finishMonthlyReview(year: Int, month: Int): FinishResult!

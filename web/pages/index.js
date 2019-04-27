@@ -45,7 +45,8 @@ import {
   AddTask,
   PrepareMonthlyReview,
   FinishMonthlyReview,
-  AddWeeklyGoal
+  AddWeeklyGoal,
+  AddMonthlyGoal
 } from '../lib/graphql'
 
 
@@ -90,6 +91,7 @@ const QueryContainer = adopt({
   SetGoalDone,
   AddTask,
   AddWeeklyGoal,
+  AddMonthlyGoal,
 })
 
 class IndexPage extends React.Component {
@@ -156,7 +158,8 @@ class IndexPage extends React.Component {
           StartTimer,
           SetGoalDone,
           AddTask,
-          AddWeeklyGoal
+          AddWeeklyGoal,
+          AddMonthlyGoal,
         }) =>
           <React.Fragment>
             <NavHeader switchTab={this.switchTab} activeTab={this.state.activeTab} />
@@ -286,11 +289,14 @@ class IndexPage extends React.Component {
                   </Row>
                   <Row>
                     <Col lg={6}>
-                      <div className="listTitle">Goals</div>
-                      {loadingAllGoals && <Spinner color="primary" />}
-                      {!loadingAllGoals && console.log('got data', allGoals)}
-                      {queryAllGoalsError && <div>Goals: {queryAllGoalsError.message}</div>}
-                      {!loadingAllGoals && !queryAllGoalsError && <GoalList startTimer={StartTimer} timerRefetch={timerRefetch} setGoalDone={SetGoalDone} addWeeklyGoal={AddWeeklyGoal} goals={allGoals.monthlyGoals}/>}
+                      <GoalList 
+                        loading={loadingAllGoals} error={queryAllGoalsError}
+                        startTimer={StartTimer} timerRefetch={timerRefetch}
+                        setGoalDone={SetGoalDone}
+                        addWeeklyGoal={AddWeeklyGoal}
+                        addMonthlyGoal={AddMonthlyGoal}
+                        goals={allGoals.monthlyGoals}
+                      />
                     </Col>
                     <Col lg={6}>
                       <TaskList

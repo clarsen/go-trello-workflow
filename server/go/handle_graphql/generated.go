@@ -75,6 +75,7 @@ type ComplexityRoot struct {
 		SetGoalDone          func(childComplexity int, taskID string, checkitemID string, done bool, status *string) int
 		AddTask              func(childComplexity int, title string, board *string, list *string) int
 		AddWeeklyGoal        func(childComplexity int, taskID string, title string, week int) int
+		AddMonthlyGoal       func(childComplexity int, title string) int
 		PrepareMonthlyReview func(childComplexity int, year *int, month *int) int
 		FinishMonthlyReview  func(childComplexity int, year *int, month *int) int
 	}
@@ -129,6 +130,7 @@ type MutationResolver interface {
 	SetGoalDone(ctx context.Context, taskID string, checkitemID string, done bool, status *string) ([]MonthlyGoal, error)
 	AddTask(ctx context.Context, title string, board *string, list *string) (*Task, error)
 	AddWeeklyGoal(ctx context.Context, taskID string, title string, week int) ([]MonthlyGoal, error)
+	AddMonthlyGoal(ctx context.Context, title string) ([]MonthlyGoal, error)
 	PrepareMonthlyReview(ctx context.Context, year *int, month *int) (*GenerateResult, error)
 	FinishMonthlyReview(ctx context.Context, year *int, month *int) (*FinishResult, error)
 }
@@ -337,6 +339,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.AddWeeklyGoal(childComplexity, args["taskID"].(string), args["title"].(string), args["week"].(int)), true
+
+	case "Mutation.AddMonthlyGoal":
+		if e.complexity.Mutation.AddMonthlyGoal == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addMonthlyGoal_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddMonthlyGoal(childComplexity, args["title"].(string)), true
 
 	case "Mutation.PrepareMonthlyReview":
 		if e.complexity.Mutation.PrepareMonthlyReview == nil {
@@ -690,6 +704,7 @@ type Mutation {
   setGoalDone(taskID: String!, checkitemID: String!, done: Boolean!, status: String): [MonthlyGoal!]
   addTask(title: String!, board: String, list: String): Task!
   addWeeklyGoal(taskID: ID!, title: String!, week: Int!): [MonthlyGoal!]
+  addMonthlyGoal(title: String!): [MonthlyGoal!]
 
   prepareMonthlyReview(year: Int, month: Int): GenerateResult!
   finishMonthlyReview(year: Int, month: Int): FinishResult!
@@ -700,6 +715,20 @@ type Mutation {
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_addMonthlyGoal_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["title"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["title"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_addTask_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1650,6 +1679,36 @@ func (ec *executionContext) _Mutation_addWeeklyGoal(ctx context.Context, field g
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().AddWeeklyGoal(rctx, args["taskID"].(string), args["title"].(string), args["week"].(int))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]MonthlyGoal)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOMonthlyGoal2ᚕgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐMonthlyGoal(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_addMonthlyGoal(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_addMonthlyGoal_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddMonthlyGoal(rctx, args["title"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -3367,6 +3426,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "addWeeklyGoal":
 			out.Values[i] = ec._Mutation_addWeeklyGoal(ctx, field)
+		case "addMonthlyGoal":
+			out.Values[i] = ec._Mutation_addMonthlyGoal(ctx, field)
 		case "prepareMonthlyReview":
 			out.Values[i] = ec._Mutation_prepareMonthlyReview(ctx, field)
 			if out.Values[i] == graphql.Null {

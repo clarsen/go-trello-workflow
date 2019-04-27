@@ -280,6 +280,34 @@ export const AddWeeklyGoal = ({ render }) => (
   </Mutation>
 )
 
+const addMonthlyGoalQuery = gql`
+  mutation addMonthlyGoal($title: String!) {
+    addMonthlyGoal(title: $title) {
+      ...MonthlyGoalWhole
+    }
+  }
+  ${fragments.monthlyGoal}
+`
+
+export const AddMonthlyGoal = ({ render }) => (
+  <Mutation
+    mutation={addMonthlyGoalQuery}
+    update={(cache, { data: { addMonthlyGoal } }) => {
+      console.log('mutation update got addMonthlyGoal', addMonthlyGoal)
+
+      const query = MonthlyGoalsQuery
+      const { monthlyGoals } = cache.readQuery({ query })
+      console.log('currently monthlyGoals', monthlyGoals)
+
+      cache.writeQuery({
+        query,
+        data: { monthlyGoals: addMonthlyGoal }
+      })
+    }}  >
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
 const prepareMonthlyReviewQuery = gql`
   mutation prepareMonthlyReview($year: Int, $month: Int) {
     prepareMonthlyReview(year: $year, month: $month) {

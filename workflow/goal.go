@@ -50,6 +50,16 @@ func (cl *Client) AddWeeklyGoal(mg *WFMonthlyGoal, title string, week int) error
 	return err
 }
 
+func (cl *Client) AddMonthlyGoal(title string) error {
+	card, err := cl.CreateCard(title, "Kanban daily/weekly", "Monthly Goals")
+	if err != nil {
+		return err
+	}
+
+	err = card.AddChecklist("Weekly goals")
+	return err
+}
+
 func (cl *Client) GetMonthlyGoal(id string) (*WFMonthlyGoal, error) {
 	card, err := cl.Client.GetCard(id, trello.Defaults())
 	if err != nil {

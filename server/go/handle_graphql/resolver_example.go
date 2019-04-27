@@ -3,7 +3,7 @@ package handle_graphql
 // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 // type Resolver struct{}
-//
+
 // func (r *Resolver) MonthlyGoal() MonthlyGoalResolver {
 // 	return &monthlyGoalResolver{r}
 // }
@@ -13,15 +13,15 @@ package handle_graphql
 // func (r *Resolver) Query() QueryResolver {
 // 	return &queryResolver{r}
 // }
-//
+
 // type monthlyGoalResolver struct{ *Resolver }
-//
+
 // func (r *monthlyGoalResolver) WeeklyGoals(ctx context.Context, obj *MonthlyGoal) ([]WeeklyGoal, error) {
 // 	panic("not implemented")
 // }
-//
+
 // type mutationResolver struct{ *Resolver }
-//
+
 // func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, week *int) (*GenerateResult, error) {
 // 	panic("not implemented")
 // }
@@ -49,7 +49,10 @@ package handle_graphql
 // func (r *mutationResolver) AddTask(ctx context.Context, title string, board *string, list *string) (*Task, error) {
 // 	panic("not implemented")
 // }
-// func (r *mutationResolver) AddWeeklyGoal(ctx context.Context, taskID string, title string) ([]MonthlyGoal, error) {
+// func (r *mutationResolver) AddWeeklyGoal(ctx context.Context, taskID string, title string, week int) ([]MonthlyGoal, error) {
+// 	panic("not implemented")
+// }
+// func (r *mutationResolver) AddMonthlyGoal(ctx context.Context, title string) ([]MonthlyGoal, error) {
 // 	panic("not implemented")
 // }
 // func (r *mutationResolver) PrepareMonthlyReview(ctx context.Context, year *int, month *int) (*GenerateResult, error) {
@@ -58,9 +61,9 @@ package handle_graphql
 // func (r *mutationResolver) FinishMonthlyReview(ctx context.Context, year *int, month *int) (*FinishResult, error) {
 // 	panic("not implemented")
 // }
-//
+
 // type queryResolver struct{ *Resolver }
-//
+
 // func (r *queryResolver) Tasks(ctx context.Context, dueBefore *int, inBoardList *BoardListInput) ([]Task, error) {
 // 	panic("not implemented")
 // }
