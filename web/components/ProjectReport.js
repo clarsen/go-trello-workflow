@@ -13,6 +13,7 @@ import {
 } from 'reactstrap'
 import { FaSync } from 'react-icons/fa'
 import classnames from 'classnames'
+import 'cross-fetch/polyfill'
 
 import numeral from 'numeral'
 import moment from 'moment'
@@ -29,6 +30,7 @@ import auth from '../lib/auth0'
 
 const pythonGraphqlClient = new ApolloClient({
   uri: ENDPOINTS['python']['private_gql'],
+  fetch,
   cache: new InMemoryCache().restore({}),
   request: operation => {
     operation.setContext(context => ({
