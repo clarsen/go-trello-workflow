@@ -140,7 +140,7 @@ class IndexPage extends React.Component {
     let remainingWeek = 168 - elapsedWeek
     let elapsedWeekPct = elapsedWeek/168.0*100.0
     return (
-      <QueryContainer year={now.year()} week={now.isoWeek()} month={3}>
+      <QueryContainer year={now.year()} week={now.isoWeek()} month={now.month()+1}>
         {({
           queryAll: { loading: loadingAll, data: allTasks, error: queryAllError, refetch: allRefetch },
           queryAllGoals: { loading: loadingAllGoals, data: allGoals, error: queryAllGoalsError, refetch: allGoalsRefetch },
@@ -223,14 +223,14 @@ class IndexPage extends React.Component {
                       .mutation({
                         variables: {
                           year: nowGraceMonth.year(),
-                          month: nowGraceMonth.month(),
+                          month: nowGraceMonth.month()+1,
                         }
                       })
                       .then(({ data }) => alert.show(data.prepareMonthlyReview.message))
                   }}>
-                      Prepare monthly review for {nowGraceMonth.year()}-{nowGraceMonth.month()}
+                      Prepare monthly review for {nowGraceMonth.year()}-{nowGraceMonth.month()+1}
                   </Button>{' '}
-                  {nowGraceMonth.month() !== monthNext &&
+                  {nowGraceMonth.month()+1 !== monthNext &&
                     <Button color='primary' size='sm' onClick={() => {
                       PrepareMonthlyReview
                         .mutation({
@@ -244,18 +244,20 @@ class IndexPage extends React.Component {
                         Prepare monthly review for {now.year()}-{monthNext}
                     </Button>
                   }{' '}
-                  <Button color='primary' size='sm' onClick={() => {
-                    FinishMonthlyReview
-                      .mutation({
-                        variables: {
-                          year: nowGraceMonth.year(),
-                          month: nowGraceMonth.month(),
-                        }
-                      })
-                      .then(({ data }) => alert.show(data.finishMonthlyReview.message))
-                  }}>
-                      Finish monthly review for {nowGraceMonth.year()}-{nowGraceMonth.month()}
-                  </Button>{' '}
+                  {nowGraceMonth.month()+1 !== monthNext &&
+                    <Button color='primary' size='sm' onClick={() => {
+                      FinishMonthlyReview
+                        .mutation({
+                          variables: {
+                            year: nowGraceMonth.year(),
+                            month: nowGraceMonth.month()+1,
+                          }
+                        })
+                        .then(({ data }) => alert.show(data.finishMonthlyReview.message))
+                    }}>
+                        Finish monthly review for {nowGraceMonth.year()}-{nowGraceMonth.month()+1}
+                    </Button>
+                  }{' '}
                   <Button color='primary' size='sm' onClick={() => {
                     FinishMonthlyReview
                       .mutation({

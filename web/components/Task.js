@@ -73,6 +73,19 @@ class Task extends React.Component {
               `}</style>
 
               <Collapse isOpen={this.state.showDueDateControls}>
+                {task.list.list !== 'Today' &&
+                  <Button outline color='primary' size='sm' onClick={()=>{
+                    moveTaskToList.mutation({
+                      variables: {
+                        taskID: task.id,
+                        list: {
+                          board: 'Kanban daily/weekly',
+                          list: 'Today',
+                        },
+                      }
+                    })
+                  }}>Today</Button>
+                }{' '}
                 <Button outline color='primary' size='sm' onClick={this.toggleMove}>Move</Button>
                 <Collapse isOpen={this.state.showMoveControls}>
                   {task.list.list !== 'Today' &&
