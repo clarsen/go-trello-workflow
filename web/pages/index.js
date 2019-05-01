@@ -15,7 +15,14 @@ import { Query } from 'react-apollo'
 import { adopt } from 'react-adopt'
 import { withAlert } from 'react-alert'
 import moment from 'moment'
-import { FaCheckCircle, FaSync } from 'react-icons/fa'
+import { 
+  FaCalendarDay, 
+  FaCheckCircle, 
+  FaListUl,
+  FaRecycle,
+  FaRegClock, 
+  FaSync 
+} from 'react-icons/fa'
 import NavHeader from '../components/NavHeader'
 import TaskList from '../components/TaskList'
 import GoalList from '../components/GoalList'
@@ -280,7 +287,8 @@ class IndexPage extends React.Component {
                     <Col lg={6}>
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
-                        listTitle={'Today'} listFilter={['Today']}
+                        listTitle={<div><FaCalendarDay size={25}/> {'Today'}</div>}
+                        listFilter={['Today']}
                         setDueDate={SetDueDate} setDone={SetDone}
                         moveTaskToList={MoveTaskToList} startTimer={StartTimer}
                         timerRefetch={timerRefetch}
@@ -303,7 +311,8 @@ class IndexPage extends React.Component {
                     <Col lg={6}>
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
-                        listTitle={'Waiting on...'} listFilter={['Waiting on']}
+                        listTitle={<div><FaRegClock size={25}/> {'Waiting on...'}</div>}
+                        listFilter={['Waiting on']}
                         setDueDate={SetDueDate} setDone={SetDone}
                         moveTaskToList={MoveTaskToList} startTimer={StartTimer}
                         timerRefetch={timerRefetch}
@@ -315,7 +324,8 @@ class IndexPage extends React.Component {
                     <Col lg={6}>
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
-                        listTitle={'Backlog'} listFilter={['Backlog (Personal)']}
+                        listTitle={<div><FaListUl size={25}/> {'Backlog'}</div>}
+                        listFilter={['Backlog (Personal)']}
                         setDueDate={SetDueDate} setDone={SetDone}
                         moveTaskToList={MoveTaskToList} startTimer={StartTimer}
                         timerRefetch={timerRefetch}
@@ -324,7 +334,7 @@ class IndexPage extends React.Component {
                     </Col>
                     <Col lg={6}>
                       <Row>
-                        <div className="listTitle">Periodic</div>
+                        <div className="listTitle"><FaRecycle size={25}/> {'Periodic'}</div>
                         <TaskList
                           loading={loadingAll} error={queryAllError} data={allTasks}
                           listSubGroupTitle={'Often'} listFilter={['Often']}

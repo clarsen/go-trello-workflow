@@ -1,4 +1,5 @@
 import React from 'react'
+import { FaBullseye } from 'react-icons/fa'
 import Goal from './Goal'
 import {
   Button,
@@ -29,7 +30,10 @@ class GoalList extends React.Component {
     let { goals, loading, error, startTimer, timerRefetch, setGoalDone, addWeeklyGoal, addMonthlyGoal } = this.props
     return (
       <React.Fragment>
-        <div className="listTitle" onClick={this.toggleAdd}>Goals</div>
+        <div className="listTitle" onClick={this.toggleAdd}>
+          <FaBullseye size={25}/> 
+          Goals
+        </div>
         <Container>
           {loading && <Spinner color="primary" />}
           {!loading && console.log('got data', goals)}
