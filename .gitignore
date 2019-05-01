@@ -11,3 +11,4 @@
 /web/.serverless
 /web/.next
 .DS_Store
+/server/go/handle_graphql/server/bin/server

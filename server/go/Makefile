@@ -22,9 +22,10 @@ build:
 .PHONY: local
 local:
 	cd handle_graphql; go generate .
-	cd ../..; packr2
-	go build -ldflags="-s -w" -o bin/server handle_graphql/server/main.go
-	cd ../..; packr2 clean
+	# cd ../..; packr2
+	packr2 -v build -ldflags="-s -w" -o bin/server handle_graphql/server/main.go
+	# cd ../..; go build -ldflags="-s -w" -o server/go/bin/server server/go/handle_graphql/server/main.go
+	# cd ../..; packr2 clean
 
 .PHONY: deploy
 deploy: clean build
