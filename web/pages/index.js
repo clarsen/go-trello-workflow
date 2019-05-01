@@ -15,7 +15,7 @@ import { Query } from 'react-apollo'
 import { adopt } from 'react-adopt'
 import { withAlert } from 'react-alert'
 import moment from 'moment'
-import { FaSync } from 'react-icons/fa'
+import { FaCheckCircle, FaSync } from 'react-icons/fa'
 import NavHeader from '../components/NavHeader'
 import TaskList from '../components/TaskList'
 import GoalList from '../components/GoalList'
@@ -315,17 +315,6 @@ class IndexPage extends React.Component {
                     <Col lg={6}>
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
-                        listTitle={'Done this week'} listFilter={['Done this week']}
-                        setDueDate={SetDueDate} setDone={SetDone}
-                        moveTaskToList={MoveTaskToList} startTimer={StartTimer}
-                        timerRefetch={timerRefetch}
-                      />
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col lg={6}>
-                      <TaskList
-                        loading={loadingAll} error={queryAllError} data={allTasks}
                         listTitle={'Backlog'} listFilter={['Backlog (Personal)']}
                         setDueDate={SetDueDate} setDone={SetDone}
                         moveTaskToList={MoveTaskToList} startTimer={StartTimer}
@@ -371,6 +360,18 @@ class IndexPage extends React.Component {
                           timerRefetch={timerRefetch}
                         />
                       </Row>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col lg={6}>
+                      <TaskList
+                        loading={loadingAll} error={queryAllError} data={allTasks}
+                        listTitle={<div><FaCheckCircle size={25}/> {'Done this week'}</div>}
+                        listFilter={['Done this week']}
+                        setDueDate={SetDueDate} setDone={SetDone}
+                        moveTaskToList={MoveTaskToList} startTimer={StartTimer}
+                        timerRefetch={timerRefetch}
+                      />
                     </Col>
                   </Row>
                 </TabPane>
