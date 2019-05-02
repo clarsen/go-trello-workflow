@@ -36,7 +36,7 @@ const pythonGraphqlClient = new ApolloClient({
     operation.setContext(context => ({
       headers: {
         ...context.headers,
-        Authorization: `Bearer ${auth().getIdToken()}`,
+        Authorization: `Bearer ${auth.instance().getIdToken()}`,
       },
     }))
   },
@@ -338,9 +338,11 @@ class ProjectReport extends React.Component {
                 {(!loadingMonthly && !errorMonthly) &&
                 <Table dark striped>
                   <thead>
-                    <th>Project</th>
-                    <th>Total</th>
-                    <th>Detail/Duration (HH:MM:SS)</th>
+                    <tr>
+                      <th>Project</th>
+                      <th>Total</th>
+                      <th>Detail/Duration (HH:MM:SS)</th>
+                    </tr>
                   </thead>
                   <tbody>
                     {dataMonthly.projects.map((p) => <ProjectItem project={p} />)}
@@ -351,9 +353,11 @@ class ProjectReport extends React.Component {
                 {(!loadingMonthly && !errorMonthly) &&
                 <Table dark striped>
                   <thead>
-                    <th>Project</th>
-                    <th>Total</th>
-                    <th>Detail/Duration (HH:MM:SS)</th>
+                    <tr>
+                      <th>Project</th>
+                      <th>Total</th>
+                      <th>Detail/Duration (HH:MM:SS)</th>
+                    </tr>
                   </thead>
                   <tbody>
                     {rebucket(dataMonthly.projects, 2).map((p) => <ProjectItem project={p} />)}
@@ -386,9 +390,11 @@ class ProjectReport extends React.Component {
                 {(!loadingYearly && !errorYearly) &&
                 <Table dark striped>
                   <thead>
-                    <th>Project</th>
-                    <th>Total</th>
-                    <th>Detail/Duration (HH:MM:SS)</th>
+                    <tr>
+                      <th>Project</th>
+                      <th>Total</th>
+                      <th>Detail/Duration (HH:MM:SS)</th>
+                    </tr>
                   </thead>
                   <tbody>
                     {dataYearly.projects.map((p) => <ProjectItem project={p} />)}
@@ -399,9 +405,11 @@ class ProjectReport extends React.Component {
                 {(!loadingYearly && !errorYearly) &&
                 <Table dark striped>
                   <thead>
-                    <th>Project</th>
-                    <th>Total</th>
-                    <th>Detail/Duration (HH:MM:SS)</th>
+                    <tr>
+                      <th>Project</th>
+                      <th>Total</th>
+                      <th>Detail/Duration (HH:MM:SS)</th>
+                    </tr>
                   </thead>
                   <tbody>
                     {rebucket(dataYearly.projects, 2).map((p) => <ProjectItem project={p} />)}

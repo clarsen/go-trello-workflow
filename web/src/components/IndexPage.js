@@ -106,7 +106,7 @@ class IndexPage extends React.Component {
   async componentDidMount () {
     console.log('componentDidMount')
     try {
-      await auth().silentAuth()
+      await auth.instance().silentAuth()
       console.log('silentAuth done')
     } catch (err) {
       console.log('error', err)
@@ -116,7 +116,7 @@ class IndexPage extends React.Component {
         return
       }
     }
-    if (!auth().isAuthenticated()) {
+    if (!auth.instance().isAuthenticated()) {
       console.log('not authenticated')
       navigate('/login')
       // redirect({}, '/login')
@@ -309,7 +309,7 @@ class IndexPage extends React.Component {
                         setGoalDone={SetGoalDone}
                         addWeeklyGoal={AddWeeklyGoal}
                         addMonthlyGoal={AddMonthlyGoal}
-                        goals={allGoals.monthlyGoals}
+                        goals={allGoals ? allGoals.monthlyGoals : null}
                       />
                     </Col>
                     <Col lg={6}>

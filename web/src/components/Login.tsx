@@ -7,12 +7,14 @@ interface ICustomInputProps {
 }
 
 class Login extends React.Component<ICustomInputProps> {
-  public render() {
-    if (auth().isAuthenticated()) {
+  public async componentDidMount() {
+    if (auth.instance().isAuthenticated()) {
       navigate('/')
       return null
     }
-    auth().login()
+    await auth.instance().login()
+  }
+  public render() {
     return (
       <div>Logging in...</div>
     )

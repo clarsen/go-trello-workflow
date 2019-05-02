@@ -13,7 +13,7 @@ export default withApollo(({ ctx, headers, initialState }) => (
       operation.setContext(context => ({
         headers: {
           ...context.headers,
-          Authorization: `Bearer ${auth().getIdToken()}`,
+          Authorization: `Bearer ${auth.instance().getIdToken()}`,
         },
       }))
     }

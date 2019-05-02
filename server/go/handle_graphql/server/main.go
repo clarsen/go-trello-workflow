@@ -19,6 +19,8 @@ func addCors(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Origin", "https://workflow.app.caselarsen.com")
 		if strings.HasPrefix(r.Header.Get("Origin"), "http://localhost") {
 			w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+		} else if strings.HasPrefix(r.Header.Get("Origin"), "http://192.168.7.26:8000") {
+			w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 		} else if strings.HasPrefix(r.Header.Get("Origin"), "https://workflow.caselarsen.com") {
 			w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 		}

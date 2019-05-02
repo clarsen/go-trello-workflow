@@ -61,12 +61,12 @@ class Header extends React.Component {
             </NavItem>
           </Nav>
           <Nav className="ml-auto" navbar>
-            {auth().isAuthenticated()
-              ? <NavItem onClick={() => { console.log('Logout'); auth().logout() }}>
+            {(!auth.instance() || auth.instance().isAuthenticated())
+              ? <NavItem onClick={() => { console.log('Logout'); auth.instance().logout() }}>
                 <NavLink to="#" className="nav-link">
                   Logout</NavLink>
               </NavItem>
-              : <NavItem onClick={() => { console.log('Login'); auth().login() }}>
+              : <NavItem onClick={() => { console.log('Login'); auth.instance().login() }}>
                 <NavLink to="#" className="nav-link">
                   Login</NavLink>
               </NavItem>

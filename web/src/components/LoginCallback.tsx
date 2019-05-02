@@ -8,12 +8,24 @@ interface ICustomInputProps {
 
 class LoginCallback extends React.Component<ICustomInputProps> {
   public async componentDidMount() {
-    await auth().handleAuthentication()
-    navigate('/')
+    try {
+      await auth.instance().handleAuthentication()
+      navigate('/')
+    } catch (err) {
+      console.log(err)
+    }
   }
   public render() {
+    // navigate('/')
+    const authFlag = localStorage.getItem(auth.instance().authFlag)
     return (
-      <div>This is authentication page</div>
+      <div>This is authentication page.
+        auth = {`${auth.instance()}`},
+        isAuthenticated = {`${auth.instance().isAuthenticated()}`}.
+        getIdToken = {`${auth.instance().getIdToken()}`},
+        authFlag = {`${auth.instance().authFlag}`},
+        authFlagValue in storage = {`${authFlag}`}
+        </div>
     )
   }
 }

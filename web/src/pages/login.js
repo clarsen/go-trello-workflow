@@ -7,7 +7,7 @@ import auth from '../lib/auth0'
 class LoginPage extends React.Component {
   render () {
     return (
-      <Button onClick={() => { console.log('Login'); auth().login() }}>You must log in</Button>
+      <Button onClick={() => { console.log('Login'); auth.instance().login() }}>You must log in</Button>
     )
   }
 }

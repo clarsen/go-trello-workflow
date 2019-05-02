@@ -45,6 +45,7 @@ class Auth {
     }
   }
   login() {
+    console.log('auth().login - calling auth0 authorize')
     this.auth0.authorize()
   }
 
@@ -62,9 +63,17 @@ class Auth {
   }
   handleAuthentication() {
     return new Promise((resolve, reject) => {
+      console.log('calling auth0.parseHash, location=', window.location, ' hash=', window.location.hash)
+      if (window.location.hash === "") {
+        return reject(new Error("No location hash"))
+      }
       this.auth0.parseHash((err, authResult) => {
-        if (err) return reject(err)
+        if (err) {
+          console.log(err)
+          return reject(err)
+        }
         if (!authResult || !authResult.idToken) {
+          console.log('authResult =', authResult)
           return reject(err)
         }
         this.setSession(authResult)
@@ -134,12 +143,17 @@ class Auth {
   }
 }
 
-var _auth = null
 
-const auth = () => {
-  if (_auth === null) {
-    _auth = new Auth()
+const authSingleton = (() => {
+  var _auth = null
+  return {
+    instance: () => {
+      if (_auth === null) {
+        _auth = new Auth()
+      }
+      return _auth
+    }
   }
-  return _auth
-}
-export default auth
+})()
+
+export default authSingleton

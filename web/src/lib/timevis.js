@@ -7,7 +7,7 @@ const fetchTimeReport = () => {
   return fetch(ENDPOINTS['python']['timevis_api'], {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${auth().getIdToken()}`,
+      Authorization: `Bearer ${auth.instance().getIdToken()}`,
     },
   })
     .then(response => {
