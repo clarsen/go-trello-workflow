@@ -13,7 +13,7 @@ export default () => {
       <Router>
         <IndexPage path='/' />
         <Login path='/login' />
-        <LoginCallback path='/callback/' />
+        <LoginCallback path='/callback' />
       </Router>
     </Layout>
   )
