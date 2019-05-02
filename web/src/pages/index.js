@@ -32,7 +32,9 @@ import ProjectReport from '../components/ProjectReport'
 import MarkdownRenderer from 'react-markdown-renderer'
 
 import auth from '../lib/auth0'
-import redirect from '../lib/redirect'
+// import redirect from '../lib/redirect'
+import { navigate } from 'gatsby'
+import Layout from '../components/layout'
 
 import {
   TaskQuery,
@@ -110,13 +112,15 @@ class IndexPage extends React.Component {
     } catch (err) {
       console.log('error', err)
       if (err.error === 'login_required') {
-        redirect({}, '/login')
+        navigate('/login')
+        // redirect({}, '/login')
         return
       }
     }
     if (!auth().isAuthenticated()) {
       console.log('not authenticated')
-      redirect({}, '/login')
+      navigate('/login')
+      // redirect({}, '/login')
       return
     }
   }
@@ -147,6 +151,7 @@ class IndexPage extends React.Component {
     let remainingWeek = 168 - elapsedWeek
     let elapsedWeekPct = elapsedWeek/168.0*100.0
     return (
+      <Layout>
       <QueryContainer year={now.year()} week={now.isoWeek()} month={now.month()+1}>
         {({
           queryAll: { loading: loadingAll, data: allTasks, error: queryAllError, refetch: allRefetch },
@@ -430,6 +435,7 @@ class IndexPage extends React.Component {
           </React.Fragment>
         }
       </QueryContainer>
+      </Layout>
     )
   }
 }

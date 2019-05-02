@@ -1,11 +1,13 @@
 import React from 'react'
-import Router from 'next/router'
+// import Router from 'next/router'
 import auth from '../lib/auth0'
+import { navigate } from 'gatsby'
 
 class CallbackPage extends React.Component {
   async componentDidMount() {
     await auth().handleAuthentication()
-    Router.push('/')
+    navigate('/')
+    // Router.push('/')
   }
   render () {
     return (

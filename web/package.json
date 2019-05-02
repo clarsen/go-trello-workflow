@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "next -p 3002",
     "deploy": "next build && sls deploy -v",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "type-check": "tsc --noEmit",
+    "lint": "tslint --project ."
   },
   "keywords": [],
   "author": "",
@@ -19,6 +21,13 @@
     "cross-fetch": "^3.0.2",
     "dotenv": "^6.2.0",
     "express": "^4.16.4",
+    "gatsby": "^2.3.36",
+    "gatsby-plugin-create-client-paths": "^2.0.5",
+    "gatsby-plugin-manifest": "^2.0.29",
+    "gatsby-plugin-netlify": "^2.0.16",
+    "gatsby-plugin-offline": "^2.0.25",
+    "gatsby-plugin-typescript": "^2.0.13",
+    "gatsby-source-filesystem": "^2.0.33",
     "graphql": "^14.2.1",
     "isomorphic-unfetch": "^3.0.0",
     "moment": "^2.24.0",
@@ -46,8 +55,20 @@
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.4.4",
     "@babel/plugin-proposal-decorators": "^7.4.4",
+    "@types/react": "^16.8.15",
+    "@types/react-dom": "^16.8.4",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.16.0",
-    "eslint-plugin-react": "^7.12.4"
+    "eslint-plugin-react": "^7.12.4",
+    "gatsby-plugin-tslint": "0.0.2",
+    "stylelint": "^10.0.1",
+    "stylelint-config-recommended": "^2.2.0",
+    "stylelint-config-styled-components": "^0.1.1",
+    "stylelint-processor-styled-components": "^1.6.0",
+    "tslint": "^5.16.0",
+    "tslint-config-airbnb": "^5.11.1",
+    "tslint-loader": "^3.5.4",
+    "tslint-react": "^4.0.0",
+    "typescript": "^3.4.5"
   }
 }
