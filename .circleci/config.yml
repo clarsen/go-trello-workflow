@@ -81,13 +81,13 @@ jobs:
             cd server/go
             serverless deploy --verbose
 
-      - run:
-          name: deploy web UI
-          command: |
-            source ./circleci_branch_config.sh
-            cd web
-            npm i
-            NODE_ENV=production npm run deploy
+      # - run:
+      #     name: deploy web UI
+      #     command: |
+      #       source ./circleci_branch_config.sh
+      #       cd web
+      #       npm i
+      #       NODE_ENV=production npm run deploy
 
       - save_cache:
           key: node-v1-{{ checksum "server/go/package.json" }}-{{ checksum "web/package.json" }}
