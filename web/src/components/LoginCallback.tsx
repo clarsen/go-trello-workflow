@@ -16,7 +16,6 @@ class LoginCallback extends React.Component<ICustomInputProps> {
     }
   }
   public render() {
-    // navigate('/')
     const authFlag = localStorage.getItem(auth.instance().authFlag)
     return (
       <div>This is authentication page.
