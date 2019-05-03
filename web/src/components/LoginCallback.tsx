@@ -8,6 +8,7 @@ interface ICustomInputProps {
 
 class LoginCallback extends React.Component<ICustomInputProps> {
   public async componentDidMount() {
+    console.log('LoginCallback componentDidMount')
     try {
       await auth.instance().handleAuthentication()
       navigate('/')

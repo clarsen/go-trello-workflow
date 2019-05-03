@@ -75,7 +75,7 @@ class ProjectDetailEntry extends React.Component {
         .filter(e => moment.unix(e.start).day() === day )
         .reduce((acc, e) => acc + e.duration_ms, 0)
       cols.push(
-        <td>{dur_for_day[day]>0 && `${numeral(dur_for_day[day]/1000.0).format('00:00:00')}`}</td>
+        <td key={day}>{dur_for_day[day]>0 && `${numeral(dur_for_day[day]/1000.0).format('00:00:00')}`}</td>
       )
     }
 
@@ -136,7 +136,7 @@ class ProjectItem extends React.Component {
     let rollupCols =[]
     for (let day = 0; day < 7; day++) {
       rollupCols.push(
-        <td>{rollup[day]>0 && `${numeral(rollup[day]/1000.0).format('00:00:00')}`}</td>
+        <td key={day}>{rollup[day]>0 && `${numeral(rollup[day]/1000.0).format('00:00:00')}`}</td>
       )
     }
 
@@ -150,24 +150,28 @@ class ProjectItem extends React.Component {
           <td>
             <Collapse isOpen={this.state.showDetails}>
               <Table dark>
-                <tr>
-                  <td>Su</td>
-                  <td>M</td>
-                  <td>Tu</td>
-                  <td>W</td>
-                  <td>Th</td>
-                  <td>F</td>
-                  <td>Sa</td>
-                </tr>
-                <tr>
-                  {rollupCols}
-                </tr>
-                </Table>
+                <tbody>
+                  <tr>
+                    <td>Su</td>
+                    <td>M</td>
+                    <td>Tu</td>
+                    <td>W</td>
+                    <td>Th</td>
+                    <td>F</td>
+                    <td>Sa</td>
+                  </tr>
+                  <tr>
+                    {rollupCols}
+                  </tr>
+                </tbody>
+              </Table>
             </Collapse>
             <Table dark>
-              {project.entries.map((e) =>
-                <ProjectDetailEntry entry={e} showDetails={this.state.showDetails}/>
-              )}
+              <tbody>
+                {project.entries.map((e) =>
+                  <ProjectDetailEntry key={e.detail} entry={e} showDetails={this.state.showDetails}/>
+                )}
+              </tbody>
             </Table>
           </td>
         </tr>
@@ -287,12 +291,14 @@ class ProjectReport extends React.Component {
                 {(!loading && !error) &&
                 <Table dark striped>
                   <thead>
-                    <th>Project</th>
-                    <th>Total</th>
-                    <th>Detail/Duration (HH:MM:SS)</th>
+                    <tr>
+                      <th>Project</th>
+                      <th>Total</th>
+                      <th>Detail/Duration (HH:MM:SS)</th>
+                    </tr>
                   </thead>
                   <tbody>
-                    {data.projects.map((p) => <ProjectItem project={p} />)}
+                    {data.projects.map((p) => <ProjectItem key={p.title} project={p} />)}
                   </tbody>
                 </Table>
                 }
@@ -300,12 +306,14 @@ class ProjectReport extends React.Component {
                 {(!loading && !error) &&
                 <Table dark striped>
                   <thead>
-                    <th>Project</th>
-                    <th>Total</th>
-                    <th>Detail/Duration (HH:MM:SS)</th>
+                    <tr>
+                      <th>Project</th>
+                      <th>Total</th>
+                      <th>Detail/Duration (HH:MM:SS)</th>
+                    </tr>
                   </thead>
                   <tbody>
-                    {rebucket(data.projects, 2).map((p) => <ProjectItem project={p} />)}
+                    {rebucket(data.projects, 2).map((p) => <ProjectItem key={p.title} project={p} />)}
                   </tbody>
                 </Table>
                 }
@@ -345,7 +353,7 @@ class ProjectReport extends React.Component {
                     </tr>
                   </thead>
                   <tbody>
-                    {dataMonthly.projects.map((p) => <ProjectItem project={p} />)}
+                    {dataMonthly.projects.map((p) => <ProjectItem key={p.title} project={p} />)}
                   </tbody>
                 </Table>
                 }
@@ -360,7 +368,7 @@ class ProjectReport extends React.Component {
                     </tr>
                   </thead>
                   <tbody>
-                    {rebucket(dataMonthly.projects, 2).map((p) => <ProjectItem project={p} />)}
+                    {rebucket(dataMonthly.projects, 2).map((p) => <ProjectItem key={p.title} project={p} />)}
                   </tbody>
                 </Table>
                 }
