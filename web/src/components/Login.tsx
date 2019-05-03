@@ -9,7 +9,7 @@ interface ICustomInputProps {
 class Login extends React.Component<ICustomInputProps> {
   public render() {
     if (auth.instance().isAuthenticated()) {
-      navigate('/')
+      navigate('/app')
       return null
     }
     auth.instance().login()

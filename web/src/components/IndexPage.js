@@ -118,7 +118,7 @@ class IndexPage extends React.Component {
     // }
     if (!auth.instance().isAuthenticated()) {
       console.log('not authenticated')
-      navigate('/login')
+      navigate('/app/login')
       return null
     }
   }

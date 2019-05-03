@@ -11,7 +11,7 @@ class Auth {
       return
     }
     // think the Safari browser will redirect to 'callback/' if we don't have the trailing slash in the URL
-    let redirectUri = `${window.location.protocol}//${window.location.host}/callback/`
+    let redirectUri = `${window.location.protocol}//${window.location.host}/app/callback/`
     this.auth0 = new auth0.WebAuth({
       domain: AUTH0_DOMAIN,
       clientID: AUTH0_CLIENT_ID,

@@ -13,7 +13,7 @@ module.exports = {
     // `gatsby-plugin-emotion`,
     {
       resolve: `gatsby-plugin-create-client-paths`,
-      options: { prefixes: [`/*`] },
+      options: { prefixes: [`/app/*`] },
     },
     {
       resolve: `gatsby-source-filesystem`,

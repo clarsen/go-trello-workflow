@@ -11,7 +11,7 @@ class LoginCallback extends React.Component<ICustomInputProps> {
     console.log('LoginCallback componentDidMount')
     try {
       await auth.instance().handleAuthentication()
-      navigate('/')
+      navigate('/app')
     } catch (err) {
       console.log(err)
     }
