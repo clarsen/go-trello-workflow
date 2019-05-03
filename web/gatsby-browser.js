@@ -21,3 +21,5 @@ const client = new ApolloClient({
 export const wrapRootElement = ({ element }) => (
   <ApolloProvider client={client}>{element}</ApolloProvider>
 )
+
+export const onServiceWorkerUpdateReady = () => window.location.reload(true)
