@@ -104,15 +104,23 @@ class Auth {
     })
   }
 
+  isAuthValid() {
+    let expTime = JSON.parse(localStorage.getItem(this.authExpiresAfter))
+    if (expTime > moment().unix()) {
+      console.log(` still valid until ${expTime}`)
+      return true
+    }
+    return false
+  }
+
   silentAuth() {
     console.log('silentAuth')
     if(this.isAuthenticated()) {
       console.log('  isAuthenticated')
-      let expTime = JSON.parse(localStorage.getItem(this.authExpiresAfter))
-      if (expTime > moment().unix()) {
-        console.log(` still valid until ${expTime}`)
+      if (this.isAuthValid()) {
         return
       }
+
       return new Promise((resolve, reject) => {
         console.log('  silentAuth promise calling')
         this.auth0.checkSession({}, (err, authResult) => {
@@ -139,7 +147,7 @@ class Auth {
     console.log(`isAuthenticated ${this.authFlag} authFlag=`, authFlag)
     let res = JSON.parse(authFlag)
     console.log('isAuthenticated Auth=', this, 'authFlag parsed =', res, 'idToken =', this.getIdToken())
-    return res && this.getIdToken() !== undefined // only if auth *and* idtoken available
+    return res && this.getIdToken() !== undefined && this.isAuthValid() // only if auth *and* idtoken available *and* not expired
   }
 }
 
