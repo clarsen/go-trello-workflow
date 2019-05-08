@@ -281,6 +281,7 @@ class ProjectReport extends React.Component {
                   <option>16</option>
                   <option>17</option>
                   <option>18</option>
+                  <option>19</option>
                 </Input>{' '}
                 <FaSync size={25} onClick={() => {
                   projectWeeklyReportRefetch()
