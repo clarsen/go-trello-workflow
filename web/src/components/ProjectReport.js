@@ -272,16 +272,7 @@ class ProjectReport extends React.Component {
             <TabContent activeTab={this.state.activeTab}>
               <TabPane tabId="weekReport">
                 {'Week '}<Input className="weekSelect" type="select" id="week" value={this.state.week} onChange={this.changeWeek}>
-                  <option>10</option>
-                  <option>11</option>
-                  <option>12</option>
-                  <option>13</option>
-                  <option>14</option>
-                  <option>15</option>
-                  <option>16</option>
-                  <option>17</option>
-                  <option>18</option>
-                  <option>19</option>
+                  {[...Array(53).keys()].map(w => <option>{`${w+1}`}</option>)}
                 </Input>{' '}
                 <FaSync size={25} onClick={() => {
                   projectWeeklyReportRefetch()
@@ -332,11 +323,7 @@ class ProjectReport extends React.Component {
               </TabPane>
               <TabPane tabId="monthReport">
                 {'Month '}<Input className="monthSelect" type="select" id="month" value={this.state.month} onChange={this.changeMonth}>
-                    <option>1</option>
-                    <option>2</option>
-                    <option>3</option>
-                    <option>4</option>
-                    <option>5</option>
+                    {[...Array(12).keys()].map(m => <option>{`${m+1}`}</option>)}
                 </Input>{' '}
                 <FaSync size={25} onClick={() => {
                   projectMonthlyReportRefetch()
@@ -389,6 +376,7 @@ class ProjectReport extends React.Component {
                 {'Year '}<Input className="yearSelect" type="select" id="year" value={this.state.year} onChange={this.changeYear}>
                     <option>2018</option>
                     <option>2019</option>
+                    <option>2020</option>
                 </Input>{' '}
                 <FaSync size={25} onClick={() => {
                   projectYearlyReportRefetch()
