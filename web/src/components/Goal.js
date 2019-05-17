@@ -7,6 +7,12 @@ import {
   Form,
   Input
 } from 'reactstrap'
+import { 
+  FaStarHalfAlt,
+  FaStar,
+  FaStop
+} from 'react-icons/fa'
+
 import moment from 'moment'
 
 class Goal extends React.Component {
@@ -102,7 +108,10 @@ class Goal extends React.Component {
             return (
               <Row key={g.idCard+g.idCheckitem}>
                 <Col>
-                  <div className={`goal ${doneClass}`} onClick={this.toggle}>{g.week}: {g.title} {g.status}</div>
+                  <div className={`goal ${doneClass}`} onClick={this.toggle}>
+                  {g.done && g.status == '(not done)' && <FaStop size={25} color={'red'}/>}
+                  {g.done && g.status == '(done)' && <FaStar size={25}/>}
+                  {g.done && g.status == '(partial)' && <FaStarHalfAlt size={25}/>}{' '}{g.week}: {g.title} {g.status}</div>
                   <Collapse isOpen={this.state.showControls}>
                     <Button outline color='primary' size='sm' onClick={()=>{
                       startTimer.mutation({
