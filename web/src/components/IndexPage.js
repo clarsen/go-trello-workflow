@@ -186,6 +186,126 @@ class IndexPage extends React.Component {
                     allGoalsRefetch()
                     timerRefetch()
                   }} />
+
+                  <Row>
+                    <Col lg={6}>
+                      {loadingTimer && <Spinner color="primary" />}
+                      {!loadingTimer && console.log('got data', timerData)}
+                      {timerError && <div>Timer: {timerError.message}</div>}
+                      {!loadingTimer && !timerError && <Timer stopTimer={StopTimer} timerRefetch={timerRefetch} activeTimer={timerData.activeTimer} />}
+                    </Col>
+                    <Col lg={6}>
+                      <TaskList
+                        loading={loadingAll} error={queryAllError} data={allTasks}
+                        listTitle={<div><FaCalendarDay size={25}/> {'Today'}</div>}
+                        listFilter={['Today']}
+                        setDueDate={SetDueDate} setDone={SetDone}
+                        moveTaskToList={MoveTaskToList} startTimer={StartTimer}
+                        timerRefetch={timerRefetch}
+                        addTask={AddTask} board={'Kanban daily/weekly'} list={'Today'}
+                      />
+
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col lg={6}>
+                      <GoalList 
+                        loading={loadingAllGoals} error={queryAllGoalsError}
+                        startTimer={StartTimer} timerRefetch={timerRefetch}
+                        setGoalDone={SetGoalDone}
+                        addWeeklyGoal={AddWeeklyGoal}
+                        addMonthlyGoal={AddMonthlyGoal}
+                        goals={allGoals ? allGoals.monthlyGoals : null}
+                      />
+                    </Col>
+
+                  </Row>
+                  <Row>
+                    <Col lg={6}>
+                      <TaskList
+                        loading={loadingAll} error={queryAllError} data={allTasks}
+                        listTitle={<div><FaListUl size={25}/> {'Backlog'}</div>}
+                        listFilter={['Backlog (Personal)']}
+                        setDueDate={SetDueDate} setDone={SetDone}
+                        moveTaskToList={MoveTaskToList} startTimer={StartTimer}
+                        timerRefetch={timerRefetch}
+                        addTask={AddTask} board={'Backlog (Personal)'} list={'Backlog'}
+                      />
+                    </Col>
+                    <Col lg={6}>
+                      <TaskList
+                        loading={loadingAll} error={queryAllError} data={allTasks}
+                        listTitle={<div><FaRegClock size={25}/> {'Waiting on...'}</div>}
+                        listFilter={['Waiting on']}
+                        setDueDate={SetDueDate} setDone={SetDone}
+                        moveTaskToList={MoveTaskToList} startTimer={StartTimer}
+                        timerRefetch={timerRefetch}
+                        addTask={AddTask} board={'Kanban daily/weekly'} list={'Waiting on'}
+                      />
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col lg={6}>
+                      <TaskList
+                        loading={loadingAll} error={queryAllError} data={allTasks}
+                        listTitle={<div><FaCheckCircle size={25}/> {'Done this week'}</div>}
+                        listFilter={['Done this week']}
+                        setDueDate={SetDueDate} setDone={SetDone}
+                        moveTaskToList={MoveTaskToList} startTimer={StartTimer}
+                        timerRefetch={timerRefetch}
+                      />
+                    </Col>
+                  </Row>
+                </TabPane>
+                <TabPane tabId="periodicBoard">
+                  <FaSync size={25} onClick={() => {
+                    allRefetch()
+                  }} />
+                  <Row>
+                    <Col lg={6}>
+                      <Row>
+                        <div className="listTitle"><FaRecycle size={25}/> {'Periodic'}</div>
+                        <TaskList
+                          loading={loadingAll} error={queryAllError} data={allTasks}
+                          listSubGroupTitle={'Often'} listFilter={['Often']}
+                          setDueDate={SetDueDate} setDone={SetDone}
+                          moveTaskToList={MoveTaskToList} startTimer={StartTimer}
+                          timerRefetch={timerRefetch}
+                        />
+                      </Row>
+                      <Row>
+                        <TaskList
+                          loading={loadingAll} error={queryAllError} data={allTasks}
+                          listSubGroupTitle={'Weekly'} listFilter={['Weekly']}
+                          setDueDate={SetDueDate} setDone={SetDone}
+                          moveTaskToList={MoveTaskToList} startTimer={StartTimer}
+                          timerRefetch={timerRefetch}
+                        />
+                      </Row>
+                      <Row>
+                        <TaskList
+                          loading={loadingAll} error={queryAllError} data={allTasks}
+                          listSubGroupTitle={'Bi-weekly to monthly'} listFilter={['Bi-weekly to monthly']}
+                          setDueDate={SetDueDate} setDone={SetDone}
+                          moveTaskToList={MoveTaskToList} startTimer={StartTimer}
+                          timerRefetch={timerRefetch}
+                        />
+                      </Row>
+                    </Col>
+                    <Col lg={6}>
+                      <Row>
+                        <TaskList
+                          loading={loadingAll} error={queryAllError} data={allTasks}
+                          listSubGroupTitle={'Quarterly to Yearly'} listFilter={['Quarterly to Yearly']}
+                          setDueDate={SetDueDate} setDone={SetDone}
+                          moveTaskToList={MoveTaskToList} startTimer={StartTimer}
+                          timerRefetch={timerRefetch}
+                        />
+                      </Row>
+                    </Col>
+                  </Row>
+                </TabPane>
+                <TabPane tabId="weeklyReview">
                   <Button color='primary' size='sm' onClick={() => {
                     PrepareWeeklyReview
                       .mutation({
@@ -228,6 +348,20 @@ class IndexPage extends React.Component {
                   }}>
                       Finish weekly review for {now.year()}-{now.isoWeek()}
                   </Button>{' '}
+                  <Row>
+                    <Col>
+                      {weeklyLoading && <Spinner color="primary" />}
+                      <div>
+                        {!weeklyLoading && <FaSync size={25} onClick={() => weeklyVisualizationRefetch()} />}
+                        {(!weeklyLoading && !weeklyError) &&
+                            <MarkdownRenderer className='weeklyReview' markdown={weeklyVisualizationData.weeklyVisualization} />
+                        }
+                      </div>
+                      {weeklyError && <div>Weekly review: {weeklyError.message}</div>}
+                    </Col>
+                  </Row>
+                </TabPane>
+                <TabPane tabId="monthlyReview">
                   <Button color='primary' size='sm' onClick={() => {
                     PrepareMonthlyReview
                       .mutation({
@@ -280,129 +414,6 @@ class IndexPage extends React.Component {
                   }}>
                       Finish monthly review for {nowGraceMonth.year()}-{monthNext}
                   </Button>{' '}
-                  <Row>
-                    <Col lg={6}>
-                      {loadingTimer && <Spinner color="primary" />}
-                      {!loadingTimer && console.log('got data', timerData)}
-                      {timerError && <div>Timer: {timerError.message}</div>}
-                      {!loadingTimer && !timerError && <Timer stopTimer={StopTimer} timerRefetch={timerRefetch} activeTimer={timerData.activeTimer} />}
-                    </Col>
-                    <Col lg={6}>
-                      <TaskList
-                        loading={loadingAll} error={queryAllError} data={allTasks}
-                        listTitle={<div><FaCalendarDay size={25}/> {'Today'}</div>}
-                        listFilter={['Today']}
-                        setDueDate={SetDueDate} setDone={SetDone}
-                        moveTaskToList={MoveTaskToList} startTimer={StartTimer}
-                        timerRefetch={timerRefetch}
-                        addTask={AddTask} board={'Kanban daily/weekly'} list={'Today'}
-                      />
-
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col lg={6}>
-                      <GoalList 
-                        loading={loadingAllGoals} error={queryAllGoalsError}
-                        startTimer={StartTimer} timerRefetch={timerRefetch}
-                        setGoalDone={SetGoalDone}
-                        addWeeklyGoal={AddWeeklyGoal}
-                        addMonthlyGoal={AddMonthlyGoal}
-                        goals={allGoals ? allGoals.monthlyGoals : null}
-                      />
-                    </Col>
-                    <Col lg={6}>
-                      <TaskList
-                        loading={loadingAll} error={queryAllError} data={allTasks}
-                        listTitle={<div><FaRegClock size={25}/> {'Waiting on...'}</div>}
-                        listFilter={['Waiting on']}
-                        setDueDate={SetDueDate} setDone={SetDone}
-                        moveTaskToList={MoveTaskToList} startTimer={StartTimer}
-                        timerRefetch={timerRefetch}
-                        addTask={AddTask} board={'Kanban daily/weekly'} list={'Waiting on'}
-                      />
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col lg={6}>
-                      <TaskList
-                        loading={loadingAll} error={queryAllError} data={allTasks}
-                        listTitle={<div><FaListUl size={25}/> {'Backlog'}</div>}
-                        listFilter={['Backlog (Personal)']}
-                        setDueDate={SetDueDate} setDone={SetDone}
-                        moveTaskToList={MoveTaskToList} startTimer={StartTimer}
-                        timerRefetch={timerRefetch}
-                        addTask={AddTask} board={'Backlog (Personal)'} list={'Backlog'}
-                      />
-                    </Col>
-                    <Col lg={6}>
-                      <Row>
-                        <div className="listTitle"><FaRecycle size={25}/> {'Periodic'}</div>
-                        <TaskList
-                          loading={loadingAll} error={queryAllError} data={allTasks}
-                          listSubGroupTitle={'Often'} listFilter={['Often']}
-                          setDueDate={SetDueDate} setDone={SetDone}
-                          moveTaskToList={MoveTaskToList} startTimer={StartTimer}
-                          timerRefetch={timerRefetch}
-                        />
-                      </Row>
-                      <Row>
-                        <TaskList
-                          loading={loadingAll} error={queryAllError} data={allTasks}
-                          listSubGroupTitle={'Weekly'} listFilter={['Weekly']}
-                          setDueDate={SetDueDate} setDone={SetDone}
-                          moveTaskToList={MoveTaskToList} startTimer={StartTimer}
-                          timerRefetch={timerRefetch}
-                        />
-                      </Row>
-                      <Row>
-                        <TaskList
-                          loading={loadingAll} error={queryAllError} data={allTasks}
-                          listSubGroupTitle={'Bi-weekly to monthly'} listFilter={['Bi-weekly to monthly']}
-                          setDueDate={SetDueDate} setDone={SetDone}
-                          moveTaskToList={MoveTaskToList} startTimer={StartTimer}
-                          timerRefetch={timerRefetch}
-                        />
-                      </Row>
-                      <Row>
-                        <TaskList
-                          loading={loadingAll} error={queryAllError} data={allTasks}
-                          listSubGroupTitle={'Quarterly to Yearly'} listFilter={['Quarterly to Yearly']}
-                          setDueDate={SetDueDate} setDone={SetDone}
-                          moveTaskToList={MoveTaskToList} startTimer={StartTimer}
-                          timerRefetch={timerRefetch}
-                        />
-                      </Row>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col lg={6}>
-                      <TaskList
-                        loading={loadingAll} error={queryAllError} data={allTasks}
-                        listTitle={<div><FaCheckCircle size={25}/> {'Done this week'}</div>}
-                        listFilter={['Done this week']}
-                        setDueDate={SetDueDate} setDone={SetDone}
-                        moveTaskToList={MoveTaskToList} startTimer={StartTimer}
-                        timerRefetch={timerRefetch}
-                      />
-                    </Col>
-                  </Row>
-                </TabPane>
-                <TabPane tabId="weeklyReview">
-                  <Row>
-                    <Col>
-                      {weeklyLoading && <Spinner color="primary" />}
-                      <div>
-                        {!weeklyLoading && <FaSync size={25} onClick={() => weeklyVisualizationRefetch()} />}
-                        {(!weeklyLoading && !weeklyError) &&
-                            <MarkdownRenderer className='weeklyReview' markdown={weeklyVisualizationData.weeklyVisualization} />
-                        }
-                      </div>
-                      {weeklyError && <div>Weekly review: {weeklyError.message}</div>}
-                    </Col>
-                  </Row>
-                </TabPane>
-                <TabPane tabId="monthlyReview">
                   <Row>
                     <Col>
                       {monthlyLoading && <Spinner color="primary" />}

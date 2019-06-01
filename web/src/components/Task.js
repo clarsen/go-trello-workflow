@@ -58,7 +58,7 @@ class Task extends React.Component {
             <div>
               <div className='task' onClick={this.toggle}>
                 {task.title}{' '}
-                { (task.due && value>0) &&
+                { (task.due && value>0 && task.list.list != 'Done this week') &&
                       <Progress className="periodicProgress" color={color} value={value} onClick={this.toggle}>
                         {moment.unix(task.due).fromNow()}
                       </Progress>

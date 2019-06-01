@@ -45,6 +45,11 @@ class Header extends React.Component {
               </NavLink>
             </NavItem>
             <NavItem>
+              <NavLink className={classnames({ active: activeTab === 'periodicBoard'})} onClick={()=> switchTab('periodicBoard')}>
+                Periodic
+              </NavLink>
+            </NavItem>
+            <NavItem>
               <NavLink className={classnames({ active: activeTab === 'weeklyReview'})} onClick={()=> switchTab('weeklyReview')}>
                 Weekly Review
               </NavLink>

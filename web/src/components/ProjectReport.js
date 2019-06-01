@@ -212,17 +212,46 @@ class ProjectReport extends React.Component {
       month: now.month() + 1,
       year: now.year(),
       activeTab: 'weekReport',
+      activeWeekSubTab: 'weekReportDetail',
+      activeMonthSubTab: 'monthReportByProject',
+      activeYearSubTab: 'yearReportByProject',
     }
     this.changeWeek = this.changeWeek.bind(this)
     this.changeMonth = this.changeMonth.bind(this)
     this.changeYear = this.changeYear.bind(this)
     this.switchTab = this.switchTab.bind(this)
+    this.switchWeekSubTab = this.switchWeekSubTab.bind(this)
+    this.switchMonthSubTab = this.switchMonthSubTab.bind(this)
+    this.switchYearSubTab = this.switchYearSubTab.bind(this)
   }
 
   switchTab (tab) {
     if (this.state.activeTab !== tab) {
       this.setState({
         activeTab: tab
+      })
+    }
+  }
+
+  switchWeekSubTab (tab) {
+    if (this.state.activeWeekSubTab !== tab) {
+      this.setState({
+        activeWeekSubTab: tab
+      })
+    }
+  }
+  switchMonthSubTab (tab) {
+    if (this.state.activeMonthSubTab !== tab) {
+      this.setState({
+        activeMonthSubTab: tab
+      })
+    }
+  }
+
+  switchYearSubTab (tab) {
+    if (this.state.activeYearSubTab !== tab) {
+      this.setState({
+        activeYearSubTab: tab
       })
     }
   }
@@ -252,7 +281,7 @@ class ProjectReport extends React.Component {
           <React.Fragment>
             <Navbar expand="lg">
               <Nav className="mr-auto" tabs>
-                <NavItem>
+              <NavItem>
                   <NavLink className={classnames({ active: this.state.activeTab === 'weekReport'})} onClick={()=> this.switchTab('weekReport')}>
                     Weekly
                   </NavLink>
@@ -271,44 +300,65 @@ class ProjectReport extends React.Component {
             </Navbar>
             <TabContent activeTab={this.state.activeTab}>
               <TabPane tabId="weekReport">
+                <Navbar expand="lg">
+                  <Nav className="mr-auto" tabs>
+                    <NavItem>
+                      <NavLink className={classnames({ active: this.state.activeWeekSubTab === 'weekReportDetail'})} onClick={()=> this.switchWeekSubTab('weekReportDetail')}>
+                        Detail
+                      </NavLink>
+                    </NavItem>
+                    <NavItem>
+                      <NavLink className={classnames({ active: this.state.activeWeekSubTab === 'weekReportByProject'})} onClick={()=> this.switchWeekSubTab('weekReportByProject')}>
+                        Project rollup
+                      </NavLink>
+                    </NavItem>
+                  </Nav>
+                </Navbar>
+
                 {'Week '}<Input className="weekSelect" type="select" id="week" value={this.state.week} onChange={this.changeWeek}>
                   {[...Array(53).keys()].map(w => <option>{`${w+1}`}</option>)}
                 </Input>{' '}
                 <FaSync size={25} onClick={() => {
                   projectWeeklyReportRefetch()
                 }} />
-                <div className="sectionName">Project summary:</div>
                 {loading && <Spinner color="primary" />}
                 {!loading && console.log('got data', data)}
-                {(!loading && !error) &&
-                <Table dark striped>
-                  <thead>
-                    <tr>
-                      <th>Project</th>
-                      <th>Total</th>
-                      <th>Detail/Duration (HH:MM:SS)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.projects.map((p) => <ProjectItem key={p.title} project={p} />)}
-                  </tbody>
-                </Table>
-                }
-                <div className="sectionName">Project group summary:</div>
-                {(!loading && !error) &&
-                <Table dark striped>
-                  <thead>
-                    <tr>
-                      <th>Project</th>
-                      <th>Total</th>
-                      <th>Detail/Duration (HH:MM:SS)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rebucket(data.projects, 2).map((p) => <ProjectItem key={p.title} project={p} />)}
-                  </tbody>
-                </Table>
-                }
+                <TabContent activeTab={this.state.activeWeekSubTab}>
+                  <TabPane tabId="weekReportDetail">
+                    <div className="sectionName">Project summary:</div>
+                    {(!loading && !error) &&
+                    <Table dark striped>
+                      <thead>
+                        <tr>
+                          <th>Project</th>
+                          <th>Total</th>
+                          <th>Detail/Duration (HH:MM:SS)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.projects.map((p) => <ProjectItem key={p.title} project={p} />)}
+                      </tbody>
+                    </Table>
+                    }
+                  </TabPane>
+                  <TabPane tabId="weekReportByProject">
+                    <div className="sectionName">Project group summary:</div>
+                    {(!loading && !error) &&
+                    <Table dark striped>
+                      <thead>
+                        <tr>
+                          <th>Project</th>
+                          <th>Total</th>
+                          <th>Detail/Duration (HH:MM:SS)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rebucket(data.projects, 2).map((p) => <ProjectItem key={p.title} project={p} />)}
+                      </tbody>
+                    </Table>
+                    }
+                  </TabPane>
+                </TabContent>
                 <style global jsx>{`
                   .weekSelect {
                     display: inline;
@@ -321,45 +371,67 @@ class ProjectReport extends React.Component {
                   }
                 `}</style>
               </TabPane>
+
               <TabPane tabId="monthReport">
+                <Navbar expand="lg">
+                  <Nav className="mr-auto" tabs>
+                    <NavItem>
+                      <NavLink className={classnames({ active: this.state.activeMonthSubTab === 'monthReportDetail'})} onClick={()=> this.switchMonthSubTab('monthReportDetail')}>
+                        Detail
+                      </NavLink>
+                    </NavItem>
+                    <NavItem>
+                      <NavLink className={classnames({ active: this.state.activeMonthSubTab === 'monthReportByProject'})} onClick={()=> this.switchMonthSubTab('monthReportByProject')}>
+                        Project rollup
+                      </NavLink>
+                    </NavItem>
+                  </Nav>
+                </Navbar>
+
                 {'Month '}<Input className="monthSelect" type="select" id="month" value={this.state.month} onChange={this.changeMonth}>
                     {[...Array(12).keys()].map(m => <option>{`${m+1}`}</option>)}
                 </Input>{' '}
                 <FaSync size={25} onClick={() => {
                   projectMonthlyReportRefetch()
                 }} />
-                <div className="sectionName">Project summary:</div>
-                {loadingMonthly && <Spinner color="primary" />}
-                {!loadingMonthly && console.log('got data', dataMonthly)}
-                {(!loadingMonthly && !errorMonthly) &&
-                <Table dark striped>
-                  <thead>
-                    <tr>
-                      <th>Project</th>
-                      <th>Total</th>
-                      <th>Detail/Duration (HH:MM:SS)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dataMonthly.projects.map((p) => <ProjectItem key={p.title} project={p} />)}
-                  </tbody>
-                </Table>
-                }
-                <div className="sectionName">Project group summary:</div>
-                {(!loadingMonthly && !errorMonthly) &&
-                <Table dark striped>
-                  <thead>
-                    <tr>
-                      <th>Project</th>
-                      <th>Total</th>
-                      <th>Detail/Duration (HH:MM:SS)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rebucket(dataMonthly.projects, 2).map((p) => <ProjectItem key={p.title} project={p} />)}
-                  </tbody>
-                </Table>
-                }
+                <TabContent activeTab={this.state.activeMonthSubTab}>
+                  <TabPane tabId="monthReportDetail">
+                    <div className="sectionName">Project summary:</div>
+                    {loadingMonthly && <Spinner color="primary" />}
+                    {!loadingMonthly && console.log('got data', dataMonthly)}
+                    {(!loadingMonthly && !errorMonthly) &&
+                      <Table dark striped>
+                        <thead>
+                          <tr>
+                            <th>Project</th>
+                            <th>Total</th>
+                            <th>Detail/Duration (HH:MM:SS)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dataMonthly.projects.map((p) => <ProjectItem key={p.title} project={p} />)}
+                        </tbody>
+                      </Table>
+                    }
+                  </TabPane>
+                  <TabPane tabId="monthReportByProject">
+                    <div className="sectionName">Project group summary:</div>
+                    {(!loadingMonthly && !errorMonthly) &&
+                      <Table dark striped>
+                        <thead>
+                          <tr>
+                            <th>Project</th>
+                            <th>Total</th>
+                            <th>Detail/Duration (HH:MM:SS)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {rebucket(dataMonthly.projects, 2).map((p) => <ProjectItem key={p.title} project={p} />)}
+                        </tbody>
+                      </Table>
+                    }
+                  </TabPane>
+                </TabContent>
                 <style global jsx>{`
                   .monthSelect {
                     display: inline;
@@ -372,7 +444,22 @@ class ProjectReport extends React.Component {
                   }
                 `}</style>
               </TabPane>
+
               <TabPane tabId="yearReport">
+                <Navbar expand="lg">
+                  <Nav className="mr-auto" tabs>
+                    <NavItem>
+                      <NavLink className={classnames({ active: this.state.activeYearSubTab === 'yearReportDetail'})} onClick={()=> this.switchYearSubTab('yearReportDetail')}>
+                        Detail
+                      </NavLink>
+                    </NavItem>
+                    <NavItem>
+                      <NavLink className={classnames({ active: this.state.activeYearSubTab === 'yearReportByProject'})} onClick={()=> this.switchYearSubTab('yearReportByProject')}>
+                        Project rollup
+                      </NavLink>
+                    </NavItem>
+                  </Nav>
+                </Navbar>
                 {'Year '}<Input className="yearSelect" type="select" id="year" value={this.state.year} onChange={this.changeYear}>
                     <option>2018</option>
                     <option>2019</option>
@@ -381,38 +468,44 @@ class ProjectReport extends React.Component {
                 <FaSync size={25} onClick={() => {
                   projectYearlyReportRefetch()
                 }} />
-                <div className="sectionName">Project summary:</div>
-                {loadingYearly && <Spinner color="primary" />}
-                {!loadingYearly && console.log('got data', dataYearly)}
-                {(!loadingYearly && !errorYearly) &&
-                <Table dark striped>
-                  <thead>
-                    <tr>
-                      <th>Project</th>
-                      <th>Total</th>
-                      <th>Detail/Duration (HH:MM:SS)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dataYearly.projects.map((p) => <ProjectItem project={p} />)}
-                  </tbody>
-                </Table>
-                }
-                <div className="sectionName">Project group summary:</div>
-                {(!loadingYearly && !errorYearly) &&
-                <Table dark striped>
-                  <thead>
-                    <tr>
-                      <th>Project</th>
-                      <th>Total</th>
-                      <th>Detail/Duration (HH:MM:SS)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rebucket(dataYearly.projects, 2).map((p) => <ProjectItem project={p} />)}
-                  </tbody>
-                </Table>
-                }
+                <TabContent activeTab={this.state.activeYearSubTab}>
+                  <TabPane tabId="yearReportDetail">
+                    <div className="sectionName">Project summary:</div>
+                    {loadingYearly && <Spinner color="primary" />}
+                    {!loadingYearly && console.log('got data', dataYearly)}
+                    {(!loadingYearly && !errorYearly) &&
+                      <Table dark striped>
+                        <thead>
+                          <tr>
+                            <th>Project</th>
+                            <th>Total</th>
+                            <th>Detail/Duration (HH:MM:SS)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dataYearly.projects.map((p) => <ProjectItem project={p} />)}
+                        </tbody>
+                      </Table>
+                    }
+                  </TabPane>
+                  <TabPane tabId="yearReportByProject">
+                    <div className="sectionName">Project group summary:</div>
+                    {(!loadingYearly && !errorYearly) &&
+                      <Table dark striped>
+                        <thead>
+                          <tr>
+                            <th>Project</th>
+                            <th>Total</th>
+                            <th>Detail/Duration (HH:MM:SS)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {rebucket(dataYearly.projects, 2).map((p) => <ProjectItem project={p} />)}
+                        </tbody>
+                      </Table>
+                    }
+                  </TabPane>
+                </TabContent>
                 <style global jsx>{`
                   .yearSelect {
                     display: inline;

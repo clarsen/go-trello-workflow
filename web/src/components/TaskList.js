@@ -8,6 +8,7 @@ import {
   Input,
   Spinner,
 } from 'reactstrap'
+import moment from 'moment'
 
 class TaskList extends React.Component {
   constructor (props) {
@@ -32,6 +33,7 @@ class TaskList extends React.Component {
       listFilter, isPeriodic, setDueDate, setDone, moveTaskToList, startTimer, timerRefetch,
       addTask,
     } = this.props
+    console.log('for list', list)
     return (
       <React.Fragment>
         {listTitle && <div className="listTitle" onClick={this.toggle}>{listTitle}</div>}
@@ -73,13 +75,26 @@ class TaskList extends React.Component {
                 .filter((t) => !listFilter || listFilter.count == 0 || listFilter.includes(t.list.board) || listFilter.includes(t.list.list))
                 .sort((a,b) => b.createdDate - a.createdDate)
                 .sort((a,b) => {
+                  let delta_b_days
+                  let delta_a_days
+                  if (b.due) {
+                    delta_b_days = moment().diff(moment.unix(b.due))/(86400*1000)
+                  }
+                  if (a.due) {
+                    delta_a_days = moment().diff(moment.unix(a.due))/(86400*1000)
+                  }
+                  // console.log(a.title, 'delta a', delta_a_days, b.title, 'delta b', delta_b_days)
                   if (a.due && b.due) { // within tasks with due dates, earlier ones first
                     return a.due - b.due
-                  } else if (a.due) { // tasks without due dates sorted before those with due dates
+                  } else if (b.due && delta_b_days >= -7) { // tasks with due dates (< 7 days) sorted before others
                     return 1
-                  } else if (b.due ) { // tasks without due dates sorted before those with due dates
+                  } else if (a.due && delta_a_days >= -7) { // tasks with due dates (< 7 days) sorted before others
                     return -1
-                  } else { // within tasks with no due dates, defer to created date
+                  } else if (b.due && delta_b_days < -7) { // tasks with due dates (> 7 days) sorted to end
+                    return -1
+                  } else if (a.due && delta_a_days <- 7) { // tasks with due dates (> 7 days) sorted to end
+                    return 1
+                  } else { // within tasks with no due dates, or due date bucketing, defer to created date
                     return 0
                   }
                 })
