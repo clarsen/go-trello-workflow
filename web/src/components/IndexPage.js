@@ -314,7 +314,9 @@ class IndexPage extends React.Component {
                           week: now.isoWeek(),
                         }
                       })
-                      .then(({ data }) => alert.show(data.prepareWeeklyReview.message))
+                      .then(( { data } ) => {
+                        alert.show(data.prepareWeeklyReview.message)
+                      })
                   }}>
                       Prepare weekly review for {now.year()}-{now.isoWeek()}
                   </Button>{' '}
@@ -448,4 +450,4 @@ class IndexPage extends React.Component {
   }
 }
 
-export default IndexPage
+export default withAlert()(IndexPage)
