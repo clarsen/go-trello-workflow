@@ -228,20 +228,18 @@ func WeeklyCleanup(user, appkey, authtoken string) error {
 			log.Println("copying", card.Name, "to", destListName)
 			card.CopyToList(destList.ID,
 				trello.Arguments{"idBoard": destList.IDBoard, "pos": "bottom", "keepFromSource": "all"})
-		} else {
-			log.Println("moving", card.Name, "to", destListName)
-			card.MoveToListOnBoard(destList.ID, destList.IDBoard, trello.Arguments{"pos": "bottom"})
-		}
-	}
-	for _, card := range cards {
-		if isPeriodic(card) {
 			log.Println("moving", card.Name, "back to periodic")
 			err2 := moveBackPeriodic(cl, card)
 			if err2 != nil {
 				return err2
 			}
+
+		} else {
+			log.Println("moving", card.Name, "to", destListName)
+			card.MoveToListOnBoard(destList.ID, destList.IDBoard, trello.Arguments{"pos": "bottom"})
 		}
 	}
+
 	monthlyGoalsList, err := ListFor(cl, "Kanban daily/weekly", "Monthly Goals")
 	if err != nil {
 		return err
