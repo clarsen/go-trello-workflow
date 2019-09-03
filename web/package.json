@@ -4,8 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "next -p 3002",
-    "deploy": "next build && sls deploy -v",
     "test": "echo \"Error: no test specified\" && exit 1",
     "type-check": "tsc --noEmit",
     "lint": "tslint --project ."
@@ -14,7 +12,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@zeit/next-css": "^1.0.1",
     "apollo-boost": "^0.3.1",
     "auth0-js": "^9.10.2",
     "bootstrap": "^4.3.1",
@@ -32,7 +29,6 @@
     "isomorphic-unfetch": "^3.0.0",
     "moment": "^2.24.0",
     "next": "^8.1.0",
-    "next-with-apollo": "^3.4.0",
     "numeral": "^2.0.6",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
