@@ -82,6 +82,17 @@ class Task extends React.Component {
                           board: 'Kanban daily/weekly',
                           list: 'Today',
                         },
+                      },
+                      optimisticResponse: {
+                        moveTaskToList: {
+                          __typename: 'Task',
+                          id: task.id,
+                          list: {
+                            __typename: 'BoardList',
+                            board: 'Kanban daily/weekly',
+                            list: 'Today',
+                          }
+                        }
                       }
                     })
                   }}>Today</Button>
@@ -97,6 +108,17 @@ class Task extends React.Component {
                             board: 'Kanban daily/weekly',
                             list: 'Today',
                           },
+                        },
+                        optimisticResponse: {
+                          moveTaskToList: {
+                            __typename: 'Task',
+                            id: task.id,
+                            list: {
+                              __typename: 'BoardList',
+                              board: 'Kanban daily/weekly',
+                              list: 'Today',
+                            }
+                          }
                         }
                       })
                     }}>Today</Button>
@@ -110,6 +132,17 @@ class Task extends React.Component {
                             board: 'Kanban daily/weekly',
                             list: 'Inbox',
                           },
+                        },
+                        optimisticResponse: {
+                          moveTaskToList: {
+                            __typename: 'Task',
+                            id: task.id,
+                            list: {
+                              __typename: 'BoardList',
+                              board: 'Kanban daily/weekly',
+                              list: 'Inbox',
+                            }
+                          }
                         }
                       })
                     }}>Inbox</Button>
@@ -123,10 +156,45 @@ class Task extends React.Component {
                             board: 'Kanban daily/weekly',
                             list: 'Waiting on',
                           },
+                        },
+                        optimisticResponse: {
+                          moveTaskToList: {
+                            __typename: 'Task',
+                            id: task.id,
+                            list: {
+                              __typename: 'BoardList',
+                              board: 'Kanban daily/weekly',
+                              list: 'Waiting on',
+                            }
+                          }
                         }
                       })
                     }}>Waiting on</Button>
-                  }
+                  }{' '}
+                  {task.list.list !== 'Backlog' &&
+                    <Button outline color='primary' size='sm' onClick={()=>{
+                      moveTaskToList.mutation({
+                        variables: {
+                          taskID: task.id,
+                          list: {
+                            board: 'Backlog (Personal)',
+                            list: 'Backlog',
+                          },
+                        },
+                        optimisticResponse: {
+                          moveTaskToList: {
+                            __typename: 'Task',
+                            id: task.id,
+                            list: {
+                              __typename: 'BoardList',
+                              board: 'Backlog (Personal)',
+                              list: 'Backlog',
+                            }
+                          }
+                        }
+                      })
+                    }}>Backlog</Button>
+                  }                 
                 </Collapse>
                 <Button outline color='primary' size='sm' onClick={()=>{
                   startTimer.mutation({
