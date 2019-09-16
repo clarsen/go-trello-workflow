@@ -218,9 +218,6 @@ class IndexPage extends React.Component {
                         goals={allGoals ? allGoals.monthlyGoals : null}
                       />
                     </Col>
-
-                  </Row>
-                  <Row>
                     <Col lg={6}>
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
@@ -231,8 +228,6 @@ class IndexPage extends React.Component {
                         timerRefetch={timerRefetch}
                         addTask={AddTask} board={'Backlog (Personal)'} list={'Backlog'}
                       />
-                    </Col>
-                    <Col lg={6}>
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
                         listTitle={<div><FaRegClock size={25}/> {'Waiting on...'}</div>}
@@ -242,10 +237,6 @@ class IndexPage extends React.Component {
                         timerRefetch={timerRefetch}
                         addTask={AddTask} board={'Kanban daily/weekly'} list={'Waiting on'}
                       />
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col lg={6}>
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
                         listTitle={<div><FaCheckCircle size={25}/> {'Done this week'}</div>}
