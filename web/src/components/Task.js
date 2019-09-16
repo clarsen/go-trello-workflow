@@ -242,11 +242,15 @@ class Task extends React.Component {
                         nextDue
                       },
                       optimisticResponse: {
-                        setDueDate: {
+                        setDone: {
                           __typename: 'Task',
                           id: task.id,
-                          done: true,
-                          nextDue,
+                          due: nextDue,
+                          list: {
+                            __typename: 'BoardList',
+                            board: 'Kanban daily/weekly',
+                            list: 'Done this week',
+                          }
                         }
                       }
                     })
@@ -262,11 +266,15 @@ class Task extends React.Component {
                         nextDue
                       },
                       optimisticResponse: {
-                        setDueDate: {
+                        setDone: {
                           __typename: 'Task',
                           id: task.id,
-                          done: true,
-                          nextDue,
+                          due: nextDue,
+                          list: {
+                            __typename: 'BoardList',
+                            board: 'Kanban daily/weekly',
+                            list: 'Done this week',
+                          }
                         }
                       }
                     })
@@ -282,11 +290,15 @@ class Task extends React.Component {
                         nextDue,
                       },
                       optimisticResponse: {
-                        setDueDate: {
+                        setDone: {
                           __typename: 'Task',
                           id: task.id,
-                          done: true,
-                          nextDue,
+                          due: nextDue,
+                          list: {
+                            __typename: 'BoardList',
+                            board: 'Kanban daily/weekly',
+                            list: 'Done this week',
+                          }
                         }
                       }
                     })
