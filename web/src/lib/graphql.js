@@ -200,6 +200,16 @@ const stopTimerQuery = gql`
 export const StopTimer = ({ render }) => (
   <Mutation
     mutation={stopTimerQuery}
+    update={(cache, { data: { stopTimer } }) => {
+      console.log('mutation update got stopTimer', stopTimer)
+      cache.writeQuery({
+        query: ActiveTimerQuery,
+        data: { 
+          activeTimer: null,
+        }
+      })
+    }}
+
   >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
@@ -217,6 +227,16 @@ const startTimerQuery = gql`
 export const StartTimer = ({ render }) => (
   <Mutation
     mutation={startTimerQuery}
+    update={(cache, { data: { startTimer } }) => {
+      console.log('mutation update got startTimer', startTimer)
+      console.log('cache is', cache)
+      cache.writeQuery({
+        query: ActiveTimerQuery,
+        data: { 
+          activeTimer: startTimer,
+        }
+      })
+    }}
   >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>

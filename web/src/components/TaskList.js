@@ -33,7 +33,7 @@ class TaskList extends React.Component {
       listFilter, isPeriodic, setDueDate, setDone, moveTaskToList, startTimer, timerRefetch,
       addTask,
     } = this.props
-    console.log('for list', list)
+    // console.log('for list', list)
     return (
       <React.Fragment>
         {listTitle && <div className="listTitle" onClick={this.toggle}>{listTitle}</div>}
@@ -65,7 +65,7 @@ class TaskList extends React.Component {
           </Collapse>
         }
         {loading && <Spinner color="primary" />}
-        {!loading && console.log('got data', data)}
+        {/* {!loading && console.log('got data', data)} */}
         {error && <div>Tasks: {error.message}</div>}
         {(!loading && !error) &&
           <Container>

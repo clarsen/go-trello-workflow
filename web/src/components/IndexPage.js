@@ -190,7 +190,7 @@ class IndexPage extends React.Component {
                   <Row>
                     <Col lg={6}>
                       {loadingTimer && <Spinner color="primary" />}
-                      {!loadingTimer && console.log('got data', timerData)}
+                      {/* {!loadingTimer && console.log('got data', timerData)} */}
                       {timerError && <div>Timer: {timerError.message}</div>}
                       {!loadingTimer && !timerError && <Timer stopTimer={StopTimer} timerRefetch={timerRefetch} activeTimer={timerData.activeTimer} />}
                     </Col>

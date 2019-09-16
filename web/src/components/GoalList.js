@@ -36,7 +36,7 @@ class GoalList extends React.Component {
         </div>
         <Container>
           {loading && <Spinner color="primary" />}
-          {!loading && console.log('got data', goals)}
+          {/* {!loading && console.log('got data', goals)} */}
           {error && <div>Goals: {error.message}</div>}
           <Collapse isOpen={this.state.showAddControls}>
             <Form>

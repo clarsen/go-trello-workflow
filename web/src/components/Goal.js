@@ -118,9 +118,16 @@ class Goal extends React.Component {
                         variables: {
                           taskID: g.idCard,
                           checkitemID: g.idCheckitem
+                        },
+                        optimisticResponse: {
+                          startTimer: {
+                            __typename: 'Timer',
+                            id: 'xxx',
+                            title: g.title,
+                          }
                         }
                       })
-                        .then(() => timerRefetch())
+                        // .then(() => timerRefetch())
                     }}>Start</Button>
                     <Button outline color='primary' size='sm' onClick={()=>{
                       setGoalDone.mutation({

@@ -132,9 +132,16 @@ class Task extends React.Component {
                   startTimer.mutation({
                     variables: {
                       taskID: task.id,
+                    },
+                    optimisticResponse: {
+                      startTimer: {
+                        __typename: 'Timer',
+                        id: 'xxx',
+                        title: task.title,
+                      }
                     }
                   })
-                    .then(() => timerRefetch())
+                    // .then(() => timerRefetch())
                 }}>Start</Button>
                 {!task.period &&
                   <Button outline color='primary' size='sm' onClick={()=>{
@@ -142,69 +149,131 @@ class Task extends React.Component {
                       variables: {
                         taskId: task.id,
                         done: true,
+                      },
+                      optimisticResponse: {
+                        setDone: {
+                          __typename: 'Task',
+                          id: task.id,
+                          list: {
+                            __typename: 'BoardList',
+                            board: 'Kanban daily/weekly',
+                            list: 'Done this week',
+                          }
+                        }
                       }
                     })
                   }}>√</Button>
                 }{' '}
                 {task.period &&
                   <Button outline color='primary' size='sm' onClick={()=>{
+                    let nextDue = moment.unix(task.due).add(1, 'month').unix()
                     setDone.mutation({
                       variables: {
                         taskId: task.id,
                         done: true,
-                        nextDue: moment.unix(task.due).add(1, 'month').unix(),
+                        nextDue
+                      },
+                      optimisticResponse: {
+                        setDueDate: {
+                          __typename: 'Task',
+                          id: task.id,
+                          done: true,
+                          nextDue,
+                        }
                       }
                     })
                   }}>√+1m</Button>
                 }{' '}
                 {task.period &&
                   <Button outline color='primary' size='sm' onClick={()=>{
+                    let nextDue = moment.unix(task.due).add(2, 'weeks').unix()
                     setDone.mutation({
                       variables: {
                         taskId: task.id,
                         done: true,
-                        nextDue: moment.unix(task.due).add(2, 'weeks').unix(),
+                        nextDue
+                      },
+                      optimisticResponse: {
+                        setDueDate: {
+                          __typename: 'Task',
+                          id: task.id,
+                          done: true,
+                          nextDue,
+                        }
                       }
                     })
                   }}>√+2w</Button>
                 }{' '}
                 {task.period &&
                   <Button outline color='primary' size='sm' onClick={()=>{
+                    let nextDue = moment.unix(task.due).add(1, 'weeks').unix()
                     setDone.mutation({
                       variables: {
                         taskId: task.id,
                         done: true,
-                        nextDue: moment.unix(task.due).add(1, 'weeks').unix(),
+                        nextDue,
+                      },
+                      optimisticResponse: {
+                        setDueDate: {
+                          __typename: 'Task',
+                          id: task.id,
+                          done: true,
+                          nextDue,
+                        }
                       }
                     })
                   }}>√+1w</Button>
                 }{' '}
                 {task.due &&
                   <Button outline color='primary' size='sm' onClick={()=>{
+                    let due = task.due + 7*86400
                     setDueDate.mutation({
                       variables: {
                         taskId: task.id,
-                        due: task.due + 7*86400
+                        due
+                      },
+                      optimisticResponse: {
+                        setDueDate: {
+                          __typename: 'Task',
+                          id: task.id,
+                          due
+                        }
                       }
                     })
                   }}>+=1w</Button>
                 }{' '}
                 {task.due &&
                   <Button outline color='primary' size='sm' onClick={()=>{
+                    let due = task.due + 14*86400
                     setDueDate.mutation({
                       variables: {
                         taskId: task.id,
-                        due: task.due + 14*86400,
+                        due
+                      },
+                      optimisticResponse: {
+                        setDueDate: {
+                          __typename: 'Task',
+                          id: task.id,
+                          due
+                        }
                       }
                     })
                   }}>+=2w</Button>
                 }{' '}
                 {task.due &&
                   <Button outline color='primary' size='sm' onClick={()=>{
+                    let due = task.due + 28*86400
                     setDueDate.mutation({
                       variables: {
                         taskId: task.id,
-                        due: task.due + 28*86400,
+                        due
+                      },
+                      optimisticResponse: {
+                        setDueDate: {
+                          __typename: 'Task',
+                          id: task.id,
+                          due
+                        }
                       }
                     })
                   }}>+=1m</Button>

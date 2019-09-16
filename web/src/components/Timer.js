@@ -22,9 +22,12 @@ class Timer extends React.Component {
                 stopTimer.mutation({
                   variables: {
                     timerID: activeTimer.id,
+                  },
+                  optimisticResponse: {
+                    stopTimer: true
                   }
                 })
-                  .then(() => timerRefetch())
+                  // .then(() => timerRefetch())
               }}>Stop</Button>
             </Col>
           </Row>

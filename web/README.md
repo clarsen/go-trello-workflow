@@ -16,7 +16,8 @@
 
 # running locally
 ```
-npm run dev
+gatsby develop
+go to http://localhost:8000
 ```
 
 # domain (first time before deploy)

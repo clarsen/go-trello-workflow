@@ -118,7 +118,7 @@ class ProjectItem extends React.Component {
     this.setState(state => ({ showDetails: !state.showDetails }))
   }
   render() {
-    let { project } = this.props
+    let { key, project } = this.props
     let tot_ms = project.entries.reduce((acc, e) =>
       acc + e.entries.reduce((acc, de) =>
       acc + de.duration_ms, 0), 0)
@@ -168,8 +168,8 @@ class ProjectItem extends React.Component {
             </Collapse>
             <Table dark>
               <tbody>
-                {project.entries.map((e) =>
-                  <ProjectDetailEntry key={e.detail} entry={e} showDetails={this.state.showDetails}/>
+                {project.entries.map((e) => 
+                    <ProjectDetailEntry key={`${key}-${e.detail}`} entry={e} showDetails={this.state.showDetails}/>
                 )}
               </tbody>
             </Table>
@@ -322,7 +322,7 @@ class ProjectReport extends React.Component {
                   projectWeeklyReportRefetch()
                 }} />
                 {loading && <Spinner color="primary" />}
-                {!loading && console.log('got data', data)}
+                {/* {!loading && console.log('got data', data)} */}
                 <TabContent activeTab={this.state.activeWeekSubTab}>
                   <TabPane tabId="weekReportDetail">
                     <div className="sectionName">Project summary:</div>
@@ -353,7 +353,7 @@ class ProjectReport extends React.Component {
                         </tr>
                       </thead>
                       <tbody>
-                        {rebucket(data.projects, 2).map((p) => <ProjectItem key={p.title} project={p} />)}
+                        {rebucket(data.projects, 2).map((p) => <ProjectItem key={"bucketed-" + p.title} project={p} />)}
                       </tbody>
                     </Table>
                     }
@@ -398,7 +398,7 @@ class ProjectReport extends React.Component {
                   <TabPane tabId="monthReportDetail">
                     <div className="sectionName">Project summary:</div>
                     {loadingMonthly && <Spinner color="primary" />}
-                    {!loadingMonthly && console.log('got data', dataMonthly)}
+                    {/* {!loadingMonthly && console.log('got data', dataMonthly)} */}
                     {(!loadingMonthly && !errorMonthly) &&
                       <Table dark striped>
                         <thead>
@@ -426,7 +426,7 @@ class ProjectReport extends React.Component {
                           </tr>
                         </thead>
                         <tbody>
-                          {rebucket(dataMonthly.projects, 2).map((p) => <ProjectItem key={p.title} project={p} />)}
+                          {rebucket(dataMonthly.projects, 2).map((p) => <ProjectItem key={"bucketed-" + p.title} project={p} />)}
                         </tbody>
                       </Table>
                     }
@@ -472,7 +472,7 @@ class ProjectReport extends React.Component {
                   <TabPane tabId="yearReportDetail">
                     <div className="sectionName">Project summary:</div>
                     {loadingYearly && <Spinner color="primary" />}
-                    {!loadingYearly && console.log('got data', dataYearly)}
+                    {/* {!loadingYearly && console.log('got data', dataYearly)} */}
                     {(!loadingYearly && !errorYearly) &&
                       <Table dark striped>
                         <thead>
@@ -483,7 +483,7 @@ class ProjectReport extends React.Component {
                           </tr>
                         </thead>
                         <tbody>
-                          {dataYearly.projects.map((p) => <ProjectItem project={p} />)}
+                          {dataYearly.projects.map((p) => <ProjectItem key={p.title} project={p} />)}
                         </tbody>
                       </Table>
                     }
@@ -500,7 +500,7 @@ class ProjectReport extends React.Component {
                           </tr>
                         </thead>
                         <tbody>
-                          {rebucket(dataYearly.projects, 2).map((p) => <ProjectItem project={p} />)}
+                          {rebucket(dataYearly.projects, 2).map((p) => <ProjectItem key={"bucketed-" + p.title} project={p} />)}
                         </tbody>
                       </Table>
                     }
