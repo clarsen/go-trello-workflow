@@ -46,12 +46,12 @@ functions:
           rate: cron(30 5 * * ? *)
           input:
             action: daily
-      - schedule:
-          name: morning-reminder
-          description: "every morning at 14:00 GMT (6AM PST)"
-          rate: cron(0 14 * * ? *)
-          input:
-            action: morning-reminder
+      # - schedule:
+      #     name: morning-reminder
+      #     description: "every morning at 14:00 GMT (6AM PST)"
+      #     rate: cron(0 14 * * ? *)
+      #     input:
+      #       action: morning-reminder
 
   authorize:
     handler: bin/auth
