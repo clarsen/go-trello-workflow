@@ -19,6 +19,16 @@ Trello boards should be set up as per expectations of the code.
     npm install
 ```
 
+## test with local code
+```
+go mod edit -replace github.com/clarsen/gtoggl-api=/Users/clarsen/lsrc/gtoggl-api
+```
+## run local server
+```
+cd server/go;
+make local && go run handle_graphql/server/main.go
+```
+
 ## Deploy to AWS serverless
 
 - automatic on git push via CircleCI

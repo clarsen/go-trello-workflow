@@ -16,6 +16,10 @@ github.com/awslabs/aws-lambda-go-api-proxy v0.0.0-20190219202933-eb5a49d3c0ad h1
 github.com/awslabs/aws-lambda-go-api-proxy v0.0.0-20190219202933-eb5a49d3c0ad/go.mod h1:1WYCl0lFZD+KAqdW+usdz46oShDhOEj3uTw09Qv++28=
 github.com/clarsen/gtoggl-api v0.0.0-20190315195523-0ffb4732cac5 h1:V/cTlwnuddPbbSuf0+Q9Hw9FJ12SCeDCscWxf1v9cLI=
 github.com/clarsen/gtoggl-api v0.0.0-20190315195523-0ffb4732cac5/go.mod h1:T+FwhTzdwSb6vPVhXJD3E1LY2r+56lCYXB6oBkFgRP4=
+github.com/clarsen/gtoggl-api v0.0.0-20191207015857-e597982b0584 h1:Jsbyp/pI2v6xf1GUtpFujRwHJHNDxPkP5X3Re7VL3fc=
+github.com/clarsen/gtoggl-api v0.0.0-20191207015857-e597982b0584/go.mod h1:T+FwhTzdwSb6vPVhXJD3E1LY2r+56lCYXB6oBkFgRP4=
+github.com/clarsen/gtoggl-api v0.0.0-20191207020520-629b92e414bb h1:AhZSW7J4nlv0EE674Vz02ruZFS+KKzdMLoIniTblZFQ=
+github.com/clarsen/gtoggl-api v0.0.0-20191207020520-629b92e414bb/go.mod h1:T+FwhTzdwSb6vPVhXJD3E1LY2r+56lCYXB6oBkFgRP4=
 github.com/clarsen/trello v0.0.0-20190427042447-84d701606a9b h1:hVp4ds/DBaOOxggtg8/J1rdAtqwvi2oOmJw4BZAwraw=
 github.com/clarsen/trello v0.0.0-20190427042447-84d701606a9b/go.mod h1:9xDVD0X4DJ2aURLb3+x/ASLuqe5+5IEDGtuYLDpO/Ak=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

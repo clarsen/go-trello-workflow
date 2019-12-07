@@ -37,6 +37,7 @@ const (
 	ReviewDir = "reviews"
 	// ReviewVisDir is where templates from ReviewDir are processed into human friendly documents
 	ReviewVisDir = "visualized_reviews"
+	debug        = false
 )
 
 func init() {
@@ -62,18 +63,25 @@ func init() {
 		log.Fatal("$togglAPIKey must be set")
 	}
 
-	// logger := log.New(os.Stderr, "gthttp.trace: ", log.LstdFlags|log.Llongfile)
-	// _thc, err := gthttp.NewClient(togglAPIKey, gthttp.SetTraceLogger(logger))
-	_thc, err := gthttp.NewClient(togglAPIKey)
-	if err != nil {
-		log.Fatal("Couldn't create new gthttp client")
+	var _thc *gthttp.TogglHttpClient
+	if debug {
+		logger := log.New(os.Stderr, "gthttp.trace: ", log.LstdFlags|log.Llongfile)
+		_thc, err = gthttp.NewClient(togglAPIKey, gthttp.SetTraceLogger(logger))
+		if err != nil {
+			log.Fatal("Couldn't create new gthttp client")
+		}
+	} else {
+		_thc, err = gthttp.NewClient(togglAPIKey)
+		if err != nil {
+			log.Fatal("Couldn't create new gthttp client")
+		}
 	}
 
-	//	_tc := gtclient.NewClient(_thc)
 	_tec := gttimeentry.NewClient(_thc)
 	teCL = _tec
 
 	_tew := gtworkspace.NewClient(_thc)
+
 	wlist, err := _tew.List()
 	if err != nil {
 		log.Fatal("Couldn't get workspaces")
