@@ -45,7 +45,7 @@ func handler(request events.APIGatewayCustomAuthorizerRequest) (events.APIGatewa
 		return events.APIGatewayCustomAuthorizerResponse{}, errors.New("Unauthorized")
 	}
 
-	if str != "clarsen@gmail.com" {
+	if str != "clarsen@gmail.com" && str != "ctlarsen@lbl.gov" {
 		log.Printf("%+v not allowed", str)
 		return events.APIGatewayCustomAuthorizerResponse{}, errors.New("Unauthorized")
 	}
