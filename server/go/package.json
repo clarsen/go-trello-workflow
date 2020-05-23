@@ -13,6 +13,6 @@
     "dotenv": "^6.2.0"
   },
   "devDependencies": {
-    "serverless-domain-manager": "^3.1.0"
+    "serverless-domain-manager": "angel-carvajal/serverless-domain-manager#v1.0.0"
   }
 }
