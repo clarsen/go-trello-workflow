@@ -71,7 +71,7 @@ jobs:
           name: dependencies
           command: |
             cd server/go
-            sudo npm i -g serverless
+            sudo npm i -g serverless@1.59.3
             npm i
 
       - run:
