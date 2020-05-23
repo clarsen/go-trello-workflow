@@ -79,7 +79,7 @@ jobs:
           command: |
             source ./circleci_branch_config.sh
             cd server/go
-            serverless deploy --verbose
+            SLS_DEBUG=* serverless deploy --verbose
 
       # - run:
       #     name: deploy web UI
