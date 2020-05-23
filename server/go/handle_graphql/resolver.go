@@ -190,7 +190,7 @@ func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, w
 		_week = *week
 	}
 
-	summaryFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", SummaryDir, _year, _week)
+	summaryFname := fmt.Sprintf("%s/%d/weekly/weekly-%d-%02d.yaml", SummaryDir, _year, _year, _week)
 
 	out, err := wd.fs.Create(summaryFname)
 	if err != nil {
@@ -209,7 +209,7 @@ func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, w
 		return nil, err2
 	}
 
-	templateFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", ReviewDir, _year, _week)
+	templateFname := fmt.Sprintf("%s/%d/weekly/weekly-%d-%02d.yaml", ReviewDir, _year, _year, _week)
 	// overwrite if exists
 	outReview, err2 := wd.fs.Create(templateFname)
 	if err2 != nil {
@@ -270,19 +270,19 @@ func (r *mutationResolver) FinishWeeklyReview(ctx context.Context, year *int, we
 		_week = *week
 	}
 
-	summaryFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", SummaryDir, _year, _week)
+	summaryFname := fmt.Sprintf("%s/%d/weekly/weekly-%d-%02d.yaml", SummaryDir, _year, _year, _week)
 	inSummary, err2 := wd.fs.Open(summaryFname)
 	if err2 != nil {
 		return nil, err2
 	}
 
-	reviewFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", ReviewDir, _year, _week)
+	reviewFname := fmt.Sprintf("%s/%d/weekly/weekly-%d-%02d.yaml", ReviewDir, _year, _year, _week)
 	inReview, err2 := wd.fs.Open(reviewFname)
 	if err2 != nil {
 		return nil, err2
 	}
 
-	visualFname := fmt.Sprintf("%s/weekly-%d-%02d.md", ReviewVisDir, _year, _week)
+	visualFname := fmt.Sprintf("%s/%d/weekly/weekly-%d-%02d.md", ReviewVisDir, _year, _year, _week)
 	out, err2 := wd.fs.Create(visualFname)
 	if err2 != nil {
 		return nil, err2
@@ -496,7 +496,7 @@ func (r *queryResolver) WeeklyVisualization(ctx context.Context, year *int, week
 	if week != nil {
 		_week = *week
 	}
-	summaryFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", SummaryDir, _year, _week)
+	summaryFname := fmt.Sprintf("%s/%d/weekly/weekly-%d-%02d.yaml", SummaryDir, _year, _year, _week)
 	if _, err = wd.fs.Stat(summaryFname); os.IsNotExist(err) {
 		return nil, err
 	}
@@ -504,7 +504,7 @@ func (r *queryResolver) WeeklyVisualization(ctx context.Context, year *int, week
 	if err2 != nil {
 		return nil, err2
 	}
-	reviewFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", ReviewDir, _year, _week)
+	reviewFname := fmt.Sprintf("%s/%d/weekly/weekly-%d-%02d.yaml", ReviewDir, _year, _year, _week)
 	if _, err = wd.fs.Stat(reviewFname); os.IsNotExist(err) {
 		return nil, err
 	}
@@ -614,7 +614,7 @@ func (r *mutationResolver) PrepareMonthlyReview(ctx context.Context, year *int, 
 	var inReviews []workflow.WeeklyReviewData
 
 	for week := 1; week <= 53; week++ {
-		weekSummary := fmt.Sprintf("%s/weekly-%d-%02d.yaml", SummaryDir, _year, week)
+		weekSummary := fmt.Sprintf("%s/%d/weekly/weekly-%d-%02d.yaml", SummaryDir, _year, _year, week)
 		if _, err1 := wd.fs.Stat(weekSummary); os.IsNotExist(err1) {
 			// log.Printf("%+v doesn't exist, skipping", weekSummary)
 			continue
@@ -637,7 +637,7 @@ func (r *mutationResolver) PrepareMonthlyReview(ctx context.Context, year *int, 
 		}
 
 		// get weekly review for month
-		reviewFname := fmt.Sprintf("%s/weekly-%d-%02d.yaml", ReviewDir, _year, week)
+		reviewFname := fmt.Sprintf("%s/%d/weekly/weekly-%d-%02d.yaml", ReviewDir, _year, _year, week)
 		if _, err = wd.fs.Stat(reviewFname); os.IsNotExist(err) {
 			log.Printf("%+v doesn't exist", reviewFname)
 			continue
@@ -661,7 +661,7 @@ func (r *mutationResolver) PrepareMonthlyReview(ctx context.Context, year *int, 
 		}
 	}
 
-	monthlySummary := fmt.Sprintf("%s/monthly-%d-%02d.yaml", SummaryDir, _year, _month)
+	monthlySummary := fmt.Sprintf("%s/%d/monthly/monthly-%d-%02d.yaml", SummaryDir, _year, _year, _month)
 	out, err := wd.fs.Create(monthlySummary)
 	if err != nil {
 		log.Printf("PrepareMonthlyReview %+v", err)
@@ -682,7 +682,7 @@ func (r *mutationResolver) PrepareMonthlyReview(ctx context.Context, year *int, 
 		return nil, err
 	}
 
-	templateFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", ReviewDir, _year, _month)
+	templateFname := fmt.Sprintf("%s/%d/monthly/monthly-%d-%02d.yaml", ReviewDir, _year, _year, _month)
 	outReview, err2 := wd.fs.Create(templateFname)
 	if err2 != nil {
 		log.Printf("Create %+v, %+v", templateFname, err2)
@@ -701,7 +701,7 @@ func (r *mutationResolver) PrepareMonthlyReview(ctx context.Context, year *int, 
 		log.Printf("Open %+v, %+v", monthlySummary, err)
 		return nil, err
 	}
-	monthlyInputFname := fmt.Sprintf("%s/monthlyinput-%d-%02d.md", ReviewVisDir, _year, _month)
+	monthlyInputFname := fmt.Sprintf("%s/%d/monthlyinput/monthlyinput-%d-%02d.md", ReviewVisDir, _year, _year, _month)
 	outMonthlyVisInput, err := wd.fs.Create(monthlyInputFname)
 	if err != nil {
 		log.Printf("Create %+v, %+v", monthlyInputFname, err)
@@ -761,14 +761,14 @@ func (r *queryResolver) MonthlyVisualization(ctx context.Context, year *int, mon
 		_month = *month
 	}
 
-	summaryFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", SummaryDir, _year, _month)
+	summaryFname := fmt.Sprintf("%s/%d/monthly/monthly-%d-%02d.yaml", SummaryDir, _year, _year, _month)
 	inSummary, err := wd.fs.Open(summaryFname)
 	if err != nil {
 		log.Printf("Open %+v, %+v", summaryFname, err)
 		return nil, err
 	}
 
-	reviewFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", ReviewDir, _year, _month)
+	reviewFname := fmt.Sprintf("%s/%d/monthly/monthly-%d-%02d.yaml", ReviewDir, _year, _year, _month)
 	inReview, err := wd.fs.Open(reviewFname)
 	if err != nil {
 		log.Printf("Open %+v, %+v", reviewFname, err)
@@ -800,19 +800,19 @@ func (r *mutationResolver) FinishMonthlyReview(ctx context.Context, year *int, m
 		_month = *month
 	}
 
-	summaryFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", SummaryDir, _year, _month)
+	summaryFname := fmt.Sprintf("%s/%d/monthly/monthly-%d-%02d.yaml", SummaryDir, _year, _year, _month)
 	inSummary, err2 := wd.fs.Open(summaryFname)
 	if err2 != nil {
 		return nil, err2
 	}
 
-	reviewFname := fmt.Sprintf("%s/monthly-%d-%02d.yaml", ReviewDir, _year, _month)
+	reviewFname := fmt.Sprintf("%s/%d/monthly/monthly-%d-%02d.yaml", ReviewDir, _year, _year, _month)
 	inReview, err2 := wd.fs.Open(reviewFname)
 	if err2 != nil {
 		return nil, err2
 	}
 
-	visualFname := fmt.Sprintf("%s/monthly-%d-%02d.md", ReviewVisDir, _year, _month)
+	visualFname := fmt.Sprintf("%s/%d/monthly/monthly-%d-%02d.md", ReviewVisDir, _year, _year, _month)
 	out, err2 := wd.fs.Create(visualFname)
 	if err2 != nil {
 		return nil, err2
