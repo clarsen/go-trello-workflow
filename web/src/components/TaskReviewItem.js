@@ -6,11 +6,14 @@ import {
   FaThumbsUp,
   FaLink,
   FaExternalLinkAlt,
-} from "react-icons/fa"
+  FaFileAlt,
+  FaListUl,
+} from "react-icons/fa";
 
-let iconSize = 20
+let iconSize = 20;
 
 function TaskReviewItem({ task, setDone }) {
+  const [expanded, setExpanded] = useState(false);
 
   let color = "";
   let value = 0;
@@ -34,7 +37,9 @@ function TaskReviewItem({ task, setDone }) {
       }
     }
   }
-  let activitySinceCreate = moment.unix(task.dateLastActivity).diff(moment.unix(task.createdDate)) / (86400 * 1000)
+  let activitySinceCreate =
+    moment.unix(task.dateLastActivity).diff(moment.unix(task.createdDate)) /
+    (86400 * 1000);
 
   return (
     <React.Fragment key={task.id}>
@@ -42,54 +47,91 @@ function TaskReviewItem({ task, setDone }) {
         <Col xs={12} lg={12} key={"2" + task.id}>
           <div>
             <div className="task">
-              <Badge color="info">{moment.unix(task.dateLastActivity).format('YYYY-MM-DD')}</Badge>
-              {activitySinceCreate > 30 && <Badge color="dark">{moment.unix(task.createdDate).format('YYYY-MM-DD')}</Badge>}
-              {' '}<a target="_blank" rel="noopener noreferrer" href={task.url}><FaLink size={iconSize}/></a>
-              <a target="_blank" rel="noopener noreferrer" href={`trello://x-callback-url/showCard?x-source=go-trello-workflow&id=${task.id}`}><FaExternalLinkAlt size={iconSize}/></a>
-              {task.title}{" "}<Badge color="secondary">{task.list.board}</Badge>
-              {"/"}<Badge color="secondary">{task.list.list}</Badge>
-              {" "}
-              <FaTimes size={iconSize} onClick={() => {
+              <Badge color="info">
+                {moment.unix(task.dateLastActivity).format("YYYY-MM-DD")}
+              </Badge>
+              {activitySinceCreate > 30 && (
+                <Badge color="dark">
+                  {moment.unix(task.createdDate).format("YYYY-MM-DD")}
+                </Badge>
+              )}{" "}
+              <a target="_blank" rel="noopener noreferrer" href={task.url}>
+                <FaLink size={iconSize} />
+              </a>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href={`trello://x-callback-url/showCard?x-source=go-trello-workflow&id=${task.id}`}
+              >
+                <FaExternalLinkAlt size={iconSize} />
+              </a>
+              {task.desc != "" && (
+                <FaFileAlt
+                  size={iconSize}
+                  onClick={() => {
+                    setExpanded(!expanded);
+                  }}
+                />
+              )}
+              {task.checklistItems.length > 0 && (
+                <FaListUl
+                  size={iconSize}
+                  onClick={() => {
+                    setExpanded(!expanded);
+                  }}
+                />
+              )}
+              {task.title}
+              <Badge color="secondary">{task.list.board}</Badge>
+              {"/"}
+              <Badge color="secondary">{task.list.list}</Badge>{" "}
+              <FaTimes
+                size={iconSize}
+                onClick={() => {
                   setDone.mutation({
                     variables: {
                       taskId: task.id,
                       done: true,
-                      titleComment: "won't do: "
+                      titleComment: "won't do: ",
                     },
                     optimisticResponse: {
                       setDone: {
-                        __typename: 'Task',
+                        __typename: "Task",
                         id: task.id,
                         list: {
-                          __typename: 'BoardList',
-                          board: 'Kanban daily/weekly',
-                          list: 'Done this week',
-                        }
-                      }
-                    }
-                  })
-              }}/>
-              <FaThumbsUp size={iconSize} onClick={() => {
+                          __typename: "BoardList",
+                          board: "Kanban daily/weekly",
+                          list: "Done this week",
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+              <FaThumbsUp
+                size={iconSize}
+                onClick={() => {
                   setDone.mutation({
                     variables: {
                       taskId: task.id,
                       done: true,
-                      titleComment: "Enough for now: "
+                      titleComment: "Enough for now: ",
                     },
                     optimisticResponse: {
                       setDone: {
-                        __typename: 'Task',
+                        __typename: "Task",
                         id: task.id,
                         list: {
-                          __typename: 'BoardList',
-                          board: 'Kanban daily/weekly',
-                          list: 'Done this week',
-                        }
-                      }
-                    }
-                  })
-              }}/>
-              </div>
+                          __typename: "BoardList",
+                          board: "Kanban daily/weekly",
+                          list: "Done this week",
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </div>
             <style jsx global>{`
               .periodicProgress {
                 float: right;
@@ -99,10 +141,32 @@ function TaskReviewItem({ task, setDone }) {
           </div>
         </Col>
       </Row>
+      {expanded && (
+        <React.Fragment>
+          {task.checklistItems.length > 0 && (
+            <Row key={"checkitems-" + task.id}>
+              <Col xs={12} lg={12} key={"checkitems-" + task.id}>
+                Checklist:
+                <ul>
+                  {task.checklistItems.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </Col>
+            </Row>
+          )}
+          {task.desc != "" && (
+            <Row key={"description-" + task.id}>
+              <Col xs={12} lg={12} key={"desc-" + task.id}>
+                Description:
+                <pre style={{ color: "white" }}>{task.desc}</pre>
+              </Col>
+            </Row>
+          )}
+        </React.Fragment>
+      )}
     </React.Fragment>
   );
 }
-
-
 
 export default TaskReviewItem;

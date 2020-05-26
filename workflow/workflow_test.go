@@ -96,3 +96,27 @@ func TestYMWForTime(t *testing.T) {
 		}
 	}
 }
+
+func TestGetTitleAndAttributes(t *testing.T) {
+	date := "2016-09-09"
+	period := "p1w"
+	var tests = []struct {
+		//input
+		name string
+		//expected
+		title   string
+		created *string
+		period  *string
+	}{
+		{"Check out snap-ci", "Check out snap-ci", nil, nil},
+		{"Read book Millionaire Messenger (2016-09-09)", "Read book Millionaire Messenger", &date, nil},
+		{"Mondays - review Etsy store metrics (p1w)", "Mondays - review Etsy store metrics", nil, &period},
+	}
+	for _, tvec := range tests {
+		title, created, _ := parseCardName(tvec.name)
+		if title != tvec.title || tvec.created != nil && *created != *tvec.created {
+			t.Errorf("TestGetTitleAndAttributes(%+v): expected (%s, %+v), actual (%s, %+v)",
+				tvec.name, tvec.title, tvec.created, title, created)
+		}
+	}
+}

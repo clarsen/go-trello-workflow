@@ -35,6 +35,8 @@ type Task struct {
 	List             *BoardList `json:"list"`
 	Period           *string    `json:"period"`
 	DateLastActivity *time.Time `json:"dateLastActivity"`
+	Desc             string     `json:"desc"`
+	ChecklistItems   []string   `json:"checklistItems"`
 }
 
 type Timer struct {

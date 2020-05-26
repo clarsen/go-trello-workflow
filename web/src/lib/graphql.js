@@ -6,6 +6,7 @@ const fragments = {
     fragment TaskWhole on Task {
       id
       title
+      desc
       createdDate
       url
       due
@@ -15,6 +16,7 @@ const fragments = {
       }
       period
       dateLastActivity
+      checklistItems
     }
   `,
   monthlyGoal: gql`

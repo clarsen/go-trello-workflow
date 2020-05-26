@@ -82,24 +82,30 @@ func GetAttributesFromChecklistTitle(name string) (title string, week int, creat
 	return
 }
 
-func GetTitleAndAttributes(card *trello.Card) (title string, created *string, period *string) {
-	re := regexp.MustCompile(`(.*)\s+?(\((\d{4}-\d{2}-\d{2})\))?\s*(\((po|p1w|p2w|p4w|p2m|p3m|p6m|p12m)\))?`)
-	groups := re.FindSubmatch([]byte(card.Name))
+func parseCardName(name string) (title string, created *string, period *string) {
+	// https://regex101.com/r/UeBSfi/1
+	re := regexp.MustCompile(`^(.*?)(?:\s+\((\d{4}-\d{2}-\d{2})\))?(?:\s*\((po|p1w|p2w|p4w|p2m|p3m|p6m|p12m)\))?$`)
+	groups := re.FindSubmatch([]byte(name))
 	if groups == nil {
-		log.Printf("match %+v didn't match\n", card.Name)
+		log.Printf("match %+v didn't match\n", name)
 		return
 	}
+
 	title = string(groups[1])
-	if len(groups[3]) > 0 {
-		c := string(groups[3])
+	if len(groups[2]) > 0 {
+		c := string(groups[2])
 		created = &c
 	}
-	if len(groups[5]) > 0 {
-		p := string(groups[5])
+	if len(groups[3]) > 0 {
+		p := string(groups[3])
 		period = &p
 	}
-	log.Printf("match %+v -> %s, %s, %s\n", card.Name, title, string(groups[3]), string(groups[5]))
+	log.Printf("match %+v -> %s, %s, %s\n", name, title, string(groups[2]), string(groups[3]))
 	return title, created, period
+}
+
+func GetTitleAndAttributes(card *trello.Card) (title string, created *string, period *string) {
+	return parseCardName(card.Name)
 }
 
 func isPeriodic(card *trello.Card) bool {

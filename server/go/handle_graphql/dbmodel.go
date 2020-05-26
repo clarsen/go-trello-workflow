@@ -137,6 +137,8 @@ func GetTasks(cl *workflow.Client,
 			Due:              t.Due,
 			Period:           t.Period,
 			DateLastActivity: t.DateLastActivity,
+			Desc:             t.Desc,
+			ChecklistItems:   t.ChecklistItems,
 			List: &BoardList{
 				t.List.Board,
 				t.List.List,

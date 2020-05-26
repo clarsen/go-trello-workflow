@@ -16,12 +16,14 @@ type WFBoardList struct {
 type WFTask struct {
 	ID               string       `json:"id"`
 	Title            string       `json:"title"`
+	Desc             string       `json:"desc"`
 	CreatedDate      *time.Time   `json:"createdDate"`
 	URL              *string      `json:"url"`
 	Due              *time.Time   `json:"due"`
 	List             *WFBoardList `json:"list"`
 	Period           *string      `json:"period"`
 	DateLastActivity *time.Time   `json:"dateLastActivity"`
+	ChecklistItems   []string     `json:"checklistItems"`
 }
 
 // MoveToListOnBoard moves card to board/list
@@ -74,6 +76,20 @@ func (cl *Client) wfTaskFor(card *trello.Card) (*WFTask, error) {
 			createdDate = maybeCreatedDate
 		}
 	}
+	if len(card.IDCheckLists) > 0 {
+		card, err = cl.Client.GetCard(card.ID, trello.Arguments{"fields": "all"})
+		if err != nil {
+			return nil, err
+		}
+	}
+	var checklistItems []string
+	for _, cl := range card.Checklists {
+		// log.Println("checklist:", cl)
+		for _, item := range cl.CheckItems {
+			log.Printf("Card %+v, checklist item: %+v\n", card.Name, item.Name)
+			checklistItems = append(checklistItems, item.Name)
+		}
+	}
 	wfTask := &WFTask{
 		ID:               card.ID,
 		Title:            title,
@@ -82,6 +98,8 @@ func (cl *Client) wfTaskFor(card *trello.Card) (*WFTask, error) {
 		Due:              card.Due,
 		Period:           period,
 		DateLastActivity: card.DateLastActivity,
+		Desc:             card.Desc,
+		ChecklistItems:   checklistItems,
 	}
 	bl, err := BoardListFor(cl, card.IDBoard, card.IDList)
 	if err != nil {
@@ -132,7 +150,7 @@ func (cl *Client) Tasks(board, boardList *string) (tasks []WFTask, err error) {
 				// handle error
 				return
 			}
-			cards, err2 := trelloBoard.GetCards(trello.Defaults())
+			cards, err2 := trelloBoard.GetCards(trello.Arguments{"fields": "all"})
 			if err2 != nil {
 				// handle error
 				err = err2
