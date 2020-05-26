@@ -70,7 +70,8 @@ func SetTaskDue(taskId string, due time.Time) (*Task, error) {
 	return &task, nil
 }
 
-func SetTaskDone(taskId string, done bool) (*Task, error) {
+// SetTaskDone moves task to done this week list or back to inbox (depending on done) and optionally prepends a title comment
+func SetTaskDone(taskID string, done bool, titleComment *string) (*Task, error) {
 	cl, err := workflow.New(user, appkey, authtoken)
 	if err != nil {
 		return nil, err
@@ -87,10 +88,20 @@ func SetTaskDone(taskId string, done bool) (*Task, error) {
 			return nil, err
 		}
 	}
-	card, err := cl.MoveToListOnBoard(taskId, targetList.ID, targetList.IDBoard)
+	card, err := cl.MoveToListOnBoard(taskID, targetList.ID, targetList.IDBoard)
 	if err != nil {
 		return nil, err
 	}
+
+	if titleComment != nil {
+		args := trello.Defaults()
+		args["name"] = (*titleComment) + card.Name
+		err = card.Update(args)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	_, _, period := workflow.GetTitleAndAttributes(card)
 	if period == nil {
 		// mark Due done if present
@@ -119,12 +130,13 @@ func GetTasks(cl *workflow.Client,
 	}
 	for _, t := range wfTasks {
 		tasks = append(tasks, Task{
-			ID:          t.ID,
-			Title:       t.Title,
-			CreatedDate: t.CreatedDate,
-			URL:         t.URL,
-			Due:         t.Due,
-			Period:      t.Period,
+			ID:               t.ID,
+			Title:            t.Title,
+			CreatedDate:      t.CreatedDate,
+			URL:              t.URL,
+			Due:              t.Due,
+			Period:           t.Period,
+			DateLastActivity: t.DateLastActivity,
 			List: &BoardList{
 				t.List.Board,
 				t.List.List,

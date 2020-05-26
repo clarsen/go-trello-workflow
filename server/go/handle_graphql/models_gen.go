@@ -27,13 +27,14 @@ type GenerateResult struct {
 }
 
 type Task struct {
-	ID          string     `json:"id"`
-	Title       string     `json:"title"`
-	CreatedDate *time.Time `json:"createdDate"`
-	URL         *string    `json:"url"`
-	Due         *time.Time `json:"due"`
-	List        *BoardList `json:"list"`
-	Period      *string    `json:"period"`
+	ID               string     `json:"id"`
+	Title            string     `json:"title"`
+	CreatedDate      *time.Time `json:"createdDate"`
+	URL              *string    `json:"url"`
+	Due              *time.Time `json:"due"`
+	List             *BoardList `json:"list"`
+	Period           *string    `json:"period"`
+	DateLastActivity *time.Time `json:"dateLastActivity"`
 }
 
 type Timer struct {

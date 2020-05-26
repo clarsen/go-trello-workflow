@@ -13,6 +13,7 @@ type Task {
   due: Timestamp
   list: BoardList
   period: String
+  dateLastActivity: Timestamp
 }
 
 input BoardListInput {
@@ -65,7 +66,7 @@ type Mutation {
   prepareWeeklyReview(year: Int, week: Int): GenerateResult!
   finishWeeklyReview(year: Int, week: Int): FinishResult!
   setDueDate(taskID: String!, due: Timestamp!): Task!
-  setDone(taskID: String!, done: Boolean!, status: String, nextDue: Timestamp): Task!
+  setDone(taskID: String!, done: Boolean!, status: String, titleComment: String, nextDue: Timestamp): Task!
   moveTaskToList(taskID: String!, list: BoardListInput!): Task!
   startTimer(taskID: String!, checkitemID: String): Timer!
   stopTimer(timerID: String!): Boolean

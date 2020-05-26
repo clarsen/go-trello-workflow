@@ -14,6 +14,7 @@ const fragments = {
         list
       }
       period
+      dateLastActivity
     }
   `,
   monthlyGoal: gql`
@@ -108,8 +109,8 @@ export const SetDueDate = ({ render }) => (
 )
 
 const setDoneQuery = gql`
-  mutation setDone($taskId: String!, $done: Boolean!, $nextDue: Timestamp) {
-    setDone(taskID: $taskId, done: $done, nextDue: $nextDue) {
+  mutation setDone($taskId: String!, $done: Boolean!, $titleComment: String, $nextDue: Timestamp) {
+    setDone(taskID: $taskId, done: $done, titleComment: $titleComment, nextDue: $nextDue) {
       ...TaskWhole
     }
   }

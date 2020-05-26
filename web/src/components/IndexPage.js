@@ -25,6 +25,7 @@ import {
 } from 'react-icons/fa'
 import NavHeader from './NavHeader'
 import TaskList from './TaskList'
+import TaskReviewList from './TaskReviewList'
 import GoalList from './GoalList'
 import Timer from './Timer'
 import ProjectReport from './ProjectReport'
@@ -198,6 +199,7 @@ class IndexPage extends React.Component {
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
                         listTitle={<div><FaCalendarDay size={25}/> {'Today'}</div>}
+                        boardFilter={['Kanban daily/weekly']}
                         listFilter={['Today']}
                         setDueDate={SetDueDate} setDone={SetDone}
                         moveTaskToList={MoveTaskToList} startTimer={StartTimer}
@@ -222,7 +224,8 @@ class IndexPage extends React.Component {
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
                         listTitle={<div><FaListUl size={25}/> {'Backlog'}</div>}
-                        listFilter={['Backlog (Personal)']}
+                        boardFilter={['Backlog (Personal)']}
+                        listFilter={['Backlog']}
                         setDueDate={SetDueDate} setDone={SetDone}
                         moveTaskToList={MoveTaskToList} startTimer={StartTimer}
                         timerRefetch={timerRefetch}
@@ -231,6 +234,7 @@ class IndexPage extends React.Component {
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
                         listTitle={<div><FaRegClock size={25}/> {'Waiting on...'}</div>}
+                        boardFilter={['Kanban daily/weekly']}
                         listFilter={['Waiting on']}
                         setDueDate={SetDueDate} setDone={SetDone}
                         moveTaskToList={MoveTaskToList} startTimer={StartTimer}
@@ -240,6 +244,7 @@ class IndexPage extends React.Component {
                       <TaskList
                         loading={loadingAll} error={queryAllError} data={allTasks}
                         listTitle={<div><FaCheckCircle size={25}/> {'Done this week'}</div>}
+                        boardFilter={['Kanban daily/weekly']}
                         listFilter={['Done this week']}
                         setDueDate={SetDueDate} setDone={SetDone}
                         moveTaskToList={MoveTaskToList} startTimer={StartTimer}
@@ -258,6 +263,7 @@ class IndexPage extends React.Component {
                         <div className="listTitle"><FaRecycle size={25}/> {'Periodic'}</div>
                         <TaskList
                           loading={loadingAll} error={queryAllError} data={allTasks}
+                          boardFilter={['Periodic board']}
                           listSubGroupTitle={'Often'} listFilter={['Often']}
                           setDueDate={SetDueDate} setDone={SetDone}
                           moveTaskToList={MoveTaskToList} startTimer={StartTimer}
@@ -267,6 +273,7 @@ class IndexPage extends React.Component {
                       <Row>
                         <TaskList
                           loading={loadingAll} error={queryAllError} data={allTasks}
+                          boardFilter={['Periodic board']}
                           listSubGroupTitle={'Weekly'} listFilter={['Weekly']}
                           setDueDate={SetDueDate} setDone={SetDone}
                           moveTaskToList={MoveTaskToList} startTimer={StartTimer}
@@ -276,6 +283,7 @@ class IndexPage extends React.Component {
                       <Row>
                         <TaskList
                           loading={loadingAll} error={queryAllError} data={allTasks}
+                          boardFilter={['Periodic board']}
                           listSubGroupTitle={'Bi-weekly to monthly'} listFilter={['Bi-weekly to monthly']}
                           setDueDate={SetDueDate} setDone={SetDone}
                           moveTaskToList={MoveTaskToList} startTimer={StartTimer}
@@ -287,12 +295,28 @@ class IndexPage extends React.Component {
                       <Row>
                         <TaskList
                           loading={loadingAll} error={queryAllError} data={allTasks}
+                          boardFilter={['Periodic board']}
                           listSubGroupTitle={'Quarterly to Yearly'} listFilter={['Quarterly to Yearly']}
                           setDueDate={SetDueDate} setDone={SetDone}
                           moveTaskToList={MoveTaskToList} startTimer={StartTimer}
                           timerRefetch={timerRefetch}
                         />
                       </Row>
+                    </Col>
+                  </Row>
+                </TabPane>
+                <TabPane tabId="oldTasksReview">
+                  <FaSync size={25} onClick={() => {
+                    allRefetch()
+                  }} />
+                  <Row>
+                    <Col lg={12}>
+                      <TaskReviewList
+                        loading={loadingAll} error={queryAllError} data={allTasks}
+                        listTitle={'Backlog (Personal)'}
+                        boardFilter={['Backlog (Personal)', 'Someday/Maybe', 'Movies, TV']}
+                        setDone={SetDone}
+                      />
                     </Col>
                   </Row>
                 </TabPane>

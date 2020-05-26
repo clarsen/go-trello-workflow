@@ -339,8 +339,8 @@ func (r *mutationResolver) SetDueDate(ctx context.Context, taskID string, due ti
 	return t, err
 }
 
-func (r *mutationResolver) SetDone(ctx context.Context, taskID string, done bool, status *string, nextDue *time.Time) (*Task, error) {
-	t, err := SetTaskDone(taskID, done)
+func (r *mutationResolver) SetDone(ctx context.Context, taskID string, done bool, status *string, titleComment *string, nextDue *time.Time) (*Task, error) {
+	t, err := SetTaskDone(taskID, done, titleComment)
 	if err != nil {
 		return nil, err
 	}

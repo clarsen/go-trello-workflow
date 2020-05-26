@@ -14,13 +14,14 @@ type WFBoardList struct {
 
 // WFTask wraps underlying trello card representation
 type WFTask struct {
-	ID          string       `json:"id"`
-	Title       string       `json:"title"`
-	CreatedDate *time.Time   `json:"createdDate"`
-	URL         *string      `json:"url"`
-	Due         *time.Time   `json:"due"`
-	List        *WFBoardList `json:"list"`
-	Period      *string      `json:"period"`
+	ID               string       `json:"id"`
+	Title            string       `json:"title"`
+	CreatedDate      *time.Time   `json:"createdDate"`
+	URL              *string      `json:"url"`
+	Due              *time.Time   `json:"due"`
+	List             *WFBoardList `json:"list"`
+	Period           *string      `json:"period"`
+	DateLastActivity *time.Time   `json:"dateLastActivity"`
 }
 
 // MoveToListOnBoard moves card to board/list
@@ -74,12 +75,13 @@ func (cl *Client) wfTaskFor(card *trello.Card) (*WFTask, error) {
 		}
 	}
 	wfTask := &WFTask{
-		ID:          card.ID,
-		Title:       title,
-		CreatedDate: &createdDate,
-		URL:         &url,
-		Due:         card.Due,
-		Period:      period,
+		ID:               card.ID,
+		Title:            title,
+		CreatedDate:      &createdDate,
+		URL:              &url,
+		Due:              card.Due,
+		Period:           period,
+		DateLastActivity: card.DateLastActivity,
 	}
 	bl, err := BoardListFor(cl, card.IDBoard, card.IDList)
 	if err != nil {
@@ -122,32 +124,41 @@ func (cl *Client) Tasks(board, boardList *string) (tasks []WFTask, err error) {
 	} else {
 		// XXX: more efficient query?
 		// get all tasks across all boards
-		for _, bl := range AllLists {
-			list, err = ListFor(cl, bl.Board, bl.List)
+		var trelloBoard *trello.Board
+		for _, boardInfo := range AllBoards {
+			log.Printf("Getting tasks for %+v\n", boardInfo.Board)
+			trelloBoard, err = BoardFor(cl.Member, boardInfo.Board)
 			if err != nil {
 				// handle error
 				return
 			}
-			cards, err2 := list.GetCards(trello.Defaults())
+			cards, err2 := trelloBoard.GetCards(trello.Defaults())
 			if err2 != nil {
 				// handle error
 				err = err2
 				return
 			}
 			for _, card := range cards {
+				// log.Printf("Card %+v", card)
 				t, err2 := cl.wfTaskFor(card)
 				if err2 != nil {
 					err = err2
 					return
 				}
+				var listName string
+				boardlist := ListForID(card.IDList)
+				if boardlist != nil {
+					listName = boardlist.List
+				}
 				t.List = &WFBoardList{
-					Board: bl.Board,
-					List:  bl.List,
+					Board: boardInfo.Board,
+					List:  listName,
 				}
 
 				tasks = append(tasks, *t)
 			}
 		}
+
 	}
 	if err != nil {
 		return

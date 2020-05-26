@@ -54,6 +54,10 @@ type BoardAndList struct {
 	List  string
 }
 
+type Board struct {
+	Board string
+}
+
 var (
 	AllLists = []BoardAndList{
 		{"Kanban daily/weekly", "Today"},
@@ -67,12 +71,20 @@ var (
 		{"Periodic board", "Bi-weekly to monthly"},
 		{"Periodic board", "Quarterly to Yearly"},
 	}
+	AllBoards = []Board{
+		{"Kanban daily/weekly"},
+		{"Backlog (Personal)"},
+		{"Periodic board"},
+		{"Someday/Maybe"},
+		{"Movies, TV"},
+	}
 )
 
 var boards []*trello.Board
 var boardmap = make(map[string]*trello.Board)
 var listmap = make(map[string]map[string]*trello.List)
 var boardlistmap = make(map[string]map[string]*BoardAndList)
+var listIdMap = make(map[string]*BoardAndList)
 
 func reportMonthlyGoal(card *trello.Card) (MonthlyGoal, error) {
 	var g MonthlyGoal
@@ -421,8 +433,14 @@ func sortChecklist(m *trello.Member, card *trello.Card) error {
 	return nil
 }
 
-func boardFor(m *trello.Member, s string) (board *trello.Board, err error) {
+// BoardFor finds trello board for board string with caching -- candidate for pushing into library
+func BoardFor(m *trello.Member, s string) (board *trello.Board, err error) {
 	if boards == nil {
+		interest := make(map[string]bool)
+		for _, binfo := range AllBoards {
+			interest[binfo.Board] = true
+		}
+
 		boards, err = m.GetBoards(trello.Defaults())
 		if err != nil {
 			fmt.Println("error")
@@ -433,7 +451,25 @@ func boardFor(m *trello.Member, s string) (board *trello.Board, err error) {
 		for _, b := range boards {
 			// fmt.Println("examining board ", b)
 			// fmt.Println(b.Name)
+			if !interest[b.Name] {
+				fmt.Printf("Skipping board %+v\n", b.Name)
+				continue
+			}
 			boardmap[b.Name] = b
+			// get lists for each board
+			lists, err := b.GetLists(trello.Defaults())
+			if err != nil {
+				fmt.Println("error")
+				return nil, err
+				// Handle error
+			}
+			fmt.Printf("Getting lists for board %+v\n", b.Name)
+			for _, l := range lists {
+				listIdMap[l.ID] = &BoardAndList{
+					Board: b.Name,
+					List:  l.Name,
+				}
+			}
 		}
 		// fmt.Println(boardmap)
 	}
@@ -442,6 +478,11 @@ func boardFor(m *trello.Member, s string) (board *trello.Board, err error) {
 		listmap[board.Name] = map[string]*trello.List{}
 	}
 	return
+}
+
+// ListForID returns board and list info for a particular list ID
+func ListForID(ID string) *BoardAndList {
+	return listIdMap[ID]
 }
 
 func moveBackPeriodic(cl *Client, c *trello.Card) (err error) {
@@ -525,7 +566,7 @@ func listForCreate(cl *Client, b string, l string) (*trello.List, error) {
 	if list != nil {
 		return list, err
 	}
-	board, err := boardFor(cl.Member, b)
+	board, err := BoardFor(cl.Member, b)
 	if err != nil {
 		return nil, err
 	}
@@ -591,7 +632,7 @@ func ListFor(cl *Client, b string, l string) (*trello.List, error) {
 		return list, nil
 	}
 
-	board, err := boardFor(m, b)
+	board, err := BoardFor(m, b)
 	if err != nil {
 		// handle error
 		return nil, err
@@ -850,7 +891,7 @@ func (cl *Client) doMinutely() error {
 
 // PrepareToday moves cards back to their respective boards at end of day
 func (cl *Client) prepareToday() error {
-	board, err := boardFor(cl.Member, "Kanban daily/weekly")
+	board, err := BoardFor(cl.Member, "Kanban daily/weekly")
 	if err != nil {
 		// handle error
 		return err

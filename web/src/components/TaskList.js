@@ -30,7 +30,8 @@ class TaskList extends React.Component {
   render () {
     let { listTitle, listSubGroupTitle, loading, error, data,
       board, list,
-      listFilter, isPeriodic, setDueDate, setDone, moveTaskToList, startTimer, timerRefetch,
+      boardFilter, listFilter, 
+      isPeriodic, setDueDate, setDone, moveTaskToList, startTimer, timerRefetch,
       addTask,
     } = this.props
     // console.log('for list', list)
@@ -72,7 +73,7 @@ class TaskList extends React.Component {
             {
               data.tasks
                 .filter((t) => !isPeriodic || isPeriodic && t.period)
-                .filter((t) => !listFilter || listFilter.count == 0 || listFilter.includes(t.list.board) || listFilter.includes(t.list.list))
+                .filter((t) => (!listFilter || listFilter.count == 0 || listFilter.includes(t.list.list)) && (!boardFilter || boardFilter.count == 0 || boardFilter.includes(t.list.board))) 
                 .sort((a,b) => b.createdDate - a.createdDate)
                 .sort((a,b) => {
                   let delta_b_days

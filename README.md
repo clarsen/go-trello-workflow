@@ -23,9 +23,12 @@ Trello boards should be set up as per expectations of the code.
 ```
 go mod edit -replace github.com/clarsen/gtoggl-api=/Users/clarsen/lsrc/gtoggl-api
 ```
+
 ## run local server
 ```
+Adjust web/src/lib/api.js to use  'http://localhost:8080/api/gql' as private_gql endpoint
 cd server/go;
+. .env.production.nocommit
 make local && go run handle_graphql/server/main.go
 ```
 

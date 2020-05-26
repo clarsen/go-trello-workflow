@@ -1,0 +1,17 @@
+session_name: go-trello-workflow
+start_directory: ./ # load session relative to config location (project root).
+windows:
+  - window_name: web site
+    panes:
+      - shell_command:
+        - sleep 10
+        - cd web
+        - gatsby develop
+
+  - window_name: local graphql
+    layout: even-vertical
+    panes:
+      - shell_command:
+        - cd server/go
+        - . .env.production.nocommit
+        - make local && go run handle_graphql/server/main.go

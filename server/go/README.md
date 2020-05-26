@@ -28,3 +28,9 @@ STAGE=production sls create_domain
   echo '{"action": "morning-reminder"}' | sls invoke -f scheduled -l
   echo '{"action": "test"}' | sls invoke -f scheduled -l
 ```
+
+# local deploy
+```
+make local
+handle_graphql/server/bin/server 
+```

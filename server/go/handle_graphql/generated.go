@@ -68,7 +68,7 @@ type ComplexityRoot struct {
 		PrepareWeeklyReview  func(childComplexity int, year *int, week *int) int
 		FinishWeeklyReview   func(childComplexity int, year *int, week *int) int
 		SetDueDate           func(childComplexity int, taskID string, due time.Time) int
-		SetDone              func(childComplexity int, taskID string, done bool, status *string, nextDue *time.Time) int
+		SetDone              func(childComplexity int, taskID string, done bool, status *string, titleComment *string, nextDue *time.Time) int
 		MoveTaskToList       func(childComplexity int, taskID string, list BoardListInput) int
 		StartTimer           func(childComplexity int, taskID string, checkitemID *string) int
 		StopTimer            func(childComplexity int, timerID string) int
@@ -89,13 +89,14 @@ type ComplexityRoot struct {
 	}
 
 	Task struct {
-		ID          func(childComplexity int) int
-		Title       func(childComplexity int) int
-		CreatedDate func(childComplexity int) int
-		URL         func(childComplexity int) int
-		Due         func(childComplexity int) int
-		List        func(childComplexity int) int
-		Period      func(childComplexity int) int
+		ID               func(childComplexity int) int
+		Title            func(childComplexity int) int
+		CreatedDate      func(childComplexity int) int
+		URL              func(childComplexity int) int
+		Due              func(childComplexity int) int
+		List             func(childComplexity int) int
+		Period           func(childComplexity int) int
+		DateLastActivity func(childComplexity int) int
 	}
 
 	Timer struct {
@@ -123,7 +124,7 @@ type MutationResolver interface {
 	PrepareWeeklyReview(ctx context.Context, year *int, week *int) (*GenerateResult, error)
 	FinishWeeklyReview(ctx context.Context, year *int, week *int) (*FinishResult, error)
 	SetDueDate(ctx context.Context, taskID string, due time.Time) (*Task, error)
-	SetDone(ctx context.Context, taskID string, done bool, status *string, nextDue *time.Time) (*Task, error)
+	SetDone(ctx context.Context, taskID string, done bool, status *string, titleComment *string, nextDue *time.Time) (*Task, error)
 	MoveTaskToList(ctx context.Context, taskID string, list BoardListInput) (*Task, error)
 	StartTimer(ctx context.Context, taskID string, checkitemID *string) (*Timer, error)
 	StopTimer(ctx context.Context, timerID string) (*bool, error)
@@ -266,7 +267,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.SetDone(childComplexity, args["taskID"].(string), args["done"].(bool), args["status"].(*string), args["nextDue"].(*time.Time)), true
+		return e.complexity.Mutation.SetDone(childComplexity, args["taskID"].(string), args["done"].(bool), args["status"].(*string), args["titleComment"].(*string), args["nextDue"].(*time.Time)), true
 
 	case "Mutation.MoveTaskToList":
 		if e.complexity.Mutation.MoveTaskToList == nil {
@@ -475,6 +476,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Task.Period(childComplexity), true
 
+	case "Task.DateLastActivity":
+		if e.complexity.Task.DateLastActivity == nil {
+			break
+		}
+
+		return e.complexity.Task.DateLastActivity(childComplexity), true
+
 	case "Timer.ID":
 		if e.complexity.Timer.ID == nil {
 			break
@@ -644,6 +652,7 @@ type Task {
   due: Timestamp
   list: BoardList
   period: String
+  dateLastActivity: Timestamp
 }
 
 input BoardListInput {
@@ -696,7 +705,7 @@ type Mutation {
   prepareWeeklyReview(year: Int, week: Int): GenerateResult!
   finishWeeklyReview(year: Int, week: Int): FinishResult!
   setDueDate(taskID: String!, due: Timestamp!): Task!
-  setDone(taskID: String!, done: Boolean!, status: String, nextDue: Timestamp): Task!
+  setDone(taskID: String!, done: Boolean!, status: String, titleComment: String, nextDue: Timestamp): Task!
   moveTaskToList(taskID: String!, list: BoardListInput!): Task!
   startTimer(taskID: String!, checkitemID: String): Timer!
   stopTimer(timerID: String!): Boolean
@@ -927,14 +936,22 @@ func (ec *executionContext) field_Mutation_setDone_args(ctx context.Context, raw
 		}
 	}
 	args["status"] = arg2
-	var arg3 *time.Time
-	if tmp, ok := rawArgs["nextDue"]; ok {
-		arg3, err = ec.unmarshalOTimestamp2ᚖtimeᚐTime(ctx, tmp)
+	var arg3 *string
+	if tmp, ok := rawArgs["titleComment"]; ok {
+		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["nextDue"] = arg3
+	args["titleComment"] = arg3
+	var arg4 *time.Time
+	if tmp, ok := rawArgs["nextDue"]; ok {
+		arg4, err = ec.unmarshalOTimestamp2ᚖtimeᚐTime(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["nextDue"] = arg4
 	return args, nil
 }
 
@@ -1486,7 +1503,7 @@ func (ec *executionContext) _Mutation_setDone(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SetDone(rctx, args["taskID"].(string), args["done"].(bool), args["status"].(*string), args["nextDue"].(*time.Time))
+		return ec.resolvers.Mutation().SetDone(rctx, args["taskID"].(string), args["done"].(bool), args["status"].(*string), args["titleComment"].(*string), args["nextDue"].(*time.Time))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -2139,6 +2156,29 @@ func (ec *executionContext) _Task_period(ctx context.Context, field graphql.Coll
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Task_dateLastActivity(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Task",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DateLastActivity, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOTimestamp2ᚖtimeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Timer_id(ctx context.Context, field graphql.CollectedField, obj *Timer) graphql.Marshaler {
@@ -3565,6 +3605,8 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._Task_list(ctx, field, obj)
 		case "period":
 			out.Values[i] = ec._Task_period(ctx, field, obj)
+		case "dateLastActivity":
+			out.Values[i] = ec._Task_dateLastActivity(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

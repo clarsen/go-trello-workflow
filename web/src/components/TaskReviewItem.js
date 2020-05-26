@@ -1,0 +1,108 @@
+import React, { useState } from "react";
+import { Badge, Button, Collapse, Row, Col, Progress } from "reactstrap";
+import moment from "moment";
+import {
+  FaTimes,
+  FaThumbsUp,
+  FaLink,
+  FaExternalLinkAlt,
+} from "react-icons/fa"
+
+let iconSize = 20
+
+function TaskReviewItem({ task, setDone }) {
+
+  let color = "";
+  let value = 0;
+  if (task.due) {
+    let delta_days = moment().diff(moment.unix(task.due)) / (86400 * 1000);
+    // console.log('task', task.title, 'task.due', moment.unix(task.due), 'delta_days from now', delta_days)
+    if (delta_days < -3) {
+      color = "info";
+      value = ((100 * (14 + delta_days)) / 14).toFixed(0);
+      if (value < 0) {
+        value = 0;
+      }
+    } else if (delta_days >= -3 && delta_days < 0) {
+      color = "warning";
+      value = ((100 * (14 + delta_days)) / 14).toFixed(0);
+    } else if (delta_days >= 0) {
+      color = "danger";
+      value = ((delta_days / 7) * 100).toFixed(0);
+      if (value > 100) {
+        value = 100;
+      }
+    }
+  }
+  let activitySinceCreate = moment.unix(task.dateLastActivity).diff(moment.unix(task.createdDate)) / (86400 * 1000)
+
+  return (
+    <React.Fragment key={task.id}>
+      <Row key={"row0" + task.id}>
+        <Col xs={12} lg={12} key={"2" + task.id}>
+          <div>
+            <div className="task">
+              <Badge color="info">{moment.unix(task.dateLastActivity).format('YYYY-MM-DD')}</Badge>
+              {activitySinceCreate > 30 && <Badge color="dark">{moment.unix(task.createdDate).format('YYYY-MM-DD')}</Badge>}
+              {' '}<a target="_blank" rel="noopener noreferrer" href={task.url}><FaLink size={iconSize}/></a>
+              <a target="_blank" rel="noopener noreferrer" href={`trello://x-callback-url/showCard?x-source=go-trello-workflow&id=${task.id}`}><FaExternalLinkAlt size={iconSize}/></a>
+              {task.title}{" "}<Badge color="secondary">{task.list.board}</Badge>
+              {"/"}<Badge color="secondary">{task.list.list}</Badge>
+              {" "}
+              <FaTimes size={iconSize} onClick={() => {
+                  setDone.mutation({
+                    variables: {
+                      taskId: task.id,
+                      done: true,
+                      titleComment: "won't do: "
+                    },
+                    optimisticResponse: {
+                      setDone: {
+                        __typename: 'Task',
+                        id: task.id,
+                        list: {
+                          __typename: 'BoardList',
+                          board: 'Kanban daily/weekly',
+                          list: 'Done this week',
+                        }
+                      }
+                    }
+                  })
+              }}/>
+              <FaThumbsUp size={iconSize} onClick={() => {
+                  setDone.mutation({
+                    variables: {
+                      taskId: task.id,
+                      done: true,
+                      titleComment: "Enough for now: "
+                    },
+                    optimisticResponse: {
+                      setDone: {
+                        __typename: 'Task',
+                        id: task.id,
+                        list: {
+                          __typename: 'BoardList',
+                          board: 'Kanban daily/weekly',
+                          list: 'Done this week',
+                        }
+                      }
+                    }
+                  })
+              }}/>
+              </div>
+            <style jsx global>{`
+              .periodicProgress {
+                float: right;
+                background-color: #888;
+              }
+            `}</style>
+          </div>
+        </Col>
+      </Row>
+    </React.Fragment>
+  );
+}
+
+
+
+export default TaskReviewItem;

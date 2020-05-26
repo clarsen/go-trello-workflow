@@ -16,6 +16,8 @@
 
 # running locally
 ```
+export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/usr/local/opt/libffi/lib/pkgconfig"
+npm i
 gatsby develop
 go to http://localhost:8000
 ```
