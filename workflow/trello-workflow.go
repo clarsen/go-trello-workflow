@@ -77,7 +77,7 @@ var (
 		{"Periodic board"},
 		{"Someday/Maybe"},
 		{"Movies, TV"},
-		{"History 2020"},
+//		{"History 2020"},
 	}
 )
 
