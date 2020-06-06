@@ -1,5 +1,5 @@
-import gql from 'graphql-tag'
-import { Mutation } from 'react-apollo'
+import gql from "graphql-tag"
+import { Mutation } from "react-apollo"
 
 const fragments = {
   task: gql`
@@ -35,10 +35,8 @@ const fragments = {
         done
         status
       }
-
     }
-  `
-
+  `,
 }
 
 export const TaskQuery = gql`
@@ -69,9 +67,7 @@ const PrepareWeeklyReviewQuery = gql`
 `
 
 export const PrepareWeeklyReview = ({ render }) => (
-  <Mutation
-    mutation={PrepareWeeklyReviewQuery}
-  >
+  <Mutation mutation={PrepareWeeklyReviewQuery}>
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
@@ -86,9 +82,7 @@ const finishWeeklyReviewQuery = gql`
 `
 
 export const FinishWeeklyReview = ({ render }) => (
-  <Mutation
-    mutation={finishWeeklyReviewQuery}
-  >
+  <Mutation mutation={finishWeeklyReviewQuery}>
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
@@ -103,16 +97,24 @@ const setDueDateQuery = gql`
 `
 
 export const SetDueDate = ({ render }) => (
-  <Mutation
-    mutation={setDueDateQuery}
-  >
+  <Mutation mutation={setDueDateQuery}>
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
 
 const setDoneQuery = gql`
-  mutation setDone($taskId: String!, $done: Boolean!, $titleComment: String, $nextDue: Timestamp) {
-    setDone(taskID: $taskId, done: $done, titleComment: $titleComment, nextDue: $nextDue) {
+  mutation setDone(
+    $taskId: String!
+    $done: Boolean!
+    $titleComment: String
+    $nextDue: Timestamp
+  ) {
+    setDone(
+      taskID: $taskId
+      done: $done
+      titleComment: $titleComment
+      nextDue: $nextDue
+    ) {
       ...TaskWhole
     }
   }
@@ -120,16 +122,38 @@ const setDoneQuery = gql`
 `
 
 export const SetDone = ({ render }) => (
-  <Mutation
-    mutation={setDoneQuery}
-  >
+  <Mutation mutation={setDoneQuery}>
+    {(mutation, result) => render({ mutation, result })}
+  </Mutation>
+)
+
+const addCommentQuery = gql`
+  mutation addComment($taskId: String!, $comment: String!) {
+    addComment(taskID: $taskId, comment: $comment) {
+      ...TaskWhole
+    }
+  }
+  ${fragments.task}
+`
+export const AddComment = ({ render }) => (
+  <Mutation mutation={addCommentQuery}>
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
 
 const setGoalDoneQuery = gql`
-  mutation setGoalDone($taskId: String!, $checkitemID: String!, $done: Boolean!, $status: String) {
-    setGoalDone(taskID: $taskId, checkitemID: $checkitemID, done: $done, status: $status) {
+  mutation setGoalDone(
+    $taskId: String!
+    $checkitemID: String!
+    $done: Boolean!
+    $status: String
+  ) {
+    setGoalDone(
+      taskID: $taskId
+      checkitemID: $checkitemID
+      done: $done
+      status: $status
+    ) {
       ...MonthlyGoalWhole
     }
   }
@@ -140,17 +164,18 @@ export const SetGoalDone = ({ render }) => (
   <Mutation
     mutation={setGoalDoneQuery}
     update={(cache, { data: { setGoalDone } }) => {
-      console.log('mutation update got setGoalDone', setGoalDone)
+      console.log("mutation update got setGoalDone", setGoalDone)
 
       const query = MonthlyGoalsQuery
       const { monthlyGoals } = cache.readQuery({ query })
-      console.log('currently monthlyGoals', monthlyGoals)
+      console.log("currently monthlyGoals", monthlyGoals)
 
       cache.writeQuery({
         query,
-        data: { monthlyGoals: setGoalDone }
+        data: { monthlyGoals: setGoalDone },
       })
-    }}  >
+    }}
+  >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
@@ -165,13 +190,10 @@ const moveTaskToListQuery = gql`
 `
 
 export const MoveTaskToList = ({ render }) => (
-  <Mutation
-    mutation={moveTaskToListQuery}
-  >
+  <Mutation mutation={moveTaskToListQuery}>
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
-
 
 export const WeeklyVisualizationQuery = gql`
   query weeklyVisualization($year: Int, $week: Int) {
@@ -204,15 +226,14 @@ export const StopTimer = ({ render }) => (
   <Mutation
     mutation={stopTimerQuery}
     update={(cache, { data: { stopTimer } }) => {
-      console.log('mutation update got stopTimer', stopTimer)
+      console.log("mutation update got stopTimer", stopTimer)
       cache.writeQuery({
         query: ActiveTimerQuery,
-        data: { 
+        data: {
           activeTimer: null,
-        }
+        },
       })
     }}
-
   >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
@@ -231,13 +252,13 @@ export const StartTimer = ({ render }) => (
   <Mutation
     mutation={startTimerQuery}
     update={(cache, { data: { startTimer } }) => {
-      console.log('mutation update got startTimer', startTimer)
-      console.log('cache is', cache)
+      console.log("mutation update got startTimer", startTimer)
+      console.log("cache is", cache)
       cache.writeQuery({
         query: ActiveTimerQuery,
-        data: { 
+        data: {
           activeTimer: startTimer,
-        }
+        },
       })
     }}
   >
@@ -258,19 +279,18 @@ export const AddTask = ({ render }) => (
   <Mutation
     mutation={addTaskQuery}
     update={(cache, { data: { addTask } }) => {
-      console.log('mutation update got addTask', addTask)
+      console.log("mutation update got addTask", addTask)
 
       const query = TaskQuery
       const { tasks } = cache.readQuery({ query })
-      console.log('currently tasks', tasks)
+      console.log("currently tasks", tasks)
 
       cache.writeQuery({
         query,
-        data: { tasks: tasks.concat([addTask]) }
+        data: { tasks: tasks.concat([addTask]) },
       })
     }}
   >
-
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
@@ -288,17 +308,18 @@ export const AddWeeklyGoal = ({ render }) => (
   <Mutation
     mutation={addWeeklyGoalQuery}
     update={(cache, { data: { addWeeklyGoal } }) => {
-      console.log('mutation update got addWeeklyGoal', addWeeklyGoal)
+      console.log("mutation update got addWeeklyGoal", addWeeklyGoal)
 
       const query = MonthlyGoalsQuery
       const { monthlyGoals } = cache.readQuery({ query })
-      console.log('currently monthlyGoals', monthlyGoals)
+      console.log("currently monthlyGoals", monthlyGoals)
 
       cache.writeQuery({
         query,
-        data: { monthlyGoals: addWeeklyGoal }
+        data: { monthlyGoals: addWeeklyGoal },
       })
-    }}  >
+    }}
+  >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
@@ -316,17 +337,18 @@ export const AddMonthlyGoal = ({ render }) => (
   <Mutation
     mutation={addMonthlyGoalQuery}
     update={(cache, { data: { addMonthlyGoal } }) => {
-      console.log('mutation update got addMonthlyGoal', addMonthlyGoal)
+      console.log("mutation update got addMonthlyGoal", addMonthlyGoal)
 
       const query = MonthlyGoalsQuery
       const { monthlyGoals } = cache.readQuery({ query })
-      console.log('currently monthlyGoals', monthlyGoals)
+      console.log("currently monthlyGoals", monthlyGoals)
 
       cache.writeQuery({
         query,
-        data: { monthlyGoals: addMonthlyGoal }
+        data: { monthlyGoals: addMonthlyGoal },
       })
-    }}  >
+    }}
+  >
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
@@ -341,9 +363,7 @@ const prepareMonthlyReviewQuery = gql`
 `
 
 export const PrepareMonthlyReview = ({ render }) => (
-  <Mutation
-    mutation={prepareMonthlyReviewQuery}
-  >
+  <Mutation mutation={prepareMonthlyReviewQuery}>
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )
@@ -357,9 +377,7 @@ const finishMonthlyReviewQuery = gql`
   }
 `
 export const FinishMonthlyReview = ({ render }) => (
-  <Mutation
-    mutation={finishMonthlyReviewQuery}
-  >
+  <Mutation mutation={finishMonthlyReviewQuery}>
     {(mutation, result) => render({ mutation, result })}
   </Mutation>
 )

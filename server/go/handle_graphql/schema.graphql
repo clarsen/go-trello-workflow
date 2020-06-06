@@ -72,7 +72,8 @@ type Mutation {
   moveTaskToList(taskID: String!, list: BoardListInput!): Task!
   startTimer(taskID: String!, checkitemID: String): Timer!
   stopTimer(timerID: String!): Boolean
-
+  addComment(taskID: String!, comment: String!): Task!
+  
   setGoalDone(taskID: String!, checkitemID: String!, done: Boolean!, status: String): [MonthlyGoal!]
   addTask(title: String!, board: String, list: String): Task!
   addWeeklyGoal(taskID: ID!, title: String!, week: Int!): [MonthlyGoal!]

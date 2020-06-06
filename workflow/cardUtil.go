@@ -100,7 +100,7 @@ func parseCardName(name string) (title string, created *string, period *string) 
 		p := string(groups[3])
 		period = &p
 	}
-	log.Printf("match %+v -> %s, %s, %s\n", name, title, string(groups[2]), string(groups[3]))
+	// log.Printf("match %+v -> %s, %s, %s\n", name, title, string(groups[2]), string(groups[3]))
 	return title, created, period
 }
 

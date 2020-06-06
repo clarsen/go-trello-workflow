@@ -72,6 +72,7 @@ type ComplexityRoot struct {
 		MoveTaskToList       func(childComplexity int, taskID string, list BoardListInput) int
 		StartTimer           func(childComplexity int, taskID string, checkitemID *string) int
 		StopTimer            func(childComplexity int, timerID string) int
+		AddComment           func(childComplexity int, taskID string, comment string) int
 		SetGoalDone          func(childComplexity int, taskID string, checkitemID string, done bool, status *string) int
 		AddTask              func(childComplexity int, title string, board *string, list *string) int
 		AddWeeklyGoal        func(childComplexity int, taskID string, title string, week int) int
@@ -130,6 +131,7 @@ type MutationResolver interface {
 	MoveTaskToList(ctx context.Context, taskID string, list BoardListInput) (*Task, error)
 	StartTimer(ctx context.Context, taskID string, checkitemID *string) (*Timer, error)
 	StopTimer(ctx context.Context, timerID string) (*bool, error)
+	AddComment(ctx context.Context, taskID string, comment string) (*Task, error)
 	SetGoalDone(ctx context.Context, taskID string, checkitemID string, done bool, status *string) ([]MonthlyGoal, error)
 	AddTask(ctx context.Context, title string, board *string, list *string) (*Task, error)
 	AddWeeklyGoal(ctx context.Context, taskID string, title string, week int) ([]MonthlyGoal, error)
@@ -306,6 +308,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.StopTimer(childComplexity, args["timerID"].(string)), true
+
+	case "Mutation.AddComment":
+		if e.complexity.Mutation.AddComment == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addComment_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddComment(childComplexity, args["taskID"].(string), args["comment"].(string)), true
 
 	case "Mutation.SetGoalDone":
 		if e.complexity.Mutation.SetGoalDone == nil {
@@ -727,7 +741,8 @@ type Mutation {
   moveTaskToList(taskID: String!, list: BoardListInput!): Task!
   startTimer(taskID: String!, checkitemID: String): Timer!
   stopTimer(timerID: String!): Boolean
-
+  addComment(taskID: String!, comment: String!): Task!
+  
   setGoalDone(taskID: String!, checkitemID: String!, done: Boolean!, status: String): [MonthlyGoal!]
   addTask(title: String!, board: String, list: String): Task!
   addWeeklyGoal(taskID: ID!, title: String!, week: Int!): [MonthlyGoal!]
@@ -742,6 +757,28 @@ type Mutation {
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_addComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["taskID"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["taskID"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["comment"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["comment"] = arg1
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_addMonthlyGoal_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1629,6 +1666,39 @@ func (ec *executionContext) _Mutation_stopTimer(ctx context.Context, field graph
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_addComment(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_addComment_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddComment(rctx, args["taskID"].(string), args["comment"].(string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Task)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNTask2ᚖgithubᚗcomᚋclarsenᚋgoᚑtrelloᚑworkflowᚋserverᚋgoᚋhandle_graphqlᚐTask(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_setGoalDone(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -3524,6 +3594,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "stopTimer":
 			out.Values[i] = ec._Mutation_stopTimer(ctx, field)
+		case "addComment":
+			out.Values[i] = ec._Mutation_addComment(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "setGoalDone":
 			out.Values[i] = ec._Mutation_setGoalDone(ctx, field)
 		case "addTask":

@@ -46,22 +46,55 @@ func TaskFor(card *trello.Card) (*Task, error) {
 	}, nil
 }
 
-func SetTaskDue(taskId string, due time.Time) (*Task, error) {
+// AddComment adds comment to card
+func AddComment(taskID string, comment string) (*Task, error) {
 	cl, err := workflow.New(user, appkey, authtoken)
 	if err != nil {
 		return nil, err
 	}
-	wfTask, err := cl.SetDue(taskId, due)
+	wfTask, err := cl.AddComment(taskID, comment)
 	if err != nil {
 		return nil, err
 	}
+	// XXX: refactor
 	task := Task{
-		ID:          wfTask.ID,
-		Title:       wfTask.Title,
-		CreatedDate: wfTask.CreatedDate,
-		URL:         wfTask.URL,
-		Due:         wfTask.Due,
-		Period:      wfTask.Period,
+		ID:               wfTask.ID,
+		Title:            wfTask.Title,
+		CreatedDate:      wfTask.CreatedDate,
+		URL:              wfTask.URL,
+		Due:              wfTask.Due,
+		Period:           wfTask.Period,
+		DateLastActivity: wfTask.DateLastActivity,
+		Desc:             wfTask.Desc,
+		ChecklistItems:   wfTask.ChecklistItems,
+		List: &BoardList{
+			wfTask.List.Board,
+			wfTask.List.List,
+		},
+	}
+	return &task, nil
+}
+
+func SetTaskDue(taskID string, due time.Time) (*Task, error) {
+	cl, err := workflow.New(user, appkey, authtoken)
+	if err != nil {
+		return nil, err
+	}
+	wfTask, err := cl.SetDue(taskID, due)
+	if err != nil {
+		return nil, err
+	}
+	// XXX: refactor
+	task := Task{
+		ID:               wfTask.ID,
+		Title:            wfTask.Title,
+		CreatedDate:      wfTask.CreatedDate,
+		URL:              wfTask.URL,
+		Due:              wfTask.Due,
+		Period:           wfTask.Period,
+		DateLastActivity: wfTask.DateLastActivity,
+		Desc:             wfTask.Desc,
+		ChecklistItems:   wfTask.ChecklistItems,
 		List: &BoardList{
 			wfTask.List.Board,
 			wfTask.List.List,

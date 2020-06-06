@@ -354,6 +354,10 @@ func (r *mutationResolver) SetDone(ctx context.Context, taskID string, done bool
 	return t, err
 }
 
+func (r *mutationResolver) AddComment(ctx context.Context, taskID string, comment string) (*Task, error) {
+	return AddComment(taskID, comment)
+}
+
 func (r *mutationResolver) SetGoalDone(ctx context.Context, taskID string, checkitemID string, done bool, status *string) ([]MonthlyGoal, error) {
 	// update checkitem title and done state
 	card, err := cl.GetCard(taskID)

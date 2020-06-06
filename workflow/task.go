@@ -41,6 +41,21 @@ func (cl *Client) MoveToListOnBoard(cardID string, listID, boardID string) (*tre
 	return card, nil
 }
 
+// AddComment adds comment to card
+func (cl *Client) AddComment(cardID string, comment string) (*WFTask, error) {
+	card, err := cl.Client.GetCard(cardID, trello.Defaults())
+	if err != nil {
+		return nil, err
+	}
+	// log.Printf("Would add %+v to card %+v, lastactivity %+v", comment, card.Name, card.DateLastActivity)
+	_, err = card.AddComment(comment, trello.Arguments{"fields": "all"})
+	if err != nil {
+		return nil, err
+	}
+	card, err = cl.Client.GetCard(cardID, trello.Arguments{"fields": "all"})
+	return cl.wfTaskFor(card)
+}
+
 // SetDue sets due date/time of card
 func (cl *Client) SetDue(cardID string, due time.Time) (*WFTask, error) {
 	card, err := cl.Client.GetCard(cardID, trello.Defaults())
@@ -86,7 +101,7 @@ func (cl *Client) wfTaskFor(card *trello.Card) (*WFTask, error) {
 	for _, cl := range card.Checklists {
 		// log.Println("checklist:", cl)
 		for _, item := range cl.CheckItems {
-			log.Printf("Card %+v, checklist item: %+v\n", card.Name, item.Name)
+			// log.Printf("Card %+v, checklist item: %+v\n", card.Name, item.Name)
 			checklistItems = append(checklistItems, item.Name)
 		}
 	}

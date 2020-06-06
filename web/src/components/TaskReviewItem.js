@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Badge, Button, Collapse, Row, Col, Progress } from "reactstrap";
-import moment from "moment";
+import React, { useState } from "react"
+import { Badge, Button, Collapse, Row, Col, Progress } from "reactstrap"
+import moment from "moment"
 import {
   FaTimes,
   FaThumbsUp,
@@ -8,38 +8,39 @@ import {
   FaExternalLinkAlt,
   FaFileAlt,
   FaListUl,
-} from "react-icons/fa";
+  FaForward,
+} from "react-icons/fa"
 
-let iconSize = 20;
+let iconSize = 20
 
-function TaskReviewItem({ task, setDone }) {
-  const [expanded, setExpanded] = useState(false);
+function TaskReviewItem({ task, setDone, addComment }) {
+  const [expanded, setExpanded] = useState(false)
 
-  let color = "";
-  let value = 0;
+  let color = ""
+  let value = 0
   if (task.due) {
-    let delta_days = moment().diff(moment.unix(task.due)) / (86400 * 1000);
+    let delta_days = moment().diff(moment.unix(task.due)) / (86400 * 1000)
     // console.log('task', task.title, 'task.due', moment.unix(task.due), 'delta_days from now', delta_days)
     if (delta_days < -3) {
-      color = "info";
-      value = ((100 * (14 + delta_days)) / 14).toFixed(0);
+      color = "info"
+      value = ((100 * (14 + delta_days)) / 14).toFixed(0)
       if (value < 0) {
-        value = 0;
+        value = 0
       }
     } else if (delta_days >= -3 && delta_days < 0) {
-      color = "warning";
-      value = ((100 * (14 + delta_days)) / 14).toFixed(0);
+      color = "warning"
+      value = ((100 * (14 + delta_days)) / 14).toFixed(0)
     } else if (delta_days >= 0) {
-      color = "danger";
-      value = ((delta_days / 7) * 100).toFixed(0);
+      color = "danger"
+      value = ((delta_days / 7) * 100).toFixed(0)
       if (value > 100) {
-        value = 100;
+        value = 100
       }
     }
   }
   let activitySinceCreate =
     moment.unix(task.dateLastActivity).diff(moment.unix(task.createdDate)) /
-    (86400 * 1000);
+    (86400 * 1000)
 
   return (
     <React.Fragment key={task.id}>
@@ -69,7 +70,7 @@ function TaskReviewItem({ task, setDone }) {
                 <FaFileAlt
                   size={iconSize}
                   onClick={() => {
-                    setExpanded(!expanded);
+                    setExpanded(!expanded)
                   }}
                 />
               )}
@@ -77,7 +78,7 @@ function TaskReviewItem({ task, setDone }) {
                 <FaListUl
                   size={iconSize}
                   onClick={() => {
-                    setExpanded(!expanded);
+                    setExpanded(!expanded)
                   }}
                 />
               )}
@@ -105,9 +106,24 @@ function TaskReviewItem({ task, setDone }) {
                         },
                       },
                     },
-                  });
+                  })
                 }}
-              />
+              />{" "}
+              <FaForward size={iconSize} onClick={() => {
+                console.log('addComment',addComment,'for',task)
+                addComment.mutation({
+                  variables: {
+                    taskId: task.id,
+                    comment: "review later"
+                  },
+                  optimisticResponse: {
+                    addComment: {
+                      ...task,
+                      dateLastActivity: moment().unix()
+                    }
+                  }
+                })
+              }} />{" "}
               <FaThumbsUp
                 size={iconSize}
                 onClick={() => {
@@ -128,7 +144,7 @@ function TaskReviewItem({ task, setDone }) {
                         },
                       },
                     },
-                  });
+                  })
                 }}
               />
             </div>
@@ -166,7 +182,7 @@ function TaskReviewItem({ task, setDone }) {
         </React.Fragment>
       )}
     </React.Fragment>
-  );
+  )
 }
 
-export default TaskReviewItem;
+export default TaskReviewItem
