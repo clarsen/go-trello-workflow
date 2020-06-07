@@ -10,10 +10,11 @@ import {
   FaListUl,
   FaForward,
 } from "react-icons/fa"
+import { GoTasklist } from "react-icons/go"
 
 let iconSize = 20
 
-function TaskReviewItem({ task, setDone, addComment }) {
+function TaskReviewItem({ task, setDone, addComment, moveTaskToList }) {
   const [expanded, setExpanded] = useState(false)
 
   let color = ""
@@ -109,21 +110,24 @@ function TaskReviewItem({ task, setDone, addComment }) {
                   })
                 }}
               />{" "}
-              <FaForward size={iconSize} onClick={() => {
-                console.log('addComment',addComment,'for',task)
-                addComment.mutation({
-                  variables: {
-                    taskId: task.id,
-                    comment: "review later"
-                  },
-                  optimisticResponse: {
-                    addComment: {
-                      ...task,
-                      dateLastActivity: moment().unix()
-                    }
-                  }
-                })
-              }} />{" "}
+              <FaForward
+                size={iconSize}
+                onClick={() => {
+                  console.log("addComment", addComment, "for", task)
+                  addComment.mutation({
+                    variables: {
+                      taskId: task.id,
+                      comment: "review later",
+                    },
+                    optimisticResponse: {
+                      addComment: {
+                        ...task,
+                        dateLastActivity: moment().unix(),
+                      },
+                    },
+                  })
+                }}
+              />{" "}
               <FaThumbsUp
                 size={iconSize}
                 onClick={() => {
@@ -141,6 +145,30 @@ function TaskReviewItem({ task, setDone, addComment }) {
                           __typename: "BoardList",
                           board: "Kanban daily/weekly",
                           list: "Done this week",
+                        },
+                      },
+                    },
+                  })
+                }}
+              />{" "}
+              <GoTasklist
+                size={iconSize}
+                onClick={() => {
+                  moveTaskToList.mutation({
+                    variables: {
+                      taskID: task.id,
+                      list: {
+                        board: "Backlog (Personal)",
+                        list: "Backlog",
+                      },
+                    },
+                    optimisticResponse: {
+                      moveTaskToList: {
+                        ...task,
+                        list: {
+                          __typename: "BoardList",
+                          board: "Backlog (Personal)",
+                          list: "Backlog",
                         },
                       },
                     },

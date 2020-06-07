@@ -19,7 +19,8 @@ export default function OldTasksReview({
   queryAllError,
   allTasks,
   setDone,
-  addComment
+  addComment,
+  moveTaskToList
 }) {
   const [activeTab, setActiveTab] = useState("backlog")
 
@@ -54,7 +55,7 @@ export default function OldTasksReview({
               })}
               onClick={() => setActiveTab("movies/tv")}
             >
-              Backlog
+              Movies, TV
             </NavLink>
           </NavItem>
         </Nav>
@@ -79,6 +80,7 @@ export default function OldTasksReview({
                 ]}
                 setDone={setDone}
                 addComment={addComment}
+                moveTaskToList={moveTaskToList}
               />{" "}
             </Col>{" "}
           </Row>{" "}
@@ -96,6 +98,7 @@ export default function OldTasksReview({
                 ]}
                 setDone={setDone}
                 addComment={addComment}
+                moveTaskToList={moveTaskToList}
               />{" "}
             </Col>{" "}
           </Row>{" "}
@@ -113,6 +116,7 @@ export default function OldTasksReview({
                 ]}
                 setDone={setDone}
                 addComment={addComment}
+                moveTaskToList={moveTaskToList}
               />{" "}
             </Col>{" "}
           </Row>{" "}

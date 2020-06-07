@@ -436,6 +436,7 @@ class IndexPage extends React.Component {
                     allTasks={allTasks}
                     setDone={SetDone}
                     addComment={AddComment}
+                    moveTaskToList={MoveTaskToList}
                   />
                 </TabPane>
                 <TabPane tabId="weeklyReview">

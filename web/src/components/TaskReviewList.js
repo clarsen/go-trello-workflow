@@ -11,6 +11,7 @@ export default function TaskReviewList({
   listFilter,
   setDone,
   addComment,
+  moveTaskToList
 }) {
   const [showControls, setShowControls] = useState(false)
 
@@ -43,7 +44,13 @@ export default function TaskReviewList({
             .sort((a, b) => a.createdDate - b.createdDate)
             .sort((a, b) => a.dateLastActivity - b.dateLastActivity)
             .map((t) => (
-              <TaskReviewItem key={t.id} setDone={setDone} addComment={addComment} task={t} />
+              <TaskReviewItem
+                key={t.id}
+                setDone={setDone}
+                addComment={addComment}
+                moveTaskToList={moveTaskToList}
+                task={t}
+              />
             ))}
         </Container>
       )}
