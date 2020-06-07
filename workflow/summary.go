@@ -182,7 +182,7 @@ func generateWeeklySummary(
 	if err != nil {
 		return nil, err
 	}
-	log.Println("generateWeeklySummary - %+v doneCards", len(doneCards))
+	log.Printf("generateWeeklySummary - %+v doneCards\n", len(doneCards))
 	for _, card := range doneCards {
 
 		actions, err2 := card.GetActions(trello.Arguments{"filter": "copyCard,updateCard:idList,moveCardToBoard"})
