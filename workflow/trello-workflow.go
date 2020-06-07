@@ -77,7 +77,7 @@ var (
 		{"Periodic board"},
 		{"Someday/Maybe"},
 		{"Movies, TV"},
-//		{"History 2020"},
+		//		{"History 2020"},
 	}
 )
 
@@ -474,7 +474,30 @@ func BoardFor(m *trello.Member, s string) (board *trello.Board, err error) {
 		}
 		// fmt.Println(boardmap)
 	}
-	board = boardmap[s]
+	board, ok := boardmap[s]
+	if !ok {
+		boards, err = m.GetBoards(trello.Defaults())
+		for _, b := range boards {
+			if b.Name == s {
+				boardmap[b.Name] = b
+				// get lists for board
+				lists, err := b.GetLists(trello.Defaults())
+				if err != nil {
+					fmt.Println("error")
+					return nil, err
+					// Handle error
+				}
+				fmt.Printf("Getting lists for board %+v\n", b.Name)
+				for _, l := range lists {
+					listIdMap[l.ID] = &BoardAndList{
+						Board: b.Name,
+						List:  l.Name,
+					}
+				}
+			}
+		}
+		board = boardmap[s]
+	}
 	if listmap[board.Name] == nil {
 		listmap[board.Name] = map[string]*trello.List{}
 	}
