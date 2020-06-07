@@ -209,6 +209,7 @@ func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, w
 	if err2 != nil {
 		return nil, err2
 	}
+	log.Printf("Dumped summary for week\n")
 
 	templateFname := fmt.Sprintf("%s/%d/weekly/weekly-%d-%02d.yaml", ReviewDir, _year, _year, _week)
 	// overwrite if exists
@@ -221,6 +222,7 @@ func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, w
 		return nil, err2
 	}
 	outReview.Close()
+	log.Printf("Created empty weekly retrospective\n")
 
 	// add (possibly changed) file
 	wd.worktree.Add(templateFname)
