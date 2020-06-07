@@ -61,7 +61,7 @@ functions:
 
   handle_graphql:
     handler: bin/handle_graphql
-    timeout: 25
+    timeout: 45
     events:
       - http:
           path: /api/gql
