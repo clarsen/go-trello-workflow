@@ -176,6 +176,7 @@ func (wd *workdir) commitAndPushData(message string) error {
 }
 
 func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, week *int) (*GenerateResult, error) {
+	log.Printf("Prepare weekly review\n")
 	// setup working directory
 	wd, err := getData()
 	if err != nil {
@@ -194,13 +195,13 @@ func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, w
 
 	out, err := wd.fs.Create(summaryFname)
 	if err != nil {
-		log.Printf("DumpSummaryForWeek %+v", err)
+		log.Printf("DumpSummaryForWeek %+v\n", err)
 		return nil, err
 	}
 
 	err = workflow.DumpSummaryForWeek(user, appkey, authtoken, _year, _week, out)
 	if err != nil {
-		log.Printf("DumpSummaryForWeek %+v", err)
+		log.Printf("DumpSummaryForWeek %+v\n", err)
 		return nil, err
 	}
 
@@ -232,7 +233,7 @@ func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, w
 	}
 
 	if status.IsClean() {
-		log.Printf("no change, not commiting")
+		log.Printf("no change, not commiting\n")
 		msg := fmt.Sprintf("No change in %s, not commiting", summaryFname)
 		result := GenerateResult{
 			Message: &msg,
@@ -241,12 +242,17 @@ func (r *mutationResolver) PrepareWeeklyReview(ctx context.Context, year *int, w
 		return &result, nil
 	}
 
+	log.Printf("Commit and push\n")
+
 	// commit and push
 	err = wd.commitAndPushData(fmt.Sprintf("dump summary for %04d-%02d", _year, _week))
 	if err != nil {
 		return nil, err
 	}
 	msg := fmt.Sprintf("Updated %s, template at %s", summaryFname, templateFname)
+
+	log.Printf("Pushed\n")
+
 	result := GenerateResult{
 		Message: &msg,
 		Ok:      true,
