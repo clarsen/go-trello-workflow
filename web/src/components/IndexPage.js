@@ -473,7 +473,27 @@ class IndexPage extends React.Component {
                     >
                       Prepare weekly review for {nowGrace.year()}-
                       {nowGrace.isoWeek()}
-                    </Button>
+                    </Button>                    
+                  )}{" "}
+                  {nowGrace.isoWeek() !== now.isoWeek() && (
+                     <Button
+                       color="primary"
+                       size="sm"
+                       onClick={() => {
+                         FinishWeeklyReview.mutation({
+                           variables: {
+                             year: nowGrace.year(),
+                             week: nowGrace.isoWeek(),
+                           },
+                         }).then(({ data }) => {
+                           alert.show(data.finishWeeklyReview.message)
+                           allRefetch()
+                           allGoalsRefetch()
+                         })
+                       }}
+                     >
+                       Finish weekly review for {nowGrace.year()}-{nowGrace.isoWeek()}
+                     </Button>
                   )}{" "}
                   <Button
                     color="primary"
