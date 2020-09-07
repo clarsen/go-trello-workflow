@@ -20,6 +20,7 @@ class Goal extends React.Component {
     super(props)
     let now = moment()
     let thisWeek = now.isoWeek()
+    let nowGrace = moment().subtract(3, "days")
     this.state = {
       showControls: false,
       showAddControls: false,
@@ -47,6 +48,8 @@ class Goal extends React.Component {
     let { goal, startTimer, timerRefetch, setGoalDone, addWeeklyGoal } = this.props
     let now = moment()
     let thisWeek = now.isoWeek()
+    let nowGrace = moment().subtract(3, "days")
+    let thisWeekGrace = nowGrace.isoWeek()
     return (
       <React.Fragment key={goal.id}>
         <Row className='monthlyGoal'>
@@ -98,7 +101,7 @@ class Goal extends React.Component {
           </Form>
         </Collapse>
         {goal.weeklyGoals
-          .filter(g => (g.week === thisWeek || g.week === thisWeek+1))
+          .filter(g => (g.week === thisWeek || g.week === thisWeek+1 || g.week === thisWeekGrace))
           .sort((a,b) => b.week - a.week)
           .map((g)=> {
             let doneClass = ''
