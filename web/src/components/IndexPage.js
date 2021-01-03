@@ -545,7 +545,7 @@ class IndexPage extends React.Component {
                     onClick={() => {
                       PrepareMonthlyReview.mutation({
                         variables: {
-                          year: nowGraceMonth.isoWeek() <= 52 ? nowGraceMonth.year() : nowGraceMonth.year()-1,
+                          year: nowGraceMonth.year(),
                           month: nowGraceMonth.month() + 1,
                         },
                       }).then(({ data }) =>
@@ -553,7 +553,7 @@ class IndexPage extends React.Component {
                       )
                     }}
                   >
-                    Prepare monthly review for {nowGraceMonth.isoWeek() <= 52 ? nowGraceMonth.year() : nowGraceMonth.year()-1}-
+                    Prepare monthly review for {nowGraceMonth.year()}-
                     {nowGraceMonth.month() + 1}
                   </Button>{" "}
                   {nowGraceMonth.month() + 1 !== monthNext && (
@@ -563,7 +563,7 @@ class IndexPage extends React.Component {
                       onClick={() => {
                         PrepareMonthlyReview.mutation({
                           variables: {
-                            year: nowGraceMonth.isoWeek() <= 52 ? nowGraceMonth.year() : nowGraceMonth.year()-1,
+                            year: nowGraceMonth.year(),
                             month: monthNext,
                           },
                         }).then(({ data }) =>
@@ -571,7 +571,7 @@ class IndexPage extends React.Component {
                         )
                       }}
                     >
-                      Prepare monthly review for {nowGraceMonth.isoWeek() <= 52 ? nowGraceMonth.year() : nowGraceMonth.year()-1}-{monthNext}
+                      Prepare monthly review for {nowGraceMonth.year()}-{monthNext}
                     </Button>
                   )}{" "}
                   {nowGraceMonth.month() + 1 !== monthNext && (
@@ -581,7 +581,7 @@ class IndexPage extends React.Component {
                       onClick={() => {
                         FinishMonthlyReview.mutation({
                           variables: {
-                            year: nowGraceMonth.isoWeek() <= 52 ? nowGraceMonth.year() : nowGraceMonth.year()-1,
+                            year: nowGraceMonth.year(),
                             month: nowGraceMonth.month() + 1,
                           },
                         }).then(({ data }) =>
@@ -589,7 +589,7 @@ class IndexPage extends React.Component {
                         )
                       }}
                     >
-                      Finish monthly review for {nowGraceMonth.isoWeek() <= 52 ? nowGraceMonth.year() : nowGraceMonth.year()-1}-
+                      Finish monthly review for {nowGraceMonth.year()}-
                       {nowGraceMonth.month() + 1}
                     </Button>
                   )}{" "}
@@ -599,7 +599,7 @@ class IndexPage extends React.Component {
                     onClick={() => {
                       FinishMonthlyReview.mutation({
                         variables: {
-                          year: nowGraceMonth.isoWeek() <= 52 ? nowGraceMonth.year() : nowGraceMonth.year()-1,
+                          year: nowGraceMonth.year(),
                           month: monthNext,
                         },
                       }).then(({ data }) =>
@@ -607,7 +607,7 @@ class IndexPage extends React.Component {
                       )
                     }}
                   >
-                    Finish monthly review for {nowGraceMonth.isoWeek() <= 52 ? nowGraceMonth.year() : nowGraceMonth.year()-1}-{monthNext}
+                    Finish monthly review for {nowGraceMonth.year()}-{monthNext}
                   </Button>{" "}
                   <Row>
                     <Col>
