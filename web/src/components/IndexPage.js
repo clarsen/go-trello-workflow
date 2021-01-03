@@ -446,7 +446,7 @@ class IndexPage extends React.Component {
                     onClick={() => {
                       PrepareWeeklyReview.mutation({
                         variables: {
-                          year: now.isoWeek() <= 53 ? now.year() : now.year()-1,
+                          year: now.isoWeek() <= 52 ? now.year() : now.year()-1,
                           week: now.isoWeek(),
                         },
                       }).then(({ data }) => {
@@ -454,7 +454,7 @@ class IndexPage extends React.Component {
                       })
                     }}
                   >
-                    Prepare weekly review for {now.isoWeek() <= 53 ? now.year() : now.year()-1}-{now.isoWeek()}
+                    Prepare weekly review for {now.isoWeek() <= 52 ? now.year() : now.year()-1}-{now.isoWeek()}
                   </Button>{" "}
                   {nowGrace.isoWeek() !== now.isoWeek() && (
                     <Button
@@ -463,7 +463,7 @@ class IndexPage extends React.Component {
                       onClick={() => {
                         PrepareWeeklyReview.mutation({
                           variables: {
-                            year: nowGrace.isoWeek() <= 53 ? nowGrace.year() : nowGrace.year()-1,
+                            year: nowGrace.isoWeek() <= 52 ? nowGrace.year() : nowGrace.year()-1,
                             week: nowGrace.isoWeek(),
                           },
                         }).then(({ data }) =>
@@ -471,7 +471,7 @@ class IndexPage extends React.Component {
                         )
                       }}
                     >
-                      Prepare weekly review for {nowGrace.isoWeek() <= 53 ? nowGrace.year() : nowGrace.year()-1}-
+                      Prepare weekly review for {nowGrace.isoWeek() <= 52 ? nowGrace.year() : nowGrace.year()-1}-
                       {nowGrace.isoWeek()}
                     </Button>                    
                   )}{" "}
@@ -482,7 +482,7 @@ class IndexPage extends React.Component {
                        onClick={() => {
                          FinishWeeklyReview.mutation({
                            variables: {
-                             year: nowGrace.isoWeek() <= 53 ? nowGrace.year() : nowGrace.year()-1,
+                             year: nowGrace.isoWeek() <= 52 ? nowGrace.year() : nowGrace.year()-1,
                              week: nowGrace.isoWeek(),
                            },
                          }).then(({ data }) => {
@@ -492,7 +492,7 @@ class IndexPage extends React.Component {
                          })
                        }}
                      >
-                       Finish weekly review for {nowGrace.isoWeek() <= 53 ? nowGrace.year() : nowGrace.year()-1}-{nowGrace.isoWeek()}
+                       Finish weekly review for {nowGrace.isoWeek() <= 52 ? nowGrace.year() : nowGrace.year()-1}-{nowGrace.isoWeek()}
                      </Button>
                   )}{" "}
                   <Button
@@ -501,7 +501,7 @@ class IndexPage extends React.Component {
                     onClick={() => {
                       FinishWeeklyReview.mutation({
                         variables: {
-                          year: now.isoWeek() <= 53 ? now.year() : now.year()-1,
+                          year: now.isoWeek() <= 52 ? now.year() : now.year()-1,
                           week: now.isoWeek(),
                         },
                       }).then(({ data }) => {
@@ -511,7 +511,7 @@ class IndexPage extends React.Component {
                       })
                     }}
                   >
-                    Finish weekly review for {now.isoWeek() <= 53 ? now.year() : now.year()-1}-{now.isoWeek()}
+                    Finish weekly review for {now.isoWeek() <= 52 ? now.year() : now.year()-1}-{now.isoWeek()}
                   </Button>{" "}
                   <Row>
                     <Col>
