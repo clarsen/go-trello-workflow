@@ -510,19 +510,20 @@ func (r *queryResolver) WeeklyVisualization(ctx context.Context, year *int, week
 	}
 	summaryFname := fmt.Sprintf("%s/%d/weekly/weekly-%d-%02d.yaml", SummaryDir, _year, _year, _week)
 	if _, err = wd.fs.Stat(summaryFname); os.IsNotExist(err) {
-		return nil, err
+		return nil, fmt.Errorf("%v: %v", summaryFname, err)
+
 	}
 	inSummary, err2 := wd.fs.Open(summaryFname)
 	if err2 != nil {
-		return nil, err2
+		return nil, fmt.Errorf("%v: %v", summaryFname, err2)
 	}
 	reviewFname := fmt.Sprintf("%s/%d/weekly/weekly-%d-%02d.yaml", ReviewDir, _year, _year, _week)
 	if _, err = wd.fs.Stat(reviewFname); os.IsNotExist(err) {
-		return nil, err
+		return nil, fmt.Errorf("%v: %v", reviewFname, err)
 	}
 	inReview, err2 := wd.fs.Open(reviewFname)
 	if err2 != nil {
-		return nil, err2
+		return nil, fmt.Errorf("%v: %v", reviewFname, err2)
 	}
 	log.Printf("got inSummary and inReview: inSummary: %+v inReview: %+v\n", inSummary, inReview)
 	var out strings.Builder
