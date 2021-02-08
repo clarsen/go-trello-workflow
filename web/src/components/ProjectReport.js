@@ -143,7 +143,7 @@ class ProjectItem extends React.Component {
     return (
       <React.Fragment>
         <tr className="projectItem">
-          <th scope="row" onClick={this.toggle}>{project.title}</th>
+          <th scope="row" onClick={this.toggle}>{project.title}<br/>{project.pid}</th>
           <td>{
             `${numeral(tot_ms/1000.0).format('00:00:00')}`
           }</td>

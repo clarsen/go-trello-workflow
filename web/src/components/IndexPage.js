@@ -164,7 +164,7 @@ class IndexPage extends React.Component {
     console.log("IndexPage props are", this.props)
     return (
       <QueryContainer
-        year={now.year()}
+        year={now.isoWeek() <= 52 ? now.year() : now.year()-1}
         week={now.isoWeek()}
         month={now.month() + 1}
       >
@@ -571,7 +571,7 @@ class IndexPage extends React.Component {
                         )
                       }}
                     >
-                      Prepare monthly review for {now.year()}-{monthNext}
+                      Prepare monthly review for {nowGraceMonth.year()}-{monthNext}
                     </Button>
                   )}{" "}
                   {nowGraceMonth.month() + 1 !== monthNext && (
